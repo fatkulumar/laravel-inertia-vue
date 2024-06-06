@@ -6,16 +6,13 @@ import { ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
 import { Modal } from "flowbite";
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-
-const editor = ref(ClassicEditor);
-const editorData = ref('<p>Content of the editor.</p>');
-const editorConfig = ref({
-    // The configuration of the editor.
-});
 
 const props = defineProps({
-  articles: {
+  users: {
+    type: Object,
+    default: () => ({}),
+  },
+  regionals: {
     type: Object,
     default: () => ({}),
   },
@@ -33,7 +30,7 @@ let search = ref(props.filters.search);
 
 watch(search, (value) => {
   router.get(
-    "/dashboard/article",
+    "/dashboard/user",
     { search: value },
     {
       preserveState: true,
@@ -42,27 +39,25 @@ watch(search, (value) => {
   );
 });
 
-const previewImage = ref(null);
 const form = useForm({
   id: "",
-  title: "",
-  body: "",
-  label: "",
-  category: "",
-  image: null,
+  name: "",
+  email: "",
+  role: "",
+  password: "mmpj12345",
+  regional_id: null,
 });
 
 function resetForm() {
   form.id = "";
-  form.title = "";
-  form.body = "";
-  form.label = "";
-  form.category = "null";
-  image.value = null;
-  previewImage.value = null;
+  form.name = "";
+  form.email = "";
+  form.role = "";
+  form.password = "mmpj12345";
+  form.regional_id = null;
 }
 
-function modalArticle(opt) {
+function modalUser(opt) {
   const $targetEl = document.getElementById("crud-modal");
   // options with default values
   const options = {
@@ -87,30 +82,30 @@ function modalArticle(opt) {
   }
 }
 
-function addArticle() {
-  form.post("/dashboard/article/store", {
-        preserveScroll: true,
-        onSuccess: (e) => {
-            toast("success", "Berhasil");
-            resetForm();
-            modalUser("hide");
-        },
+function addUser() {
+form.post("/dashboard/user/store", {
+    preserveScroll: true,
+    onSuccess: (e) => {
+        toast("success", "Berhasil");
+        resetForm();
+        modalUser("hide");
+    },
     });
 }
 
-function editArticle(data) {
+function editUser(data, role, regional) {
   form.id = data.id;
-  form.title = data.title;
-  form.body = data.body;
-  form.label = data.label;
-  form.category = data.category;
-  modalArticle("show");
+  form.name = data.name;
+  form.email = data.email;
+  form.role = role[0].name;
+  form.regional_id = regional.regional_id;
+  modalUser("show");
 }
 
-function deleteArticle(id, title) {
-  const konfirm = confirm(`Apakah anda yakin ingin menghapus ${title}?`);
+function deleteUser(id, name) {
+  const konfirm = confirm(`Apakah anda yakin ingin menghapus ${name}?`);
   if (!konfirm) return;
-  form.delete(`/dashboard/article/delete/${id}`, {
+  form.delete(`/dashboard/user/delete/${id}`, {
     preserveScroll: true,
     onSuccess: () => {
       resetForm();
@@ -186,7 +181,7 @@ function toggleCheckbox(id) {
       totalChecked++;
     }
   });
-  if (props.articles.to == totalChecked) {
+  if (props.users.to == totalChecked) {
     checkboxAll.checked = true;
   }
   if(formCheckbox.id.length > 0) {
@@ -210,7 +205,7 @@ function checkedAll() {
     checkedCheckboxes.forEach((checkbox) => {
       checkbox.checked = true;
     });
-    props.articles.data.forEach((data) => {
+    props.users.data.forEach((data) => {
       formCheckbox.id.push(data.id);
       countCheckbox.value++;
     });
@@ -228,12 +223,12 @@ function checkedAll() {
   }
 }
 
-function deleteArticleChoice() {
+function deleteUserChoice() {
   const konfirm = confirm(
     `Apakah anda yakin ingin menghapus data ini?`
   );
   if (!konfirm) return;
-  formCheckbox.post("/dashboard/article/destroy", {
+  formCheckbox.post("/dashboard/user/destroy", {
     preserveScroll: true,
     onSuccess: () => {
       formCheckbox.id = [];
@@ -348,16 +343,16 @@ function uploadImage(e) {
                   >
                     <tr>
                       <th scope="col" class="px-6 py-3">
-                        <p class="text-center">Judul</p>
+                        <p>Nama</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p class="text-center">Artikel</p>
+                        <p>Email</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p class="text-center">Status</p>
+                        <p>Regional</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p class="text-center">Tanggal</p>
+                        <p>Role</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <div class="flex gap-1">
@@ -370,7 +365,7 @@ function uploadImage(e) {
                           />
 
                           <div
-                            @click="deleteArticleChoice()"
+                            @click="deleteUserChoice()"
                             v-show="deleteChoice"
                             title="Hapus"
                             class="bg-red-100 p-0.5 rounded-md"
@@ -398,56 +393,28 @@ function uploadImage(e) {
                   </thead>
                   <tbody>
                     <tr
-                      v-for="(item, index) in props.articles.data"
+                      v-for="(item, index) in props.users.data"
                       :key="index"
                       class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                     >
-                      <th
-                        scope="row"
-                        class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
-                      >
-                        <img
-                          class="w-16 h-16 rounded-full"
-                          :src="item.image"
-                          alt="Jese image"
-                        />
-                        <div class="ps-3">
-                          <div class="text-base font-semibold">
-                            {{ item.title }}
-                          </div>
-                          <div class="font-normal text-yellow-500">
-                            {{ item.category ?? item.category }}
-                          </div>
-                          <div class="font-normal text-green-500">
-                            {{ item.label ?? item.label }}
-                          </div>
-                        </div>
-                      </th>
                       <td class="px-6 py-4">
-                        <p class="line-clamp-2" v-html="item.body"></p>
+                        {{ item.name }}
                       </td>
                       <td class="px-6 py-4">
-                        <div class="flex items-center">
-                          <div
-                            class="h-2.5 w-2.5 rounded-full bg-green-500 me-2"
-                          ></div>
-                          Publish
-                        </div>
+                        {{ item.email }}
                       </td>
                       <td class="px-6 py-4">
-                        <div class="flex items-center">
-                          <div
-                            class="h-2.5 w-2.5 rounded-full bg-green-500 me-2"
-                          ></div>
-                          {{
-                            item.updated_at ? item.updated_at : item.created_at
-                          }}
+                        {{ item.profile?.regional?.name }}
+                      </td>
+                      <td class="px-6 py-4">
+                        <div v-for="(itemRole, indexRole) in item.roles" :key="indexRole">
+                            {{ itemRole.name }}
                         </div>
                       </td>
                       <td class="px-6 py-4">
                         <div class="flex gap-2">
                           <div
-                            @click="editArticle(item)"
+                            @click="editUser(item, item.roles, item.profile)"
                             title="Edit"
                             class="bg-green-100 p-0.5 rounded-md"
                           >
@@ -502,7 +469,7 @@ function uploadImage(e) {
                           </div>
 
                           <div
-                            @click="deleteArticle(item.id, item.title)"
+                            @click="deleteUser(item.id, item.title)"
                             title="Hapus"
                             class="bg-red-100 p-0.5 rounded-md"
                           >
@@ -545,7 +512,7 @@ function uploadImage(e) {
 
                 <Pagination
                   class="my-6 flex justify-center md:justify-end"
-                  :links="props.articles.links"
+                  :links="props.users.links"
                 />
               </div>
             </div>
@@ -567,13 +534,15 @@ function uploadImage(e) {
             <div class="text-red-600 text-sm ml-2" v-for="error, index in props.errors" :key="index">
                 *{{ error }}
             </div>
-            
+
             <div
               class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
             >
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                Tambah Artikel
-              </h3>
+
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                {{ form.id ? "Update User" : "Tambah User" }}
+            </h3>
+
               <button
                 type="button"
                 class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
@@ -599,97 +568,75 @@ function uploadImage(e) {
             </div>
             <!-- Modal body -->
             <form
-              @submit.prevent="addArticle"
+              @submit.prevent="addUser"
               enctype="multipart/form-data"
               class="p-4 md:p-5"
             >
               <div class="grid gap-4 mb-4 grid-cols-2">
                 <div class="col-span-2">
                   <label
-                    for="image"
+                    for="name"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Image</label
+                    >Nama</label
                   >
-                  <img :src="previewImage" class="w-32" />
                   <input
-                    @change="uploadImage"
-                    type="file"
-                    name="image"
-                    id="image"
-                    accept="image/*"
+                    v-model="form.name"
+                    type="text"
+                    name="name"
+                    id="name"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Nama"
                   />
                 </div>
                 <div class="col-span-2">
-                  <label
-                    for="title"
-                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Judul</label
-                  >
-                  <input
-                    v-model="form.title"
-                    type="text"
-                    name="title"
-                    id="title"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Judul Artikel"
-                  />
-                </div>
-                <div class="col-span-2 sm:col-span-1">
-                  <label
-                    for="label"
-                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Label</label
-                  >
-                  <input
-                    v-model="form.label"
-                    type="text"
-                    name="label"
-                    id="label"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Label Artikel"
-                  />
-                </div>
-                <div class="col-span-2 sm:col-span-1">
-                  <label
-                    for="category"
-                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Category</label
-                  >
-                  <select
-                    v-model="form.category"
-                    id="category"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                  >
-                    <option selected="">Select category</option>
-                    <option value="TV">TV/Monitors</option>
-                    <option value="PC">PC</option>
-                    <option value="GA">Gaming/Console</option>
-                    <option value="PH">Phones</option>
-                  </select>
+                    <label
+                      for="email"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >Email</label
+                    >
+                    <input
+                      v-model="form.email"
+                      type="text"
+                      name="email"
+                      id="email"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      placeholder="Email"
+                    />
                 </div>
                 <div class="col-span-2">
-                  <label
-                    for="body"
-                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Isi Artikel</label
-                  >
-                  <ckeditor v-model="form.body" :editor="editor" :config="editorConfig"></ckeditor>
-                  <!-- <textarea
-                    v-model="form.body"
-                    id="body"
-                    rows="4"
-                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    placeholder="Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit, corporis."
-                  ></textarea> -->
+                    <label
+                      for="role"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >Role</label
+                    >
+                    {{ form.role }}
+                    <select v-model="form.role" name="role" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                        <option selected>Choose a country</option>
+                        <option value="peserta">Peserta</option>
+                        <option value="admin">Admin</option>
+                        <option value="panitia">Panitia</option>
+                    </select>
+                </div>
+                <div class="col-span-2">
+                    <label
+                      for="regional_id"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >Regional</label
+                    >
+                    <select v-model="form.regional_id" name="regional_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                        <option :selected="form.regional_id == null" value="">Choose a Regional</option>
+                        <option v-for="item, index in regionals" :key="index" :value="item.id" :selected="form.regionId === item.id">
+                            {{ item.name }}
+                        </option>
+                    </select>
                 </div>
               </div>
               <button
-                title="Tambah Artikel"
+                title="Tambah User"
                 type="submit"
                 class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
-                {{ form.id ? "Update Artikel" : "Add Artikel" }}
+                {{ form.id ? "Update User" : "Tambah User" }}
               </button>
             </form>
           </div>

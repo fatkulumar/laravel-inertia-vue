@@ -70,13 +70,16 @@ function modalRoom(opt) {
   }
 }
 
-function addClassRoom() {
+function addCategory() {
   form.post("/dashboard/category/store", {
     preserveScroll: true,
+    onSuccess: () => {
+        resetForm();
+        modalRoom("hide");
+        toast("success", "Data Berhasil Ditambah");
+    }
     });
-    resetForm();
-    modalRoom("hide");
-    toast("success", "Data Berhasil Ditambah");
+
 }
 
 function editClassRoom(data) {
@@ -90,9 +93,10 @@ function deleteClassRoom(id, name) {
   if (!konfirm) return;
   form.delete(`/dashboard/category/delete/${id}`, {
     preserveScroll: true,
-    onSuccess: () => {
-      resetForm();
-      toast("success", "Data Berhasil Dihapus");
+    onSuccess: (e) => {
+        toast("success", "Berhasil");
+        resetForm();
+        modalUser("hide");
     },
   });
 }
@@ -116,7 +120,6 @@ function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
 }
 
 const closeModal = (targetModal = "crud-modal") => {
-  resetForm()
   formCheckbox.id = []
   const $targetEl = document.getElementById(targetModal);
   const modal = new Modal($targetEl);
@@ -124,7 +127,6 @@ const closeModal = (targetModal = "crud-modal") => {
 };
 
 const showModal = (targetModal = "crud-modal") => {
-  resetForm()
   const $targetEl = document.getElementById(targetModal);
   const modal = new Modal($targetEl);
   modal.show();
@@ -321,15 +323,12 @@ function uploadImage(e) {
                 <table
                   class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
                 >
-                <div class="text-red-600 text-sm" v-for="error, index in props.errors" :key="index">
-                    *{{ error }}
-                </div>
                   <thead
                     class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
                   >
                     <tr>
                       <th scope="col" class="px-6 py-3">
-                        <p class="text-center">Nama Kategori</p>
+                        <p>Nama Kategori</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <div class="flex gap-1">
@@ -499,6 +498,9 @@ function uploadImage(e) {
           <!-- Modal content -->
           <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
             <!-- Modal header -->
+            <div class="text-red-600 text-sm ml-2" v-for="error, index in props.errors" :key="index">
+                *{{ error }}
+            </div>
             <div
               class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
             >
@@ -530,7 +532,7 @@ function uploadImage(e) {
             </div>
             <!-- Modal body -->
             <form
-              @submit.prevent="addClassRoom"
+              @submit.prevent="addCategory"
               enctype="multipart/form-data"
               class="p-4 md:p-5"
             >

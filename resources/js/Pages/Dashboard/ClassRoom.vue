@@ -73,10 +73,12 @@ function modalRoom(opt) {
 function addClassRoom() {
   form.post("/dashboard/class-room/store", {
     preserveScroll: true,
+        onSuccess: (e) => {
+            toast("success", "Berhasil");
+            resetForm();
+            modalUser("hide");
+        },
     });
-    resetForm();
-    modalRoom("hide");
-    toast("success", "Data Berhasil Ditambah");
 }
 
 function editClassRoom(data) {
@@ -321,15 +323,13 @@ function uploadImage(e) {
                 <table
                   class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
                 >
-                <div class="text-red-600 text-sm" v-for="error, index in props.errors" :key="index">
-                    *{{ error }}
-                </div>
+
                   <thead
                     class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
                   >
                     <tr>
                       <th scope="col" class="px-6 py-3">
-                        <p class="text-center">Nama Kelas</p>
+                        <p>Nama Kelas</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <div class="flex gap-1">
@@ -499,6 +499,9 @@ function uploadImage(e) {
           <!-- Modal content -->
           <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
             <!-- Modal header -->
+            <div class="text-red-600 text-sm ml-2" v-for="error, index in props.errors" :key="index">
+                *{{ error }}
+            </div>
             <div
               class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
             >

@@ -45,7 +45,7 @@ function resetForm() {
   form.name = "";
 }
 
-function modalRoom(opt) {
+function modalRegional(opt) {
   const $targetEl = document.getElementById("crud-modal");
   // options with default values
   const options = {
@@ -70,22 +70,25 @@ function modalRoom(opt) {
   }
 }
 
-function addClassRoom() {
+function addRegional() {
   form.post("/dashboard/regional/store", {
     preserveScroll: true,
+        onSuccess: (e) => {
+            toast("success", "Berhasil");
+            resetForm();
+            modalUser("hide");
+        },
     });
-    resetForm();
-    modalRoom("hide");
-    toast("success", "Data Berhasil Ditambah");
+
 }
 
-function editClassRoom(data) {
+function editClassRegional(data) {
   form.id = data.id;
   form.name = data.name;
-  modalRoom("show");
+  modalRegional("show");
 }
 
-function deleteClassRoom(id, name) {
+function deleteClassRegional(id, name) {
   const konfirm = confirm(`Apakah anda yakin ingin menghapus ${name}?`);
   if (!konfirm) return;
   form.delete(`/dashboard/regional/delete/${id}`, {
@@ -206,7 +209,7 @@ function checkedAll() {
   }
 }
 
-function deleteClassRoomChoice() {
+function deleteClassRegionalChoice() {
   const konfirm = confirm(
     `Apakah anda yakin ingin menghapus data ini?`
   );
@@ -321,15 +324,12 @@ function uploadImage(e) {
                 <table
                   class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
                 >
-                <div class="text-red-600 text-sm" v-for="error, index in props.errors" :key="index">
-                    *{{ error }}
-                </div>
                   <thead
                     class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
                   >
                     <tr>
                       <th scope="col" class="px-6 py-3">
-                        <p class="text-center">Nama Regional</p>
+                        <p>Nama Regional</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <div class="flex gap-1">
@@ -342,7 +342,7 @@ function uploadImage(e) {
                           />
 
                           <div
-                            @click="deleteClassRoomChoice()"
+                            @click="deleteClassRegionalChoice()"
                             v-show="deleteChoice"
                             title="Hapus"
                             class="bg-red-100 p-0.5 rounded-md"
@@ -382,7 +382,7 @@ function uploadImage(e) {
                       <td class="px-6 py-4">
                         <div class="flex gap-2">
                           <div
-                            @click="editClassRoom(item)"
+                            @click="editClassRegional(item)"
                             title="Edit"
                             class="bg-green-100 p-0.5 rounded-md"
                           >
@@ -437,7 +437,7 @@ function uploadImage(e) {
                           </div>
 
                           <div
-                            @click="deleteClassRoom(item.id, item.title)"
+                            @click="deleteClassRegional(item.id, item.title)"
                             title="Hapus"
                             class="bg-red-100 p-0.5 rounded-md"
                           >
@@ -499,6 +499,10 @@ function uploadImage(e) {
           <!-- Modal content -->
           <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
             <!-- Modal header -->
+            <div class="text-red-600 text-sm ml-2" v-for="error, index in props.errors" :key="index">
+                *{{ error }}
+            </div>
+
             <div
               class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
             >
@@ -530,7 +534,7 @@ function uploadImage(e) {
             </div>
             <!-- Modal body -->
             <form
-              @submit.prevent="addClassRoom"
+              @submit.prevent="addRegional"
               enctype="multipart/form-data"
               class="p-4 md:p-5"
             >
