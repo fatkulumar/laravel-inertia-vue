@@ -19,6 +19,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  categories: {
+    type: Object,
+    default: () => ({}),
+  },
   filters: {
     type: Object,
     default: () => ({}),
@@ -48,7 +52,7 @@ const form = useForm({
   title: "",
   body: "",
   label: "",
-  category: "",
+  category_id: "",
   image: null,
 });
 
@@ -57,7 +61,7 @@ function resetForm() {
   form.title = "";
   form.body = "";
   form.label = "";
-  form.category = "null";
+  form.category_id = "null";
   image.value = null;
   previewImage.value = null;
 }
@@ -93,7 +97,7 @@ function addArticle() {
         onSuccess: (e) => {
             toast("success", "Berhasil");
             resetForm();
-            modalUser("hide");
+            closeModal();
         },
     });
 }
@@ -103,7 +107,7 @@ function editArticle(data) {
   form.title = data.title;
   form.body = data.body;
   form.label = data.label;
-  form.category = data.category;
+  form.category_id = data.category_id;
   modalArticle("show");
 }
 
@@ -242,6 +246,8 @@ function deleteArticleChoice() {
         checkedCheckboxes.forEach(element => {
             element.checked = false
         });
+
+      deleteChoice.value = false
     },
   });
 }
@@ -416,7 +422,7 @@ function uploadImage(e) {
                             {{ item.title }}
                           </div>
                           <div class="font-normal text-yellow-500">
-                            {{ item.category ?? item.category }}
+                            {{ item.category_id ?? item.category_id }}
                           </div>
                           <div class="font-normal text-green-500">
                             {{ item.label ?? item.label }}
@@ -567,7 +573,7 @@ function uploadImage(e) {
             <div class="text-red-600 text-sm ml-2" v-for="error, index in props.errors" :key="index">
                 *{{ error }}
             </div>
-            
+
             <div
               class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
             >
@@ -652,20 +658,19 @@ function uploadImage(e) {
                 </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label
-                    for="category"
+                    for="category_id"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Category</label
+                    >Kategori</label
                   >
                   <select
-                    v-model="form.category"
-                    id="category"
+                    v-model="form.category_id"
+                    id="category_id"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                   >
-                    <option selected="">Select category</option>
-                    <option value="TV">TV/Monitors</option>
-                    <option value="PC">PC</option>
-                    <option value="GA">Gaming/Console</option>
-                    <option value="PH">Phones</option>
+                    <option :selected="form.category_id == null" value="">Select a Category</option>
+                    <option v-for="item, index in categories" :key="index" :value="item.id">
+                        {{ item.name }}
+                    </option>
                   </select>
                 </div>
                 <div class="col-span-2">

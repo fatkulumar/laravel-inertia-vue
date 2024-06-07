@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('body');
             $table->string('slug');
             $table->string('label');
-            $table->string('category');
+            $table->uuid('category_id');
             $table->text('image')->nullable();
             $table->uuid('user_id');
             $table->foreign('user_id')->references('id')->on('users');

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Article;
-use App\Models\User;
+use App\Models\Category;
 use App\Traits\EntityValidator;
 use App\Traits\FileUpload;
 use Illuminate\Http\Request;
@@ -37,6 +37,7 @@ class ArticleController extends Controller
                     ->when($request['search'],function($query, $request) {
                         $query->where('title','like','%'.$request.'%');
                     })
+                    ->with('category')
                     ->paginate(5)
                     ->withQueryString()
                     ->appends(['search' => $request['search']]);
@@ -50,8 +51,10 @@ class ArticleController extends Controller
                         }
                         return $profile;
                     });
+                    return $articles;
             return Inertia::render('Dashboard/Article', [
                 'articles' => $articles,
+                'categories' => Category::all(['id', 'name']),
             ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
@@ -98,7 +101,7 @@ class ArticleController extends Controller
                     'title' => $request->post('title'),
                     'body' => $request->post('body'),
                     'label' => $request->post('label'),
-                    'category' => $request->post('category'),
+                    'category_id' => $request->post('category_id'),
                     'slug' => Str::slug($request->post('title')),
                     'image' => $upload,
                     'user_id' => auth()->user()->id,
@@ -117,7 +120,7 @@ class ArticleController extends Controller
                     'title' => $request->post('title'),
                     'body' => $request->post('body'),
                     'label' => $request->post('label'),
-                    'category' => $request->post('category'),
+                    'category_id' => $request->post('category_id'),
                     'slug' => Str::slug($request->post('title')),
                     'image' => $upload,
                     'user_id' => auth()->user()->id,
@@ -142,14 +145,14 @@ private function storeValidator(Request $request)
                 'title' => 'required|string|max:100',
                 'body' => 'required',
                 'label' => 'nullable|required|string|max:1000',
-                'category' => 'nullable|required|string|max:50',
+                'category_id' => 'nullable|required|string|max:50',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ];
             $Validatedata = [
                 'title' => $request->post('title'),
                 'body' => $request->post('body'),
                 'label' => $request->post('label'),
-                'category' => $request->post('category'),
+                'category_id' => $request->post('category_id'),
                 'image' => $request->post('image'),
             ];
             $validator = EntityValidator::validate($Validatedata, $rules);

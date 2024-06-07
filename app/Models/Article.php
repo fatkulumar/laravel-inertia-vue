@@ -18,8 +18,13 @@ class Article extends Model
         'body',
         'slug',
         'label',
-        'category',
+        'category_id',
         'status',
         'image',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
 }

@@ -8,7 +8,7 @@ import Swal from "sweetalert2";
 import { Modal } from "flowbite";
 
 const props = defineProps({
-  categories: {
+  submissions: {
     type: Object,
     default: () => ({}),
   },
@@ -26,7 +26,7 @@ let search = ref(props.filters.search);
 
 watch(search, (value) => {
   router.get(
-    "/dashboard/category",
+    "/dashboard/submission",
     { search: value },
     {
       preserveState: true,
@@ -36,13 +36,23 @@ watch(search, (value) => {
 });
 
 const form = useForm({
-  id: "",
-  name: "",
+    id: "",
+    participant_id: "",
+    committee_id: "",
+    status: "",
+    approval_date: "",
+    graduation_date: "",
+    file: "",
 });
 
 function resetForm() {
   form.id = "";
-  form.name = "";
+  form.participant_id = "";
+  form.committee_id = "";
+  form.status = "";
+  form.approval_date = "";
+  form.graduation_date = "";
+  form.file = "";
 }
 
 function modalRoom(opt) {
@@ -70,29 +80,33 @@ function modalRoom(opt) {
   }
 }
 
-function addCategory() {
-  form.post("/dashboard/category/store", {
+function addsubmission() {
+  form.post("/dashboard/submission/store", {
     preserveScroll: true,
     onSuccess: () => {
         resetForm();
         modalRoom("hide");
-        toast("success", "Berhasil");
-        closeModal();
+        toast("success", "Data Berhasil Ditambah");
     }
     });
-
 }
 
 function editClassRoom(data) {
   form.id = data.id;
-  form.name = data.name;
+  form.participant_id = data.participant_id;
+  form.committee_id = data.committee_id;
+  form.status = data.status;
+  form.approval_date = data.approval_date;
+  form.graduation_date = data.graduation_date;
+  form.file = data.file;
   modalRoom("show");
 }
 
-function deleteClassRoom(id, name) {
-  const konfirm = confirm(`Apakah anda yakin ingin menghapus ${name}?`);
+function rejectSubmission(id, namePeserta) {
+  form.id = id;
+  const konfirm = confirm(`Apakah anda yakin ingin menolak ${namePeserta}?`);
   if (!konfirm) return;
-  form.delete(`/dashboard/category/delete/${id}`, {
+  form.post(`/dashboard/submission/reject-submission`, {
     preserveScroll: true,
     onSuccess: (e) => {
         toast("success", "Berhasil");
@@ -100,6 +114,34 @@ function deleteClassRoom(id, name) {
         modalUser("hide");
     },
   });
+}
+
+function approvalSubmission(id, namePeserta) {
+    form.id = id;
+    const konfirm = confirm(`Apakah anda yakin ingin menerima ${namePeserta}?`);
+    if (!konfirm) return;
+    form.post(`/dashboard/submission/approval-submission`, {
+        preserveScroll: true,
+        onSuccess: (e) => {
+            toast("success", "Berhasil");
+            resetForm();
+            modalUser("hide");
+        },
+    });
+}
+
+function graduationSubmission(id, namePeserta) {
+    form.id = id;
+    const konfirm = confirm(`Apakah anda yakin ingin meluluskan ${namePeserta}?`);
+    if (!konfirm) return;
+    form.post(`/dashboard/submission/graduation-submission`, {
+        preserveScroll: true,
+        onSuccess: (e) => {
+            toast("success", "Berhasil");
+            resetForm();
+            modalUser("hide");
+        },
+    });
 }
 
 function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
@@ -123,13 +165,13 @@ function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
 const closeModal = (targetModal = "crud-modal") => {
   resetForm()
   formCheckbox.id = []
+  formCheckbox.status = ""
   const $targetEl = document.getElementById(targetModal);
   const modal = new Modal($targetEl);
   modal.hide();
 };
 
 const showModal = (targetModal = "crud-modal") => {
-  resetForm()
   const $targetEl = document.getElementById(targetModal);
   const modal = new Modal($targetEl);
   modal.show();
@@ -137,9 +179,10 @@ const showModal = (targetModal = "crud-modal") => {
 
 const formCheckbox = useForm({
   id: [],
+  status: "",
 });
 
-const deleteChoice = ref(false)
+const choice = ref(false)
 function toggleCheckbox(id) {
   let checkbox = document.getElementById(`checkbox${id}`);
   let checkboxAll = document.getElementById(`checkboxAll`);
@@ -169,13 +212,13 @@ function toggleCheckbox(id) {
       totalChecked++;
     }
   });
-  if (props.categories.to == totalChecked) {
+  if (props.submissions.to == totalChecked) {
     checkboxAll.checked = true;
   }
   if(formCheckbox.id.length > 0) {
-    deleteChoice.value = true
+    choice.value = true
   }else{
-    deleteChoice.value = false
+    choice.value = false
   }
 }
 
@@ -193,7 +236,7 @@ function checkedAll() {
     checkedCheckboxes.forEach((checkbox) => {
       checkbox.checked = true;
     });
-    props.categories.data.forEach((data) => {
+    props.submissions.data.forEach((data) => {
       formCheckbox.id.push(data.id);
       countCheckbox.value++;
     });
@@ -202,25 +245,29 @@ function checkedAll() {
       checkbox.checked = false;
     });
     formCheckbox.id = [];
+    formCheckbox.status = "";
   }
 
   if(formCheckbox.id.length > 0) {
-    deleteChoice.value = true
+    choice.value = true
   }else{
-    deleteChoice.value = false
+    choice.value = false
   }
 }
 
-function deleteClassRoomChoice() {
-  const konfirm = confirm(
-    `Apakah anda yakin ingin menghapus data ini?`
-  );
-  if (!konfirm) return;
-  formCheckbox.post("/dashboard/category/destroy", {
+function optionSubmission() {
+    showModal()
+}
+
+function handleOptionSubmission() {
+    formCheckbox.post("/dashboard/submission/option-submission", {
     preserveScroll: true,
     onSuccess: () => {
+      choice.value = false
       formCheckbox.id = [];
-      toast("success", "Data Berhasil Dihapus");
+      formCheckbox.status = "";
+      toast("success", "Berhasil");
+      closeModal()
       let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
         checkedCheckboxes.forEach(element => {
             element.checked = false
@@ -228,6 +275,23 @@ function deleteClassRoomChoice() {
     },
   });
 }
+// function optionSubmission() {
+//   const konfirm = confirm(
+//     `Apakah anda yakin ingin menghapus data ini?`
+//   );
+//   if (!konfirm) return;
+//   formCheckbox.post("/dashboard/submission/destroy", {
+//     preserveScroll: true,
+//     onSuccess: () => {
+//       formCheckbox.id = [];
+//       toast("success", "Data Berhasil Dihapus");
+//       let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+//         checkedCheckboxes.forEach(element => {
+//             element.checked = false
+//         });
+//     },
+//   });
+// }
 
 function uploadImage(e) {
     const image = e.target.files[0];
@@ -261,8 +325,8 @@ function uploadImage(e) {
                 <div
                   class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
                 >
-                  <div>
-                    <!-- icon plus -->
+                  <!-- <div>
+                    icon plus
                     <div
                       @click="showModal()"
                       title="Tambah Artikel"
@@ -291,7 +355,7 @@ function uploadImage(e) {
                         </g>
                       </svg>
                     </div>
-                  </div>
+                  </div> -->
 
                   <label for="table-search" class="sr-only">Search</label>
                   <div class="relative">
@@ -331,10 +395,31 @@ function uploadImage(e) {
                   >
                     <tr>
                       <th scope="col" class="px-6 py-3">
-                        <p>Nama Kategori</p>
+                        <p>Nama Peserta</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <div class="flex gap-1">
+                        <p>Email Peserta</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
+                        <p>Panitia</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
+                        <p>Proposal</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
+                        <p>Status</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
+                        <p>Tanggal Terkirim</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
+                        <p>Tanggal Diterima</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
+                        <p>Tanggal Kelulusan</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
+                        <div class="flex gap-1 items-center">
                           <p class="text-center mt-1">Action</p>
                           <input
                             @click="checkedAll()"
@@ -344,27 +429,12 @@ function uploadImage(e) {
                           />
 
                           <div
-                            @click="deleteClassRoomChoice()"
-                            v-show="deleteChoice"
-                            title="Hapus"
-                            class="bg-red-100 p-0.5 rounded-md"
+                            @click="optionSubmission()"
+                            v-show="choice"
+                            title="Pilihan"
+                            class="bg-red-100 p-0.5 rounded-md cursor-pointer"
                           >
-                            <svg
-                              class="h-6 w-6 cursor-pointer"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                              <g
-                                id="SVGRepo_tracerCarrier"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              ></g>
-                              <g id="SVGRepo_iconCarrier">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M3 6.38597C3 5.90152 3.34538 5.50879 3.77143 5.50879L6.43567 5.50832C6.96502 5.49306 7.43202 5.11033 7.61214 4.54412C7.61688 4.52923 7.62232 4.51087 7.64185 4.44424L7.75665 4.05256C7.8269 3.81241 7.8881 3.60318 7.97375 3.41617C8.31209 2.67736 8.93808 2.16432 9.66147 2.03297C9.84457 1.99972 10.0385 1.99986 10.2611 2.00002H13.7391C13.9617 1.99986 14.1556 1.99972 14.3387 2.03297C15.0621 2.16432 15.6881 2.67736 16.0264 3.41617C16.1121 3.60318 16.1733 3.81241 16.2435 4.05256L16.3583 4.44424C16.3778 4.51087 16.3833 4.52923 16.388 4.54412C16.5682 5.11033 17.1278 5.49353 17.6571 5.50879H20.2286C20.6546 5.50879 21 5.90152 21 6.38597C21 6.87043 20.6546 7.26316 20.2286 7.26316H3.77143C3.34538 7.26316 3 6.87043 3 6.38597Z" fill="#1C274C"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M11.5956 22.0001H12.4044C15.1871 22.0001 16.5785 22.0001 17.4831 21.1142C18.3878 20.2283 18.4803 18.7751 18.6654 15.8686L18.9321 11.6807C19.0326 10.1037 19.0828 9.31524 18.6289 8.81558C18.1751 8.31592 17.4087 8.31592 15.876 8.31592H8.12404C6.59127 8.31592 5.82488 8.31592 5.37105 8.81558C4.91722 9.31524 4.96744 10.1037 5.06788 11.6807L5.33459 15.8686C5.5197 18.7751 5.61225 20.2283 6.51689 21.1142C7.42153 22.0001 8.81289 22.0001 11.5956 22.0001ZM10.2463 12.1886C10.2051 11.7548 9.83753 11.4382 9.42537 11.4816C9.01321 11.525 8.71251 11.9119 8.75372 12.3457L9.25372 17.6089C9.29494 18.0427 9.66247 18.3593 10.0746 18.3159C10.4868 18.2725 10.7875 17.8856 10.7463 17.4518L10.2463 12.1886ZM14.5746 11.4816C14.9868 11.525 15.2875 11.9119 15.2463 12.3457L14.7463 17.6089C14.7051 18.0427 14.3375 18.3593 13.9254 18.3159C13.5132 18.2725 13.2125 17.8856 13.2537 17.4518L13.7537 12.1886C13.7949 11.7548 14.1625 11.4382 14.5746 11.4816Z" fill="#1C274C"></path> </g></svg>
-                              </g>
-                            </svg>
+                            <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Edit / Select_Multiple"> <path id="Vector" d="M3 9V19.4C3 19.9601 3 20.2399 3.10899 20.4538C3.20487 20.642 3.35774 20.7952 3.5459 20.8911C3.7596 21 4.0395 21 4.59846 21H15.0001M17 8L13 12L11 10M7 13.8002V6.2002C7 5.08009 7 4.51962 7.21799 4.0918C7.40973 3.71547 7.71547 3.40973 8.0918 3.21799C8.51962 3 9.08009 3 10.2002 3H17.8002C18.9203 3 19.4801 3 19.9079 3.21799C20.2842 3.40973 20.5905 3.71547 20.7822 4.0918C21.0002 4.51962 21.0002 5.07969 21.0002 6.19978L21.0002 13.7998C21.0002 14.9199 21.0002 15.48 20.7822 15.9078C20.5905 16.2841 20.2842 16.5905 19.9079 16.7822C19.4805 17 18.9215 17 17.8036 17H10.1969C9.07899 17 8.5192 17 8.0918 16.7822C7.71547 16.5905 7.40973 16.2842 7.21799 15.9079C7 15.4801 7 14.9203 7 13.8002Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
                           </div>
                         </div>
                       </th>
@@ -372,55 +442,67 @@ function uploadImage(e) {
                   </thead>
                   <tbody>
                     <tr
-                      v-for="(item, index) in props.categories.data"
+                      v-for="(item, index) in props.submissions.data"
                       :key="index"
                       class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                     >
                       <td class="px-6 py-4">
-                        <p class="line-clamp-2">
-                            {{ item.name }}
-                        </p>
+                        {{ item.participant?.name }}
+                      </td>
+                      <td class="px-6 py-4">
+                        {{ item.participant?.email }}
+                      </td>
+                      <td class="px-6 py-4">
+                        {{ item.committee?.name }}
+                      </td>
+                      <td class="px-6 py-4">
+                        <a class="text-blue-500 underline" :href="item.file" target="_blank" rel="noopener noreferrer">{{ item.file }}</a>
+                      </td>
+                      <td class="px-6 py-4">
+                        {{ item.status }}
+                      </td>
+                      <td class="px-6 py-4">
+                        {{ item.created_at }}
+                      </td>
+                      <td class="px-6 py-4">
+                        {{ item.approval_date ? item.approval_date : '-----' }}
+                      </td>
+                      <td class="px-6 py-4">
+                        {{ item.graduation_date ? item.graduation_date : '-----' }}
                       </td>
                       <td class="px-6 py-4">
                         <div class="flex gap-2">
                           <div
-                            @click="editClassRoom(item)"
-                            title="Edit"
+                            @click="approvalSubmission(item)"
+                            title="Diterima"
                             class="bg-green-100 p-0.5 rounded-md"
                           >
-                            <svg
-                              class="h-6 w-6 cursor-pointer"
-                              viewBox="0 0 192 192"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xml:space="preserve"
-                              fill="none"
+                            <svg height="25x" width="25px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 46.372 46.372" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path style="fill:#010002;" d="M45.668,9.281l-4.914-4.914c-0.905-0.905-2.409-0.944-3.36-0.089L18.665,21.124 c-0.951,0.855-2.504,0.868-3.469,0.028l-5.09-4.433c-0.965-0.84-2.48-0.788-3.385,0.117l-6.042,6.042 c-0.905,0.905-0.905,2.371,0,3.276L15.82,41.295c0,0,0.491,0.491,1.096,1.096c0.605,0.605,1.79,0.325,2.645-0.626l26.194-29.123 C46.612,11.69,46.572,10.186,45.668,9.281z"></path> </g> </g></svg>
+                          </div>
+
+                          <div
+                            @click="rejectSubmission(item.id, item.participant?.name)"
+                            title="Diterima"
+                            class="bg-red-100 p-0.5 rounded-md cursor-pointer flex items-center"
+                          >
+                          <svg
+                            class="h-6 w-6 cursor-pointer"
+                            viewBox="0 0 192 192"
+                            xmlns="http://www.w3.org/2000/svg"
+                            xml:space="preserve"
+                            fill="none"
                             >
-                              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                              <g
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g
                                 id="SVGRepo_tracerCarrier"
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
-                              ></g>
-                              <g id="SVGRepo_iconCarrier">
+                            ></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <svg viewBox="0 0 25 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>Tolak</title> <desc>Created with Sketch Beta.</desc> <defs> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage"> <g id="Icon-Set-Filled" sketch:type="MSLayerGroup" transform="translate(-469.000000, -1041.000000)" fill="#000000"> <path d="M487.148,1053.48 L492.813,1047.82 C494.376,1046.26 494.376,1043.72 492.813,1042.16 C491.248,1040.59 488.712,1040.59 487.148,1042.16 L481.484,1047.82 L475.82,1042.16 C474.257,1040.59 471.721,1040.59 470.156,1042.16 C468.593,1043.72 468.593,1046.26 470.156,1047.82 L475.82,1053.48 L470.156,1059.15 C468.593,1060.71 468.593,1063.25 470.156,1064.81 C471.721,1066.38 474.257,1066.38 475.82,1064.81 L481.484,1059.15 L487.148,1064.81 C488.712,1066.38 491.248,1066.38 492.813,1064.81 C494.376,1063.25 494.376,1060.71 492.813,1059.15 L487.148,1053.48" id="cross" sketch:type="MSShapeGroup"> </path> </g> </g> </g></svg>
                                 <path
-                                  d="m104.175 90.97-4.252 38.384 38.383-4.252L247.923 15.427V2.497L226.78-18.646h-12.93zm98.164-96.96 31.671 31.67"
-                                  class="cls-1"
-                                  style="
-                                    fill: none;
-                                    fill-opacity: 1;
-                                    fill-rule: nonzero;
-                                    stroke: #000000;
-                                    stroke-width: 12;
-                                    stroke-linecap: round;
-                                    stroke-linejoin: round;
-                                    stroke-dasharray: none;
-                                    stroke-opacity: 1;
-                                  "
-                                  transform="translate(-77.923 40.646)"
-                                ></path>
-                                <path
-                                  d="m195.656 33.271-52.882 52.882"
-                                  style="
+                                d="m195.656 33.271-52.882 52.882"
+                                style="
                                     fill: none;
                                     fill-opacity: 1;
                                     fill-rule: nonzero;
@@ -431,42 +513,20 @@ function uploadImage(e) {
                                     stroke-miterlimit: 5;
                                     stroke-dasharray: none;
                                     stroke-opacity: 1;
-                                  "
-                                  transform="translate(-77.923 40.646)"
+                                "
+                                transform="translate(-77.923 40.646)"
                                 ></path>
-                              </g>
+                            </g>
                             </svg>
                           </div>
-
                           <div
-                            @click="deleteClassRoom(item.id, item.title)"
-                            title="Hapus"
-                            class="bg-red-100 p-0.5 rounded-md"
+                            @click="graduationSubmission(item)"
+                            title="Lulus"
+                            class="bg-purple-100 p-0.5 rounded-md cursor-pointer"
                           >
-                            <svg
-                              class="h-6 w-6 cursor-pointer"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                              <g
-                                id="SVGRepo_tracerCarrier"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              ></g>
-                              <g id="SVGRepo_iconCarrier">
-                                <path
-                                  d="M10 12L14 16M14 12L10 16M18 6L17.1991 18.0129C17.129 19.065 17.0939 19.5911 16.8667 19.99C16.6666 20.3412 16.3648 20.6235 16.0011 20.7998C15.588 21 15.0607 21 14.0062 21H9.99377C8.93927 21 8.41202 21 7.99889 20.7998C7.63517 20.6235 7.33339 20.3412 7.13332 19.99C6.90607 19.5911 6.871 19.065 6.80086 18.0129L6 6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6"
-                                  stroke="#000000"
-                                  stroke-width="2"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                ></path>
-                              </g>
-                            </svg>
+                          <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M11.5842 3.09053C11.8483 2.96982 12.1517 2.96982 12.4158 3.09053L22.4158 7.66195C22.7717 7.82467 23 8.18006 23 8.57143C23 8.96279 22.7717 9.31819 22.4158 9.4809L20 10.5853V16.4469C20 16.648 19.9495 16.8682 19.8221 17.0728C19.4914 17.6042 17.1726 21 12 21C6.82744 21 4.50856 17.6042 4.17785 17.0728C4.0505 16.8682 4 16.648 4 16.4469V10.5853L1.58424 9.4809C1.2283 9.31819 1 8.96279 1 8.57143C1 8.18006 1.2283 7.82467 1.58424 7.66195L11.5842 3.09053ZM6 11.4995V16.1994C6.48987 16.8789 8.31354 19 12 19C15.6865 19 17.5101 16.8789 18 16.1994V11.4995L12.4158 14.0523C12.1517 14.173 11.8483 14.173 11.5842 14.0523L6 11.4995ZM4.40524 8.57143L5.41576 9.03338L12 12.0433L18.5842 9.03338L19.5948 8.57143L12 5.09954L4.40524 8.57143ZM23.5 11.5C23.5 12.3284 22.8284 13 22 13C21.1716 13 20.5 12.3284 20.5 11.5C20.5 10.6716 21.1716 10 22 10C22.8284 10 23.5 10.6716 23.5 11.5ZM23 14.5C23 13.9477 22.5523 13.5 22 13.5C21.4477 13.5 21 13.9477 21 14.5V20C21 20.5523 21.4477 21 22 21C22.5523 21 23 20.5523 23 20V14.5Z" fill="#000000"></path> </g></svg>
                           </div>
-                          <div>
+                          <div class="flex items-center">
                             <input
                               @click="toggleCheckbox(item.id)"
                               class="h-6 w-6"
@@ -482,7 +542,7 @@ function uploadImage(e) {
 
                 <Pagination
                   class="my-6 flex justify-center md:justify-end"
-                  :links="props.categories.links"
+                  :links="props.submissions.links"
                 />
               </div>
             </div>
@@ -508,7 +568,7 @@ function uploadImage(e) {
               class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
             >
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                Tambah Artikel
+                Pilih
               </h3>
               <button
                 type="button"
@@ -535,25 +595,23 @@ function uploadImage(e) {
             </div>
             <!-- Modal body -->
             <form
-              @submit.prevent="addCategory"
+              @submit.prevent="handleOptionSubmission"
               enctype="multipart/form-data"
               class="p-4 md:p-5"
             >
               <div class="grid gap-4 mb-4 grid-cols-2">
                 <div class="col-span-2">
                   <label
-                    for="title"
+                    for="graduation"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Nama Kategori</label
+                    >Graduation</label
                   >
-                  <input
-                    v-model="form.name"
-                    type="text"
-                    name="name"
-                    id="name"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Nama Kategori"
-                  />
+                  <select id="graduation" name="graduation" v-model="formCheckbox.status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    <option selected value="">Choose a graduation</option>
+                    <option value="Diterima">Diterima</option>
+                    <option value="Ditolak">Ditolak</option>
+                    <option value="Lulus">Lulus</option>
+                  </select>
                 </div>
               </div>
               <button
@@ -561,7 +619,7 @@ function uploadImage(e) {
                 type="submit"
                 class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
-                {{ form.id ? "Update Kelas" : "Add Kelas" }}
+                {{ form.id ? "Update" : "Update" }}
               </button>
             </form>
           </div>

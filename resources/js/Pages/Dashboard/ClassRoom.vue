@@ -76,7 +76,7 @@ function addClassRoom() {
         onSuccess: (e) => {
             toast("success", "Berhasil");
             resetForm();
-            modalUser("hide");
+            closeModal();
         },
     });
 }
@@ -222,6 +222,8 @@ function deleteClassRoomChoice() {
         checkedCheckboxes.forEach(element => {
             element.checked = false
         });
+
+      deleteChoice.value = false
     },
   });
 }

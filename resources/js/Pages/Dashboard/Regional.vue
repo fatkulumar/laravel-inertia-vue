@@ -76,19 +76,19 @@ function addRegional() {
         onSuccess: (e) => {
             toast("success", "Berhasil");
             resetForm();
-            modalUser("hide");
+            closeModal();
         },
     });
 
 }
 
-function editClassRegional(data) {
+function editRegional(data) {
   form.id = data.id;
   form.name = data.name;
   modalRegional("show");
 }
 
-function deleteClassRegional(id, name) {
+function deleteRegional(id, name) {
   const konfirm = confirm(`Apakah anda yakin ingin menghapus ${name}?`);
   if (!konfirm) return;
   form.delete(`/dashboard/regional/delete/${id}`, {
@@ -209,7 +209,7 @@ function checkedAll() {
   }
 }
 
-function deleteClassRegionalChoice() {
+function deleteRegionalChoice() {
   const konfirm = confirm(
     `Apakah anda yakin ingin menghapus data ini?`
   );
@@ -223,6 +223,8 @@ function deleteClassRegionalChoice() {
         checkedCheckboxes.forEach(element => {
             element.checked = false
         });
+
+      deleteChoice.value = false
     },
   });
 }
@@ -342,7 +344,7 @@ function uploadImage(e) {
                           />
 
                           <div
-                            @click="deleteClassRegionalChoice()"
+                            @click="deleteRegionalChoice()"
                             v-show="deleteChoice"
                             title="Hapus"
                             class="bg-red-100 p-0.5 rounded-md"
@@ -382,7 +384,7 @@ function uploadImage(e) {
                       <td class="px-6 py-4">
                         <div class="flex gap-2">
                           <div
-                            @click="editClassRegional(item)"
+                            @click="editRegional(item)"
                             title="Edit"
                             class="bg-green-100 p-0.5 rounded-md"
                           >
@@ -437,7 +439,7 @@ function uploadImage(e) {
                           </div>
 
                           <div
-                            @click="deleteClassRegional(item.id, item.title)"
+                            @click="deleteRegional(item.id, item.title)"
                             title="Hapus"
                             class="bg-red-100 p-0.5 rounded-md"
                           >

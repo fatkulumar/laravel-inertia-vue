@@ -45,7 +45,7 @@ const form = useForm({
   email: "",
   role: "",
   password: "mmpj12345",
-  regional_id: null,
+  regional_id: "",
 });
 
 function resetForm() {
@@ -611,7 +611,7 @@ function uploadImage(e) {
                     >
                     {{ form.role }}
                     <select v-model="form.role" name="role" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                        <option selected>Choose a country</option>
+                        <option :selected="form.role == null" value="">Choose a Role</option>
                         <option value="peserta">Peserta</option>
                         <option value="admin">Admin</option>
                         <option value="panitia">Panitia</option>

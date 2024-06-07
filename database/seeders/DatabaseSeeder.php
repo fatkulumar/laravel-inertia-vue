@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\ClassRoom;
 use App\Models\Profile;
 use App\Models\Regional;
+use App\Models\Submission;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -50,7 +51,6 @@ class DatabaseSeeder extends Seeder
                     'regional_id' => $id_regional1,
                     'profileable_id' => $userId1,
                     'profileable_type' => 'App\Models\User',
-                    'regional_id' => $id_regional1,
                 ]);
             }
 
@@ -79,7 +79,6 @@ class DatabaseSeeder extends Seeder
                     'regional_id' => $id_regional2,
                     'profileable_id' => $userId2,
                     'profileable_type' => 'App\Models\User',
-                    'regional_id' => $id_regional2,
                 ]);
             }
 
@@ -108,30 +107,17 @@ class DatabaseSeeder extends Seeder
                     'regional_id' => $id_regional3,
                     'profileable_id' => $userId3,
                     'profileable_type' => 'App\Models\User',
-                    'regional_id' => $id_regional3,
+                ]);
+
+                $submissionId = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                Submission::create([
+                    'id' => $submissionId,
+                    'participant_id' => $userId2,
+                    'committee_id' => $userId3,
+                    'status' => 'pending',
+                    'file' => 'Link File',
                 ]);
             }
-
-            Article::create([
-                'user_id' => $userId1,
-                'title' => 'My First Article',
-                'body' => 'ini adalah body article Lorem ipsum dolor sit amet consectetur, adipisicing elit. Error, deserunt aliquam nam ab sapiente nostrum quaerat rerum dignissimos quam voluptates sed dolorem recusandae. Dolor eos cumque voluptate, neque fugiat placeat?',
-                'slug' => 'my-first-article',
-                'label' => 'Label My First Article',
-                'category' => 'Category My First Article',
-            ]);
-
-            $id_class_room = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
-            ClassRoom::create([
-                'id' => $id_class_room,
-                'name' => 'Class Room ke '. $i,
-            ]);
-
-            $id_category = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
-            Category::create([
-                'id' => $id_category,
-                'name' => 'Category ke '. $i,
-            ]);
         }
     }
 }

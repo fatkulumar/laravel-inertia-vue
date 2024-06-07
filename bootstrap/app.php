@@ -36,6 +36,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->prefix('dashboard/user')
                 ->name('dashboard.user.')
                 ->group(base_path('routes/dashboard/user.php'));
+
+            Route::middleware('web')
+                ->prefix('dashboard/submission')
+                ->name('dashboard.submission.')
+                ->group(base_path('routes/dashboard/submission.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
