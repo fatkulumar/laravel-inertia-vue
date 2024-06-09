@@ -17,6 +17,7 @@ class Profile extends Model
         'profileable_id',
         'profileable_type',
         'address',
+        'hp',
     ];
 
     public function profileable(): MorphTo

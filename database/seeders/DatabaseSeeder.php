@@ -51,6 +51,7 @@ class DatabaseSeeder extends Seeder
                     'regional_id' => $id_regional1,
                     'profileable_id' => $userId1,
                     'profileable_type' => 'App\Models\User',
+                    'hp' => '6281234567890',
                 ]);
             }
 
@@ -79,6 +80,7 @@ class DatabaseSeeder extends Seeder
                     'regional_id' => $id_regional2,
                     'profileable_id' => $userId2,
                     'profileable_type' => 'App\Models\User',
+                    'hp' => '6281234567890',
                 ]);
             }
 
@@ -107,6 +109,7 @@ class DatabaseSeeder extends Seeder
                     'regional_id' => $id_regional3,
                     'profileable_id' => $userId3,
                     'profileable_type' => 'App\Models\User',
+                    'hp' => '6281234567890',
                 ]);
 
                 $submissionId = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
@@ -116,6 +119,12 @@ class DatabaseSeeder extends Seeder
                     'committee_id' => $userId3,
                     'status' => 'pending',
                     'file' => 'Link File',
+                    'start_date_class' => now(),
+                    'end_date_class' => now(),
+                    'periode' => 14,
+                    'location' => 'SMK Hati Patah 21',
+                    'google_maps' => 'https://googlemaps.com',
+                    'address' => 'Jl. Yang di ridhoi No. 3',
                 ]);
             }
         }

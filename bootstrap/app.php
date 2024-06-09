@@ -41,6 +41,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->prefix('dashboard/submission')
                 ->name('dashboard.submission.')
                 ->group(base_path('routes/dashboard/submission.php'));
+
+            //committee
+            Route::middleware('web')
+                ->prefix('committee/schedule')
+                ->name('committee.schedule.')
+                ->group(base_path('routes/committee/schedule.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -49,7 +55,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        //
+        $middleware->alias([
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

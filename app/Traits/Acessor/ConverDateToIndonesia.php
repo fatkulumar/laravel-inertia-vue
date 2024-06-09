@@ -22,4 +22,18 @@ trait ConverDateToIndonesia
         );
     }
 
+    protected function startDateClass(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => \Carbon\Carbon::now()->translatedFormat('l, d F Y H:i:s'),
+        );
+    }
+
+    protected function endDateClass(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => \Carbon\Carbon::now()->translatedFormat('l, d F Y H:i:s'),
+        );
+    }
+
 }

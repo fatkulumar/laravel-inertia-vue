@@ -9,12 +9,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Submission extends Model
 {
-    use HasFactory, GenUid, ConverDateToIndonesia;
+    use HasFactory, GenUid;
 
     protected $fillable = [
         'participant_id',
         'committee_id',
+        'periode',
+        'location',
+        'google_maps',
+        'address',
         'status',
+        'start_date_class',
+        'end_date_class',
         'approval_date',
         'graduation_date',
         'file',

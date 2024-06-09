@@ -15,7 +15,13 @@ return new class extends Migration
             $table->uuid('id')->primary()->unique();
             $table->foreignUuid('participant_id');
             $table->foreignUuid('committee_id');
+            $table->bigInteger('periode');
+            $table->string('location');
+            $table->text('google_maps');
+            $table->text('address');
             $table->string('status');
+            $table->date('start_date_class');
+            $table->date('end_date_class');
             $table->date('approval_date')->nullable();
             $table->date('graduation_date')->nullable();
             $table->text('file');

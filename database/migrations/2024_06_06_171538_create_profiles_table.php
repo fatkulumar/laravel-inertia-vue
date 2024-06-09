@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('profileable_type');
             $table->foreignUuid('regional_id');
             $table->foreignUuid('address')->nullable();
+            $table->string('hp', 13)->nullable();
             $table->timestamps();
 
             $table->foreign('regional_id')->references('id')->on('regionals');

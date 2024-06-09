@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head, Link, useForm } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
@@ -8,7 +8,7 @@ import Swal from "sweetalert2";
 import { Modal } from "flowbite";
 
 const props = defineProps({
-  submissions: {
+  schedules: {
     type: Object,
     default: () => ({}),
   },
@@ -212,7 +212,7 @@ function toggleCheckbox(id) {
       totalChecked++;
     }
   });
-  if (props.submissions.to == totalChecked) {
+  if (props.schedules.to == totalChecked) {
     checkboxAll.checked = true;
   }
   if(formCheckbox.id.length > 0) {
@@ -236,7 +236,7 @@ function checkedAll() {
     checkedCheckboxes.forEach((checkbox) => {
       checkbox.checked = true;
     });
-    props.submissions.data.forEach((data) => {
+    props.schedules.data.forEach((data) => {
       formCheckbox.id.push(data.id);
       countCheckbox.value++;
     });
@@ -325,37 +325,7 @@ function uploadImage(e) {
                 <div
                   class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
                 >
-                  <!-- <div>
-                    icon plus
-                    <div
-                      @click="showModal()"
-                      title="Tambah Artikel"
-                      class="cursor-pointer"
-                    >
-                      <svg
-                        class="h-8 w-8 bg-green-400 p-1 rounded-lg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g
-                          id="SVGRepo_tracerCarrier"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        ></g>
-                        <g id="SVGRepo_iconCarrier">
-                          <path
-                            d="M4 12H20M12 4V20"
-                            stroke="#000000"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          ></path>
-                        </g>
-                      </svg>
-                    </div>
-                  </div> -->
+                  <Link class="bg-green-400 rounded-md py-1 px-2 text-white" href="">Tambah Jadwal</Link>
 
                   <label for="table-search" class="sr-only">Search</label>
                   <div class="relative">
@@ -394,21 +364,7 @@ function uploadImage(e) {
                     class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
                   >
                     <tr>
-                      <th scope="col" class="px-6 py-3">
-                        <p>Nama Peserta</p>
-                      </th>
-                      <th scope="col" class="px-6 py-3">
-                        <p>Email Peserta</p>
-                      </th>
-                      <th scope="col" class="px-6 py-3">
-                        <p>Panitia</p>
-                      </th>
-                      <th scope="col" class="px-6 py-3">
-                        <p>Proposal</p>
-                      </th>
-                      <th scope="col" class="px-6 py-3">
-                        <p>Status</p>
-                      </th>
+
                       <th scope="col" class="px-6 py-3">
                         <p>Tanggal Mulai Kelas</p>
                       </th>
@@ -416,13 +372,16 @@ function uploadImage(e) {
                         <p>Tanggal Selesai Kelas</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Tanggal Terkirim</p>
+                        <p>Pengusul</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Tanggal Diterima</p>
+                        <p>Tanggal Pengajuan</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Tanggal Kelulusan</p>
+                        <p>Status</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
+                        <p>Tanggal Disetujui</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <div class="flex gap-1 items-center">
@@ -448,28 +407,10 @@ function uploadImage(e) {
                   </thead>
                   <tbody>
                     <tr
-                      v-for="(item, index) in props.submissions.data"
+                      v-for="(item, index) in props.schedules.data"
                       :key="index"
                       class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                     >
-                      <td class="px-6 py-4">
-                        {{ item.participant?.name }}
-                      </td>
-                      <td class="px-6 py-4">
-                        {{ item.participant?.email }}
-                      </td>
-                      <td class="px-6 py-4">
-                        {{ item.committee?.name }}
-                      </td>
-                      <td class="px-6 py-4">
-                        <a class="text-blue-500 underline" :href="item.file" target="_blank" rel="noopener noreferrer">{{ item.file }}</a>
-                      </td>
-                      <td class="px-6 py-4">
-                        {{ item.status }}
-                      </td>
-                      <td class="px-6 py-4">
-                        {{ item.created_at }}
-                      </td>
                       <td class="px-6 py-4">
                         {{ item.start_date_class ? item.start_date_class : '-----' }}
                       </td>
@@ -477,12 +418,23 @@ function uploadImage(e) {
                         {{ item.end_date_class ? item.end_date_class : '-----' }}
                       </td>
                       <td class="px-6 py-4">
+                        {{ item.committee?.name }}
+                      </td>
+                      <td class="px-6 py-4">
+                        {{ item.created_at }}
+                      </td>
+                      <td class="px-6 py-4">
+                        {{ item.status }}
+                      </td>
+                      <td class="px-6 py-4">
                         {{ item.approval_date ? item.approval_date : '-----' }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.graduation_date ? item.graduation_date : '-----' }}
+                        <Link :href="route('committee.schedule.detail', item.id)" title="Detail Jadwal" class="cursor-pointer">
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M15.0007 12C15.0007 13.6569 13.6576 15 12.0007 15C10.3439 15 9.00073 13.6569 9.00073 12C9.00073 10.3431 10.3439 9 12.0007 9C13.6576 9 15.0007 10.3431 15.0007 12Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12.0012 5C7.52354 5 3.73326 7.94288 2.45898 12C3.73324 16.0571 7.52354 19 12.0012 19C16.4788 19 20.2691 16.0571 21.5434 12C20.2691 7.94291 16.4788 5 12.0012 5Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                        </Link>
                       </td>
-                      <td class="px-6 py-4">
+                      <!-- <td class="px-6 py-4">
                         <div class="flex gap-2">
                           <div
                             @click="approvalSubmission(item)"
@@ -547,14 +499,14 @@ function uploadImage(e) {
                             />
                           </div>
                         </div>
-                      </td>
+                      </td> -->
                     </tr>
                   </tbody>
                 </table>
 
                 <Pagination
                   class="my-6 flex justify-center md:justify-end"
-                  :links="props.submissions.links"
+                  :links="props.schedules.links"
                 />
               </div>
             </div>
