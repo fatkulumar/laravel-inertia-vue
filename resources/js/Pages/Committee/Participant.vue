@@ -1,244 +1,245 @@
 <script setup>
-import AuthenticatedLayoutAdmin from "@/Layouts/AuthenticatedLayoutAdmin.vue";
+import AuthenticatedLayoutCommittee from "@/Layouts/AuthenticatedLayoutCommittee.vue";
 import { Head, useForm } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
 import { Modal } from "flowbite";
+import TabMenu from "@/Components/Committee/TabMenu.vue";
 
 const props = defineProps({
-  users: {
-    type: Object,
-    default: () => ({}),
-  },
-  regionals: {
-    type: Object,
-    default: () => ({}),
-  },
-  filters: {
-    type: Object,
-    default: () => ({}),
-  },
-  errors: {
-    type: Object,
-    default: () => ({}),
-  },
+    participants: {
+        type: Object,
+        default: () => ({}),
+    },
+    regionals: {
+        type: Object,
+        default: () => ({}),
+    },
+    filters: {
+        type: Object,
+        default: () => ({}),
+    },
+    errors: {
+        type: Object,
+        default: () => ({}),
+    },
 });
 
 let search = ref(props.filters.search);
 
 watch(search, (value) => {
-  router.get(
-    "/dashboard/user",
-    { search: value },
-    {
-      preserveState: true,
-      replace: true,
-    }
-  );
+    router.get(
+        "/dashboard/user", { search: value }, {
+            preserveState: true,
+            replace: true,
+        }
+    );
 });
 
 const form = useForm({
-  id: "",
-  name: "",
-  email: "",
-  role: "",
-  password: "mmpj12345",
-  regional_id: "",
+    id: "",
+    name: "",
+    email: "",
+    role: "",
+    password: "mmpj12345",
+    regional_id: "",
 });
 
 function resetForm() {
-  form.id = "";
-  form.name = "";
-  form.email = "";
-  form.role = "";
-  form.password = "mmpj12345";
-  form.regional_id = null;
+    form.id = "";
+    form.name = "";
+    form.email = "";
+    form.role = "";
+    form.password = "mmpj12345";
+    form.regional_id = null;
 }
 
 function modalUser(opt) {
-  const $targetEl = document.getElementById("crud-modal");
-  // options with default values
-  const options = {
-    placement: "bottom-right",
-    backdrop: "dynamic",
-    backdropClasses: "bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40",
-    closable: false,
-  };
+    const $targetEl = document.getElementById("crud-modal");
+    // options with default values
+    const options = {
+        placement: "bottom-right",
+        backdrop: "dynamic",
+        backdropClasses: "bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40",
+        closable: false,
+    };
 
-  // instance options object
-  const instanceOptions = {
-    id: "crud-modal",
-    override: true,
-  };
+    // instance options object
+    const instanceOptions = {
+        id: "crud-modal",
+        override: true,
+    };
 
-  const modal = new Modal($targetEl, options, instanceOptions);
-  if (opt == "hide") {
-    modal.hide();
-  }
-  if (opt == "show") {
-    modal.show();
-  }
+    const modal = new Modal($targetEl, options, instanceOptions);
+    if (opt == "hide") {
+        modal.hide();
+    }
+    if (opt == "show") {
+        modal.show();
+    }
 }
 
 function addUser() {
-form.post("/dashboard/user/store", {
-    preserveScroll: true,
-    onSuccess: (e) => {
-        toast("success", "Berhasil");
-        resetForm();
-        modalUser("hide");
-    },
+    form.post("/dashboard/user/store", {
+        preserveScroll: true,
+        onSuccess: (e) => {
+            toast("success", "Berhasil");
+            resetForm();
+            modalUser("hide");
+        },
     });
 }
 
 function editUser(data, role, regional) {
-  form.id = data.id;
-  form.name = data.name;
-  form.email = data.email;
-  form.role = role[0].name;
-  form.regional_id = regional.regional_id;
-  modalUser("show");
+    form.id = data.id;
+    form.name = data.name;
+    form.email = data.email;
+    form.role = role[0].name;
+    form.regional_id = regional.regional_id;
+    modalUser("show");
 }
 
 function deleteUser(id, name) {
-  const konfirm = confirm(`Apakah anda yakin ingin menghapus ${name}?`);
-  if (!konfirm) return;
-  form.delete(`/dashboard/user/delete/${id}`, {
-    preserveScroll: true,
-    onSuccess: () => {
-      resetForm();
-      toast("success", "Data Berhasil Dihapus");
-    },
-  });
+    const konfirm = confirm(`Apakah anda yakin ingin menghapus ${name}?`);
+    if (!konfirm) return;
+    form.delete(`/dashboard/user/delete/${id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            resetForm();
+            toast("success", "Data Berhasil Dihapus");
+        },
+    });
 }
 
 function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
-  const Toast = Swal.mixin({
-    toast: true,
-    position: "top-end",
-    showConfirmButton: false,
-    timer: 3000,
-    timerProgressBar: true,
-    didOpen: (toast) => {
-      toast.onmouseenter = Swal.stopTimer;
-      toast.onmouseleave = Swal.resumeTimer;
-    },
-  });
-  Toast.fire({
-    icon: icon,
-    title: text,
-  });
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+        },
+    });
+    Toast.fire({
+        icon: icon,
+        title: text,
+    });
 }
 
 const closeModal = (targetModal = "crud-modal") => {
-  resetForm()
-  formCheckbox.id = []
-  const $targetEl = document.getElementById(targetModal);
-  const modal = new Modal($targetEl);
-  modal.hide();
+    resetForm()
+    formCheckbox.id = []
+    const $targetEl = document.getElementById(targetModal);
+    const modal = new Modal($targetEl);
+    modal.hide();
 };
 
 const showModal = (targetModal = "crud-modal") => {
-  resetForm()
-  const $targetEl = document.getElementById(targetModal);
-  const modal = new Modal($targetEl);
-  modal.show();
+    resetForm()
+    const $targetEl = document.getElementById(targetModal);
+    const modal = new Modal($targetEl);
+    modal.show();
 };
 
 const formCheckbox = useForm({
-  id: [],
+    id: [],
 });
 
 const deleteChoice = ref(false)
+
 function toggleCheckbox(id) {
-  let checkbox = document.getElementById(`checkbox${id}`);
-  let checkboxAll = document.getElementById(`checkboxAll`);
-  if (checkboxAll.checked) {
-    checkboxAll.checked = false;
-  }
-
-  if (checkbox.checked == true) {
-    const articleId = formCheckbox.id.includes(id);
-    if (!articleId) {
-      formCheckbox.id.push(id);
+    let checkbox = document.getElementById(`checkbox${id}`);
+    let checkboxAll = document.getElementById(`checkboxAll`);
+    if (checkboxAll.checked) {
+        checkboxAll.checked = false;
     }
-  } else {
-    formCheckbox.id = formCheckbox.id.filter((checkId) => checkId !== id); // Memfilter id pengguna yang cocok
-  }
 
-  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-
-  // Inisialisasi jumlah total checkbox yang dicentang
-  let totalChecked = 0;
-
-  // Iterasi melalui setiap elemen checkbox
-  checkboxes.forEach((checkbox) => {
-    // Periksa apakah checkbox dicentang
-    if (checkbox.checked) {
-      // Jika dicentang, tambahkan 1 ke jumlah total
-      totalChecked++;
+    if (checkbox.checked == true) {
+        const articleId = formCheckbox.id.includes(id);
+        if (!articleId) {
+            formCheckbox.id.push(id);
+        }
+    } else {
+        formCheckbox.id = formCheckbox.id.filter((checkId) => checkId !== id); // Memfilter id pengguna yang cocok
     }
-  });
-  if (props.users.to == totalChecked) {
-    checkboxAll.checked = true;
-  }
-  if(formCheckbox.id.length > 0) {
-    deleteChoice.value = true
-  }else{
-    deleteChoice.value = false
-  }
+
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+    // Inisialisasi jumlah total checkbox yang dicentang
+    let totalChecked = 0;
+
+    // Iterasi melalui setiap elemen checkbox
+    checkboxes.forEach((checkbox) => {
+        // Periksa apakah checkbox dicentang
+        if (checkbox.checked) {
+            // Jika dicentang, tambahkan 1 ke jumlah total
+            totalChecked++;
+        }
+    });
+    if (props.participants.to == totalChecked) {
+        checkboxAll.checked = true;
+    }
+    if (formCheckbox.id.length > 0) {
+        deleteChoice.value = true
+    } else {
+        deleteChoice.value = false
+    }
 }
 
 const countCheckbox = ref(0);
-function checkedAll() {
-  countCheckbox.value = 0;
-  let checkedCheckboxes = document.querySelectorAll(
-    'input[type="checkbox"]:not(#checkboxAll):not(:checked)'
-  );
-  let uncheckedCheckboxes = document.querySelectorAll(
-    'input[type="checkbox"]:not(#checkboxAll)'
-  );
-  let checboxAll = document.getElementById("checkboxAll");
-  if (checboxAll.checked == true) {
-    checkedCheckboxes.forEach((checkbox) => {
-      checkbox.checked = true;
-    });
-    props.users.data.forEach((data) => {
-      formCheckbox.id.push(data.id);
-      countCheckbox.value++;
-    });
-  } else {
-    uncheckedCheckboxes.forEach((checkbox) => {
-      checkbox.checked = false;
-    });
-    formCheckbox.id = [];
-  }
 
-  if(formCheckbox.id.length > 0) {
-    deleteChoice.value = true
-  }else{
-    deleteChoice.value = false
-  }
+function checkedAll() {
+    countCheckbox.value = 0;
+    let checkedCheckboxes = document.querySelectorAll(
+        'input[type="checkbox"]:not(#checkboxAll):not(:checked)'
+    );
+    let uncheckedCheckboxes = document.querySelectorAll(
+        'input[type="checkbox"]:not(#checkboxAll)'
+    );
+    let checboxAll = document.getElementById("checkboxAll");
+    if (checboxAll.checked == true) {
+        checkedCheckboxes.forEach((checkbox) => {
+            checkbox.checked = true;
+        });
+        props.participants.data.forEach((data) => {
+            formCheckbox.id.push(data.id);
+            countCheckbox.value++;
+        });
+    } else {
+        uncheckedCheckboxes.forEach((checkbox) => {
+            checkbox.checked = false;
+        });
+        formCheckbox.id = [];
+    }
+
+    if (formCheckbox.id.length > 0) {
+        deleteChoice.value = true
+    } else {
+        deleteChoice.value = false
+    }
 }
 
 function deleteUserChoice() {
-  const konfirm = confirm(
-    `Apakah anda yakin ingin menghapus data ini?`
-  );
-  if (!konfirm) return;
-  formCheckbox.post("/dashboard/user/destroy", {
-    preserveScroll: true,
-    onSuccess: () => {
-      formCheckbox.id = [];
-      toast("success", "Data Berhasil Dihapus");
-      let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-        checkedCheckboxes.forEach(element => {
-            element.checked = false
-        });
-    },
-  });
+    const konfirm = confirm(
+        `Apakah anda yakin ingin menghapus data ini?`
+    );
+    if (!konfirm) return;
+    formCheckbox.post("/dashboard/user/destroy", {
+        preserveScroll: true,
+        onSuccess: () => {
+            formCheckbox.id = [];
+            toast("success", "Data Berhasil Dihapus");
+            let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            checkedCheckboxes.forEach(element => {
+                element.checked = false
+            });
+        },
+    });
 }
 
 function uploadImage(e) {
@@ -259,12 +260,12 @@ function uploadImage(e) {
 </script>
 
 <template>
-  <Head title="Article" />
-  <div>
-    <AuthenticatedLayoutAdmin>
-      <!-- <template #header>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">Article</h2>
-            </template> -->
+    <Head title="Article" />
+    <div>
+        <AuthenticatedLayoutCommittee>
+            <template #header>
+                <TabMenu />
+            </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -392,22 +393,23 @@ function uploadImage(e) {
                     </tr>
                   </thead>
                   <tbody>
+                    <!-- {{ props.participants.data }} -->
                     <tr
-                      v-for="(item, index) in props.users.data"
+                      v-for="(item, index) in props.participants.data"
                       :key="index"
                       class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                     >
                       <td class="px-6 py-4">
-                        {{ item.name }}
+                        {{ item.participant?.name }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.email }}
+                        {{ item.participant?.email }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.profile?.regional?.name }}
+                        {{ item.participant?.profile?.regional?.name }}
                       </td>
                       <td class="px-6 py-4">
-                        <div v-for="(itemRole, indexRole) in item.roles" :key="indexRole">
+                        <div v-for="(itemRole, indexRole) in item.participant?.roles" :key="indexRole">
                             {{ itemRole.name }}
                         </div>
                       </td>
@@ -512,7 +514,7 @@ function uploadImage(e) {
 
                 <Pagination
                   class="my-6 flex justify-center md:justify-end"
-                  :links="props.users.links"
+                  :links="props.participants.links"
                 />
               </div>
             </div>
@@ -642,6 +644,6 @@ function uploadImage(e) {
           </div>
         </div>
       </div>
-    </AuthenticatedLayoutAdmin>
+    </AuthenticatedLayoutCommittee>
   </div>
 </template>

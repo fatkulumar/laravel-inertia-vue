@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('submissions', function (Blueprint $table) {
             $table->uuid('id')->primary()->unique();
-            $table->foreignUuid('participant_id');
+            $table->foreignUuid('participant_id')->nullable();
             $table->foreignUuid('committee_id');
+            $table->foreignUuid('category_id');
+            $table->foreignUuid('class_room_id');
             $table->bigInteger('periode');
             $table->string('location');
             $table->text('google_maps');
@@ -29,6 +31,8 @@ return new class extends Migration
 
             $table->foreign('participant_id')->references('id')->on('users');
             $table->foreign('committee_id')->references('id')->on('users');
+            $table->foreign('category_id')->references('id')->on('categories');
+            $table->foreign('class_room_id')->references('id')->on('class_rooms');
         });
     }
 

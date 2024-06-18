@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,13 +28,31 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request)
     {
         $request->authenticate();
 
-        $request->session()->regenerate();
+        $email = $request->email;
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = User::with('roles')->where('email', $email)->first();
+
+        $roles = $user->roles;
+        foreach ($roles as $role) {
+            if ($role->name == 'superadmin') {
+                return $role = 'superadmin';
+                break;
+            } elseif ($role->name == 'admin') {
+                $request->session()->regenerate();
+                return redirect()->intended(route('dashboard.admin', absolute: false));
+            } elseif ($role->name == 'panitia') {
+                $request->session()->regenerate();
+                return redirect()->intended(route('dashboard.committee', absolute: false));
+            } else {
+                return $role = 'user';
+            }
+        }
+
+
     }
 
     /**

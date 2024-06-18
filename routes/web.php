@@ -15,8 +15,12 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified', 'role:admin|panitia'])->name('dashboard');
+    return Inertia::render('DashboardAdmin');
+})->middleware(['auth', 'verified', 'role:admin'])->name('dashboard.admin');
+
+Route::get('/dashboard-panitia', function () {
+    return Inertia::render('DashboardPanitia');
+})->middleware(['auth', 'verified', 'role:panitia'])->name('dashboard.committee');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

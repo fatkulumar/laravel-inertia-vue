@@ -9,6 +9,7 @@ use App\Traits\EntityValidator;
 use App\Traits\FileUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Response;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
@@ -51,7 +52,7 @@ class ArticleController extends Controller
                         }
                         return $profile;
                     });
-                    return $articles;
+                    // return $articles;
             return Inertia::render('Dashboard/Article', [
                 'articles' => $articles,
                 'categories' => Category::all(['id', 'name']),
@@ -220,6 +221,31 @@ private function storeValidator(Request $request)
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function delete in ArticleController', $errors);
+        }
+    }
+
+    public function uploadFileWithCkeditor(Request $request)
+    {
+        try {
+            $request->validate([
+                'upload' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
+
+            $file = $request->file('upload');
+
+            $upload = $this->uploadFile($file);
+
+            // $path = $request->file('upload')->store('images', 'public');
+
+            return response()->json([
+                'url' => 'http://localhost:8000/file/article/1KYZsPpZc4ZsrnHoCIwKLwvMYmghJi7n0vx2ZwFM.png-Screenshot%20from%202024-06-07%2016-18-40.png'
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function uploadFileWithCkeditor in ArticleController', $errors);
         }
     }
 }

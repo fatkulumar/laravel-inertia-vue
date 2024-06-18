@@ -1,46 +1,57 @@
 <?php
 
-namespace App\Http\Controllers\Dashboard;
+namespace App\Http\Controllers\Committee;
 
 use App\Http\Controllers\Controller;
 use App\Models\Submission;
 use App\Traits\EntityValidator;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use App\Traits\FileUpload;
 
-class SubmissionController extends Controller
+class ParticipantController extends Controller
 {
     use EntityValidator;
+    use FileUpload;
+
+    protected function fileSettings()
+    {
+        $this->settings = [
+            'attributes'  => ['jpeg', 'jpg', 'png'],
+            'path'        => 'file/proposal/',
+            'softdelete'  => false
+        ];
+    }
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request, $idSubmission)
     {
         try {
-            $submissions = Submission::orderBy('created_at', 'desc')
+            $participants = Submission::orderBy('created_at', 'desc')
                 ->when($request['search'], function($query, $request) {
                     $query->whereHas('participant', function ($query) use ($request) {
                         $query->where('name', 'like', '%' . $request . '%');
                     });
                 })
-                ->whereHas('participant')
-                ->whereHas('committee')
-                ->with('participant', 'committee')
+                ->whereHas('participant.roles')
+                ->whereHas('participant.profile.regional')
+                ->with('participant.roles', 'participant.profile.regional')
+                ->where('committee_id', Auth()->user()->id)
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);
-            // return $submissions;
-            return Inertia::render('Dashboard/Submission', [
-                'submissions' => $submissions,
+            // return $participants;
+            return Inertia::render('Committee/Participant', [
+                'participants' => $participants,
             ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function index in Dashboard/SubmissionController', $errors);
+            Log::channel('daily')->info('function index in Committee/ScheduleController', $errors);
         }
     }
 
@@ -66,20 +77,36 @@ class SubmissionController extends Controller
 
                 $submissions = Submission::where('id', $id)->first();
                 $saveData = [
-                    'participant_id' => $request->post('participant_id'),
+                    'regional_id' => $request->post('regional_id'),
                     'committeee_id' => $request->post('committeee_id'),
-                    'status' => $request->post('status'),
+                    'hp' => $request->post('hp'),
+                    'start_date_class' => $request->post('start_date_class'),
+                    'end_date_class' => $request->post('end_date_class'),
+                    'location' => $request->post('location'),
+                    'goggle_maps' => $request->post('goggle_maps'),
+                    'address' => $request->post('address'),
+                    'periode' => $request->post('periode'),
                     'file' => $request->post('file'),
                 ];
                 $result = $submissions->update($saveData);
                 if (!$result) return redirect()->back()->withErrors($result)->withInput();
             } else {
 
+                $this->fileSettings();
+                $file = $request->file('file');
+                $upload = $this->uploadFile($file);
+
                 $saveData = [
-                    'participant_id' => $request->post('participant_id'),
-                    'committeee_id' => $request->post('committeee_id'),
-                    'status' => $request->post('status'),
-                    'file' => $request->post('file'),
+                    'regional_id' => $request->post('regional_id'),
+                    'committee_id' => $request->post('committee_id'),
+                    'hp' => $request->post('hp'),
+                    'start_date_class' => $request->post('start_date_class'),
+                    'end_date_class' => $request->post('end_date_class'),
+                    'location' => $request->post('location'),
+                    'google_maps' => $request->post('google_maps'),
+                    'address' => $request->post('address'),
+                    'periode' => $request->post('periode'),
+                    'file' => $upload,
                 ];
 
                 $result = Submission::create($saveData);
@@ -98,16 +125,28 @@ class SubmissionController extends Controller
     {
         try {
             $rules = [
-                'participant_id' => 'required|string|max:36',
-                'committeee_id' => 'required|string|max:36',
-                'status' => 'required|string|max:15',
+                'regional_id' => 'required|string|max:36',
+                'committee_id' => 'required|string|max:36',
+                'hp' => 'required|string|min:8|max:13',
+                'start_date_class' => 'required|string|max:15',
+                'end_date_class' => 'required|string|max:15',
+                'location' => 'required|string|max:15',
+                'google_maps' => 'required|string|max:20000',
+                'address' => 'required|string|max:20000',
+                'periode' => 'required|string|max:10',
                 'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ];
             $Validatedata = [
-                'participant_id' => $request->post('participant_id'),
-                'committeee_id' => $request->post('committeee_id'),
-                'status' => $request->post('status'),
-                'file' => $request->post('file'),
+                'regional_id' => $request->post('regional_id'),
+                'committeee_id' => $request->post('committee_id'),
+                'hp' => $request->post('hp'),
+                'start_date_class' => $request->post('start_date_class'),
+                'end_date_class' => $request->post('end_date_class'),
+                'location' => $request->post('location'),
+                'goggle_maps' => $request->post('goggle_maps'),
+                'address' => $request->post('address'),
+                'periode' => $request->post('periode'),
+                'file' => $request->file('file'),
             ];
             $validator = EntityValidator::validate($Validatedata, $rules);
             if ($validator->fails()) return $validator->errors();
@@ -125,7 +164,22 @@ class SubmissionController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $schedule = Submission::with('participant', 'committee', 'committee.profile.regional')
+                                ->where('id',$id)
+                                ->get();
+        $schedule->map(function ($schedule) {
+            $this->fileSettings();
+            if (isset($schedule['file'])) {
+                $schedule['linkFile'] = $this->getFileAttribute($schedule['file']);
+            } else {
+                $schedule['linkFile'] = null;
+            }
+            return $schedule;
+        });
+        // return $schedule;
+        return Inertia::render('Committee/Schedule/DetailSchedule', [
+            'schedule' => $schedule,
+        ]);
     }
 
     /**
@@ -176,7 +230,7 @@ class SubmissionController extends Controller
         try {
             $id = $request->post('id');
             Submission::where('id', $id)->update([
-                'status' => 'Ditolak',
+                'hp' => 'Ditolak',
                 'approval_date' => Carbon::now(),
             ]);
         } catch (\Exception $exception) {
@@ -193,7 +247,7 @@ class SubmissionController extends Controller
         try {
             $id = $request->post('id');
             Submission::where('id', $id)->update([
-                'status' => 'Diterima',
+                'hp' => 'Diterima',
                 'approval_date' => Carbon::now(),
             ]);
         } catch (\Exception $exception) {
@@ -210,7 +264,7 @@ class SubmissionController extends Controller
         try {
             $id = $request->post('id');
             Submission::where('id', $id)->update([
-                'status' => 'Lulus',
+                'hp' => 'Lulus',
                 'graduation_date' => Carbon::now(),
             ]);
         } catch (\Exception $exception) {
@@ -226,10 +280,10 @@ class SubmissionController extends Controller
     {
         try {
             $ids = $request->post('id');
-            $status = $request->post('status');
+            $hp = $request->post('hp');
             foreach($ids as $id) {
                 Submission::where('id', $id)->update([
-                    'status' => $status,
+                    'hp' => $hp,
                     'graduation_date' => Carbon::now(),
                 ]);
             }

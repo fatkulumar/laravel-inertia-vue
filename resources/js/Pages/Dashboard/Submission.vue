@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import AuthenticatedLayoutAdmin from "@/Layouts/AuthenticatedLayoutAdmin.vue";
 import { Head, useForm } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
@@ -313,7 +313,7 @@ function uploadImage(e) {
 <template>
   <Head title="Article" />
   <div>
-    <AuthenticatedLayout>
+    <AuthenticatedLayoutAdmin>
       <!-- <template #header>
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">Article</h2>
             </template> -->
@@ -637,6 +637,6 @@ function uploadImage(e) {
           </div>
         </div>
       </div>
-    </AuthenticatedLayout>
+    </AuthenticatedLayoutAdmin>
   </div>
 </template>

@@ -8,6 +8,7 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import 'flowbite';
 import 'sweetalert2';
 import CKEditor from '@ckeditor/ckeditor5-vue';
+import Editor from '@tinymce/tinymce-vue'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 

@@ -24,9 +24,18 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
+
+
         for ($i = 0; $i < 12; $i++) {
 
             if($i == 0) {
+                $Category1 = Category::create([
+                    'name' => 'Basic ' . $i ,
+                ]);
+
+                $kclassRoom1 = ClassRoom::create([
+                    'name' => 'Kelas ' . $i,
+                ]);
                 $userId1 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 $user1 = User::create([
                     'id' => $userId1,
@@ -56,6 +65,13 @@ class DatabaseSeeder extends Seeder
             }
 
             if($i == 1) {
+                $Category2 = Category::create([
+                    'name' => 'Intermediate ' . $i ,
+                ]);
+
+                $kclassRoom2 = ClassRoom::create([
+                    'name' => 'Kelas ' . $i,
+                ]);
                 $userId2 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 $user2 = User::create([
                     'id' => $userId2,
@@ -85,6 +101,13 @@ class DatabaseSeeder extends Seeder
             }
 
             if($i == 2) {
+                $Category3 = Category::create([
+                    'name' => 'Advanced ' . $i ,
+                ]);
+
+                $kclassRoom3 = ClassRoom::create([
+                    'name' => 'Kelas ' . $i,
+                ]);
                 $userId3 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 $user3 = User::create([
                     'id' => $userId3,
@@ -117,6 +140,8 @@ class DatabaseSeeder extends Seeder
                     'id' => $submissionId,
                     'participant_id' => $userId2,
                     'committee_id' => $userId3,
+                    'class_room_id' => $kclassRoom3->id,
+                    'category_id' => $Category3->id,
                     'status' => 'pending',
                     'file' => 'Link File',
                     'start_date_class' => now(),

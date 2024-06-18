@@ -56,7 +56,7 @@ return new class extends Migration
         // ]);
 
         // Role::create([
-        //     'name' => 'pengurus',
+        //     'name' => 'panitia',
         //     'guard_name' => 'web',
         // ]);
 

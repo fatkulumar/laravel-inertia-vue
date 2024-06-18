@@ -1,14 +1,23 @@
 /<script setup>
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import AuthenticatedLayoutCommittee from "@/Layouts/AuthenticatedLayoutCommittee.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
 import { Modal } from "flowbite";
+import TabMenu from "@/Components/Committee/TabMenu.vue";
 
 const props = defineProps({
   schedule: {
+    type: Object,
+    default: () => ({}),
+  },
+  classRooms: {
+    type: Object,
+    default: () => ({}),
+  },
+  categories: {
     type: Object,
     default: () => ({}),
   },
@@ -43,6 +52,8 @@ const form = useForm({
   id: props.schedule[0].id,
   regional_id: props.schedule[0].committee?.profile?.regional?.id,
   committee_id: props.schedule[0].committee?.id,
+  category_id: props.schedule[0].category_id,
+  class_room_id: props.schedule[0].class_room_id,
   hp: props.schedule[0].committee?.profile?.hp,
   start_date_class: props.schedule[0].start_date_class,
   end_date_class: props.schedule[0].end_date_class,
@@ -57,6 +68,8 @@ function resetForm() {
     form.id = ""
     form.regional_id = ""
     form.committee_id = ""
+    form.category_id = ""
+    form.class_room_id = ""
     form.hp = ""
     form.start_date_class = ""
     form.end_date_class = ""
@@ -306,6 +319,7 @@ function handleOptionSubmission() {
 //   });
 // }
 
+const previewImage = ref(null)
 function uploadImage(e) {
   const image = e.target.files[0];
   if (
@@ -317,7 +331,8 @@ function uploadImage(e) {
     reader.readAsDataURL(image);
     reader.onload = (e) => {
       previewImage.value = e.target.result;
-      form.image = image;
+      linkFile.value = e.target.result;
+      form.file = image;
     };
   } else {
     form.image = null;
@@ -325,15 +340,24 @@ function uploadImage(e) {
     toast("warning", "Harus Format Gambar");
   }
 }
+
+function updateSchedule() {
+    form.post("/committee/schedule/store", {
+      preserveScroll: true,
+      onSuccess: () => {
+        toast("success", "Data Berhasil Diedit");
+      },
+    });
+  }
 </script>
 
 <template>
   <Head title="Article" />
   <div>
-    <AuthenticatedLayout>
-      <template #header>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">Jadwal</h2>
-      </template>
+    <AuthenticatedLayoutCommittee>
+    <template #header>
+        <TabMenu />
+    </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -377,7 +401,7 @@ function uploadImage(e) {
 
                 <!-- disini -->
                 <form
-                  @submit.prevent="addArticle"
+                  @submit.prevent="updateSchedule"
                   enctype="multipart/form-data"
                   class="p-4 md:p-5"
                 >
@@ -457,6 +481,32 @@ function uploadImage(e) {
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="Regional"
                       />
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="class_room_id"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Kelas</label
+                        >
+                        <select v-model="form.class_room_id" id="class_room_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option selected>Pilih Kelas</option>
+                            <option v-for="item, index in props.classRooms" :key="index" :value="item.id">
+                                {{ item.name }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="category_id"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Tingkatan</label
+                        >
+                        <select v-model="form.category_id" id="category_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option selected>Pilih Tingkatan</option>
+                            <option v-for="item, index in props.categories" :key="index" :value="item.id">
+                                {{ item.name }}
+                            </option>
+                        </select>
                     </div>
                     <div class="col-span-2 sm:col-span-1">
                       <label
@@ -555,7 +605,7 @@ function uploadImage(e) {
                         class="w-2block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >Surat Pengajuan</label
                       >
-                      <img :src="linkFile" class="w-32 py-2" />
+                      <img :src="linkFile" class="w-5/12 py-2" />
                       <div class="flex items-center">
                         <div class="w-2/12">
                           <input
@@ -567,7 +617,7 @@ function uploadImage(e) {
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                           />
                         </div>
-                        <a :href="linkFile" class="ml-2 text-blue-500 underline">{{ form.file }}</a>
+                        <a target="_blank" :href="linkFile" class="ml-2 text-blue-500 underline">{{ form.file }}</a>
                       </div>
                     </div>
                   </div>
@@ -669,6 +719,6 @@ function uploadImage(e) {
           </div>
         </div>
       </div>
-    </AuthenticatedLayout>
+    </AuthenticatedLayoutCommittee>
   </div>
 </template>

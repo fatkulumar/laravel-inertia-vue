@@ -14,6 +14,8 @@ class Submission extends Model
     protected $fillable = [
         'participant_id',
         'committee_id',
+        'category_id',
+        'class_room_id',
         'periode',
         'location',
         'google_maps',

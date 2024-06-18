@@ -8,4 +8,5 @@
         Route::post('/store', [Dashboard\ArticleController::class, 'store'])->name('store');
         Route::delete('/delete/{id}', [Dashboard\ArticleController::class, 'delete'])->name('delete');
         Route::post('/destroy', [Dashboard\ArticleController::class, 'destroy'])->name('destroy');
+        Route::post('/upload', [Dashboard\ArticleController::class, 'uploadFileWithCkeditor'])->name('uploadFileWithCkeditor');
     });

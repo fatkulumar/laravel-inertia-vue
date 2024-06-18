@@ -1,8 +1,8 @@
 <script setup>
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import AuthenticatedLayoutCommittee from "@/Layouts/AuthenticatedLayoutCommittee.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
 import { Modal } from "flowbite";
@@ -12,11 +12,23 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  classRooms: {
+    type: Object,
+    default: () => ({}),
+  },
+  categories: {
+    type: Object,
+    default: () => ({}),
+  },
   filters: {
     type: Object,
     default: () => ({}),
   },
   errors: {
+    type: Object,
+    default: () => ({}),
+  },
+  committee: {
     type: Object,
     default: () => ({}),
   },
@@ -35,27 +47,38 @@ watch(search, (value) => {
   );
 });
 
+const committeeName = computed(() => props.committee.name);
+const regionalName = computed(() => props.committee.profile?.regional?.name);
+// const linkFile = ref(props.schedule[0].linkFile);
+
 const form = useForm({
-    id: "",
-    participant_id: "",
-    committee_id: "",
-    status: "",
-    approval_date: "",
-    graduation_date: "",
-    file: "",
+  id: "",
+  committee_id: props.committee.id,
+  class_room_id: "",
+  category_id: "",
+  hp: props.committee.profile?.hp,
+  start_date_class: "",
+  end_date_class: "",
+  location: "",
+  google_maps: "",
+  address: "",
+  periode: "",
+  file: "",
 });
 
 function resetForm() {
-  form.id = "";
-  form.participant_id = "";
-  form.committee_id = "";
-  form.status = "";
-  form.approval_date = "";
-  form.graduation_date = "";
+  form.class_room_id = "";
+  form.category_id = "";
+  form.start_date_class = "";
+  form.end_date_class = "";
+  form.location = "";
+  form.google_maps = "";
+  form.address = "";
   form.file = "";
+  previewImage.value = "";
 }
 
-function modalRoom(opt) {
+function modalAddSchedule(opt) {
   const $targetEl = document.getElementById("crud-modal");
   // options with default values
   const options = {
@@ -80,15 +103,15 @@ function modalRoom(opt) {
   }
 }
 
-function addsubmission() {
-  form.post("/dashboard/submission/store", {
+function addSchedule() {
+  form.post("/committee/schedule/store", {
     preserveScroll: true,
     onSuccess: () => {
-        resetForm();
-        modalRoom("hide");
-        toast("success", "Data Berhasil Ditambah");
-    }
-    });
+      resetForm();
+      modalAddSchedule("hide");
+      toast("success", "Data Berhasil Ditambah");
+    },
+  });
 }
 
 function editClassRoom(data) {
@@ -99,7 +122,7 @@ function editClassRoom(data) {
   form.approval_date = data.approval_date;
   form.graduation_date = data.graduation_date;
   form.file = data.file;
-  modalRoom("show");
+  modalAddSchedule("show");
 }
 
 function rejectSubmission(id, namePeserta) {
@@ -109,39 +132,39 @@ function rejectSubmission(id, namePeserta) {
   form.post(`/dashboard/submission/reject-submission`, {
     preserveScroll: true,
     onSuccess: (e) => {
-        toast("success", "Berhasil");
-        resetForm();
-        modalUser("hide");
+      toast("success", "Berhasil");
+      resetForm();
+      modalUser("hide");
     },
   });
 }
 
 function approvalSubmission(id, namePeserta) {
-    form.id = id;
-    const konfirm = confirm(`Apakah anda yakin ingin menerima ${namePeserta}?`);
-    if (!konfirm) return;
-    form.post(`/dashboard/submission/approval-submission`, {
-        preserveScroll: true,
-        onSuccess: (e) => {
-            toast("success", "Berhasil");
-            resetForm();
-            modalUser("hide");
-        },
-    });
+  form.id = id;
+  const konfirm = confirm(`Apakah anda yakin ingin menerima ${namePeserta}?`);
+  if (!konfirm) return;
+  form.post(`/dashboard/submission/approval-submission`, {
+    preserveScroll: true,
+    onSuccess: (e) => {
+      toast("success", "Berhasil");
+      resetForm();
+      modalUser("hide");
+    },
+  });
 }
 
 function graduationSubmission(id, namePeserta) {
-    form.id = id;
-    const konfirm = confirm(`Apakah anda yakin ingin meluluskan ${namePeserta}?`);
-    if (!konfirm) return;
-    form.post(`/dashboard/submission/graduation-submission`, {
-        preserveScroll: true,
-        onSuccess: (e) => {
-            toast("success", "Berhasil");
-            resetForm();
-            modalUser("hide");
-        },
-    });
+  form.id = id;
+  const konfirm = confirm(`Apakah anda yakin ingin meluluskan ${namePeserta}?`);
+  if (!konfirm) return;
+  form.post(`/dashboard/submission/graduation-submission`, {
+    preserveScroll: true,
+    onSuccess: (e) => {
+      toast("success", "Berhasil");
+      resetForm();
+      modalUser("hide");
+    },
+  });
 }
 
 function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
@@ -163,9 +186,9 @@ function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
 }
 
 const closeModal = (targetModal = "crud-modal") => {
-  resetForm()
-  formCheckbox.id = []
-  formCheckbox.status = ""
+  resetForm();
+  formCheckbox.id = [];
+  formCheckbox.status = "";
   const $targetEl = document.getElementById(targetModal);
   const modal = new Modal($targetEl);
   modal.hide();
@@ -182,7 +205,7 @@ const formCheckbox = useForm({
   status: "",
 });
 
-const choice = ref(false)
+const choice = ref(false);
 function toggleCheckbox(id) {
   let checkbox = document.getElementById(`checkbox${id}`);
   let checkboxAll = document.getElementById(`checkboxAll`);
@@ -215,10 +238,10 @@ function toggleCheckbox(id) {
   if (props.schedules.to == totalChecked) {
     checkboxAll.checked = true;
   }
-  if(formCheckbox.id.length > 0) {
-    choice.value = true
-  }else{
-    choice.value = false
+  if (formCheckbox.id.length > 0) {
+    choice.value = true;
+  } else {
+    choice.value = false;
   }
 }
 
@@ -248,30 +271,32 @@ function checkedAll() {
     formCheckbox.status = "";
   }
 
-  if(formCheckbox.id.length > 0) {
-    choice.value = true
-  }else{
-    choice.value = false
+  if (formCheckbox.id.length > 0) {
+    choice.value = true;
+  } else {
+    choice.value = false;
   }
 }
 
 function optionSubmission() {
-    showModal()
+  showModal();
 }
 
 function handleOptionSubmission() {
-    formCheckbox.post("/dashboard/submission/option-submission", {
+  formCheckbox.post("/dashboard/submission/option-submission", {
     preserveScroll: true,
     onSuccess: () => {
-      choice.value = false
+      choice.value = false;
       formCheckbox.id = [];
       formCheckbox.status = "";
       toast("success", "Berhasil");
-      closeModal()
-      let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-        checkedCheckboxes.forEach(element => {
-            element.checked = false
-        });
+      closeModal();
+      let checkedCheckboxes = document.querySelectorAll(
+        'input[type="checkbox"]:checked'
+      );
+      checkedCheckboxes.forEach((element) => {
+        element.checked = false;
+      });
     },
   });
 }
@@ -293,30 +318,44 @@ function handleOptionSubmission() {
 //   });
 // }
 
+const previewImage = ref(null);
 function uploadImage(e) {
-    const image = e.target.files[0];
-    if (image.type == 'image/png' | image.type == 'image/jpg' | image.type == 'image/jpeg') {
-        const reader = new FileReader();
-        reader.readAsDataURL(image);
-        reader.onload = e => {
-            previewImage.value = e.target.result;
-            form.image = image;
-        };
-    } else {
-        form.image = null;
-        closeModal('crud-modal');
-        toast('warning', 'Harus Format Gambar')
-    }
+  const image = e.target.files[0];
+  if (
+    (image.type == "image/png") |
+    (image.type == "image/jpg") |
+    (image.type == "image/jpeg")
+  ) {
+    const reader = new FileReader();
+    reader.readAsDataURL(image);
+    reader.onload = (e) => {
+      previewImage.value = e.target.result;
+      form.file = image;
+    };
+  } else {
+    form.image = null;
+    toast("warning", "Harus Format Gambar");
+  }
+}
+
+function deleteSchedule(id) {
+  const konfirm = confirm(`Apakah anda yakin ingin menghapus?`);
+  if (!konfirm) return;
+  form.delete(`/committee/schedule/delete/${id}`, {
+    preserveScroll: true,
+    onSuccess: () => {
+      resetForm();
+      toast("success", "Data Berhasil Dihapus");
+    },
+  });
 }
 </script>
 
 <template>
   <Head title="Article" />
   <div>
-    <AuthenticatedLayout>
-      <!-- <template #header>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">Article</h2>
-            </template> -->
+    <AuthenticatedLayoutCommittee>
+      <template #header> Jadwal </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -325,7 +364,37 @@ function uploadImage(e) {
                 <div
                   class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
                 >
-                  <Link class="bg-green-400 rounded-md py-1 px-2 text-white" href="">Tambah Jadwal</Link>
+                  <div>
+                    <!-- icon plus -->
+                    <div
+                      @click="showModal()"
+                      title="Tambah Jadwal"
+                      class="cursor-pointer"
+                    >
+                      <svg
+                        class="h-8 w-8 bg-green-400 p-1 rounded-lg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g
+                          id="SVGRepo_tracerCarrier"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        ></g>
+                        <g id="SVGRepo_iconCarrier">
+                          <path
+                            d="M4 12H20M12 4V20"
+                            stroke="#000000"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          ></path>
+                        </g>
+                      </svg>
+                    </div>
+                  </div>
 
                   <label for="table-search" class="sr-only">Search</label>
                   <div class="relative">
@@ -364,15 +433,14 @@ function uploadImage(e) {
                     class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
                   >
                     <tr>
-
+                      <th scope="col" class="px-6 py-3">
+                        <p>No</p>
+                      </th>
                       <th scope="col" class="px-6 py-3">
                         <p>Tanggal Mulai Kelas</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <p>Tanggal Selesai Kelas</p>
-                      </th>
-                      <th scope="col" class="px-6 py-3">
-                        <p>Pengusul</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <p>Tanggal Pengajuan</p>
@@ -386,20 +454,37 @@ function uploadImage(e) {
                       <th scope="col" class="px-6 py-3">
                         <div class="flex gap-1 items-center">
                           <p class="text-center mt-1">Action</p>
-                          <input
-                            @click="checkedAll()"
-                            class="h-6 w-6"
-                            type="checkbox"
-                            :id="`checkboxAll`"
-                          />
-
                           <div
                             @click="optionSubmission()"
                             v-show="choice"
                             title="Pilihan"
                             class="bg-red-100 p-0.5 rounded-md cursor-pointer"
                           >
-                            <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Edit / Select_Multiple"> <path id="Vector" d="M3 9V19.4C3 19.9601 3 20.2399 3.10899 20.4538C3.20487 20.642 3.35774 20.7952 3.5459 20.8911C3.7596 21 4.0395 21 4.59846 21H15.0001M17 8L13 12L11 10M7 13.8002V6.2002C7 5.08009 7 4.51962 7.21799 4.0918C7.40973 3.71547 7.71547 3.40973 8.0918 3.21799C8.51962 3 9.08009 3 10.2002 3H17.8002C18.9203 3 19.4801 3 19.9079 3.21799C20.2842 3.40973 20.5905 3.71547 20.7822 4.0918C21.0002 4.51962 21.0002 5.07969 21.0002 6.19978L21.0002 13.7998C21.0002 14.9199 21.0002 15.48 20.7822 15.9078C20.5905 16.2841 20.2842 16.5905 19.9079 16.7822C19.4805 17 18.9215 17 17.8036 17H10.1969C9.07899 17 8.5192 17 8.0918 16.7822C7.71547 16.5905 7.40973 16.2842 7.21799 15.9079C7 15.4801 7 14.9203 7 13.8002Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
+                            <svg
+                              class="h-8 w-8"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                              <g
+                                id="SVGRepo_tracerCarrier"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              ></g>
+                              <g id="SVGRepo_iconCarrier">
+                                <g id="Edit / Select_Multiple">
+                                  <path
+                                    id="Vector"
+                                    d="M3 9V19.4C3 19.9601 3 20.2399 3.10899 20.4538C3.20487 20.642 3.35774 20.7952 3.5459 20.8911C3.7596 21 4.0395 21 4.59846 21H15.0001M17 8L13 12L11 10M7 13.8002V6.2002C7 5.08009 7 4.51962 7.21799 4.0918C7.40973 3.71547 7.71547 3.40973 8.0918 3.21799C8.51962 3 9.08009 3 10.2002 3H17.8002C18.9203 3 19.4801 3 19.9079 3.21799C20.2842 3.40973 20.5905 3.71547 20.7822 4.0918C21.0002 4.51962 21.0002 5.07969 21.0002 6.19978L21.0002 13.7998C21.0002 14.9199 21.0002 15.48 20.7822 15.9078C20.5905 16.2841 20.2842 16.5905 19.9079 16.7822C19.4805 17 18.9215 17 17.8036 17H10.1969C9.07899 17 8.5192 17 8.0918 16.7822C7.71547 16.5905 7.40973 16.2842 7.21799 15.9079C7 15.4801 7 14.9203 7 13.8002Z"
+                                    stroke="#000000"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  ></path>
+                                </g>
+                              </g>
+                            </svg>
                           </div>
                         </div>
                       </th>
@@ -412,13 +497,19 @@ function uploadImage(e) {
                       class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                     >
                       <td class="px-6 py-4">
-                        {{ item.start_date_class ? item.start_date_class : '-----' }}
+                        {{ props.schedules.from + index }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.end_date_class ? item.end_date_class : '-----' }}
+                        {{
+                          item.start_date_class
+                            ? item.start_date_class
+                            : "-----"
+                        }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.committee?.name }}
+                        {{
+                          item.end_date_class ? item.end_date_class : "-----"
+                        }}
                       </td>
                       <td class="px-6 py-4">
                         {{ item.created_at }}
@@ -427,12 +518,82 @@ function uploadImage(e) {
                         {{ item.status }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.approval_date ? item.approval_date : '-----' }}
+                        {{ item.approval_date ? item.approval_date : "-----" }}
                       </td>
                       <td class="px-6 py-4">
-                        <Link :href="route('committee.schedule.detail', item.id)" title="Detail Jadwal" class="cursor-pointer">
-                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M15.0007 12C15.0007 13.6569 13.6576 15 12.0007 15C10.3439 15 9.00073 13.6569 9.00073 12C9.00073 10.3431 10.3439 9 12.0007 9C13.6576 9 15.0007 10.3431 15.0007 12Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12.0012 5C7.52354 5 3.73326 7.94288 2.45898 12C3.73324 16.0571 7.52354 19 12.0012 19C16.4788 19 20.2691 16.0571 21.5434 12C20.2691 7.94291 16.4788 5 12.0012 5Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
-                        </Link>
+                        <div class="flex items-center">
+                          <Link
+                            :href="route('committee.schedule.detail', item.id)"
+                            title="Detail Jadwal"
+                            class="cursor-pointer"
+                          >
+                            <svg
+                              class="h-6 w-6"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                              <g
+                                id="SVGRepo_tracerCarrier"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              ></g>
+                              <g id="SVGRepo_iconCarrier">
+                                <path
+                                  d="M15.0007 12C15.0007 13.6569 13.6576 15 12.0007 15C10.3439 15 9.00073 13.6569 9.00073 12C9.00073 10.3431 10.3439 9 12.0007 9C13.6576 9 15.0007 10.3431 15.0007 12Z"
+                                  stroke="#000000"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                ></path>
+                                <path
+                                  d="M12.0012 5C7.52354 5 3.73326 7.94288 2.45898 12C3.73324 16.0571 7.52354 19 12.0012 19C16.4788 19 20.2691 16.0571 21.5434 12C20.2691 7.94291 16.4788 5 12.0012 5Z"
+                                  stroke="#000000"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                ></path>
+                              </g>
+                            </svg>
+                          </Link>
+                          <div
+                            @click="deleteSchedule(item.id)"
+                            title="Hapus"
+                            class="bg-red-100 p-0.5 rounded-md"
+                          >
+                            <svg
+                              class="h-6 w-6 cursor-pointer"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                              <g
+                                id="SVGRepo_tracerCarrier"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              ></g>
+                              <g id="SVGRepo_iconCarrier">
+                                <path
+                                  d="M10 12L14 16M14 12L10 16M18 6L17.1991 18.0129C17.129 19.065 17.0939 19.5911 16.8667 19.99C16.6666 20.3412 16.3648 20.6235 16.0011 20.7998C15.588 21 15.0607 21 14.0062 21H9.99377C8.93927 21 8.41202 21 7.99889 20.7998C7.63517 20.6235 7.33339 20.3412 7.13332 19.99C6.90607 19.5911 6.871 19.065 6.80086 18.0129L6 6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6"
+                                  stroke="#000000"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                ></path>
+                              </g>
+                            </svg>
+                          </div>
+                          <!-- <div>
+                            <input
+                              @click="toggleCheckbox(item.id)"
+                              class="h-6 w-6"
+                              type="checkbox"
+                              :id="`checkbox${item.id}`"
+                            />
+                          </div> -->
+                        </div>
                       </td>
                       <!-- <td class="px-6 py-4">
                         <div class="flex gap-2">
@@ -525,8 +686,12 @@ function uploadImage(e) {
           <!-- Modal content -->
           <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
             <!-- Modal header -->
-            <div class="text-red-600 text-sm ml-2" v-for="error, index in props.errors" :key="index">
-                *{{ error }}
+            <div
+              class="text-red-600 text-sm ml-2"
+              v-for="(error, index) in props.errors"
+              :key="index"
+            >
+              *{{ error }}
             </div>
             <div
               class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
@@ -559,36 +724,225 @@ function uploadImage(e) {
             </div>
             <!-- Modal body -->
             <form
-              @submit.prevent="handleOptionSubmission"
+              @submit.prevent="addSchedule"
               enctype="multipart/form-data"
               class="p-4 md:p-5"
             >
               <div class="grid gap-4 mb-4 grid-cols-2">
+                <!-- <div class="col-span-2">
+                    <label
+                      for="image"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >Image</label
+                    >
+                    <img :src="previewImage" class="w-32" />
+                    <input
+                      @change="uploadImage"
+                      type="file"
+                      name="image"
+                      id="image"
+                      accept="image/*"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    />
+                  </div>
+                  <div class="col-span-2">
+                    <label
+                      for="title"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >Judul</label
+                    >
+                    <input
+                      v-model="form.title"
+                      type="text"
+                      name="title"
+                      id="title"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      placeholder="Judul Artikel"
+                    />
+                  </div> -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="committee_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Pengusul</label
+                  >
+                  <input
+                    :value="committeeName"
+                    type="text"
+                    name="committee_id"
+                    id="committee_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Pengusul"
+                    readonly
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="hp"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >HP</label
+                  >
+                  <input
+                    v-model="form.hp"
+                    type="text"
+                    name="hp"
+                    id="hp"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="HP"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                    <label
+                      for="class_room_id"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >Kelas</label
+                    >
+                    <select v-model="form.class_room_id" id="class_room_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                        <option value="" selected>Pilih Kelas</option>
+                        <option v-for="item, index in props.classRooms" :key="index" :value="item.id">
+                            {{ item.name }}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                    <label
+                      for="category_id"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >Tingkatan</label
+                    >
+                    <select v-model="form.category_id" id="category_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                        <option value="" selected>Pilih Tingkatan</option>
+                        <option v-for="item, index in props.categories" :key="index" :value="item.id">
+                            {{ item.name }}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="periode"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Angkatan Ke</label
+                  >
+                  <input
+                    v-model="form.periode"
+                    type="text"
+                    name="periode"
+                    id="periode"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Periode Ke"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="start_date_class"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Mulai</label
+                  >
+                  <input
+                    v-model="form.start_date_class"
+                    type="date"
+                    name="start_date_class"
+                    id="start_date_class"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Tanggal Muali"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="end_date_class"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Selesai</label
+                  >
+                  <input
+                    v-model="form.end_date_class"
+                    type="date"
+                    name="end_date_class"
+                    id="end_date_class"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Tanggal Selesai"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="location"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Lokasi</label
+                  >
+                  <input
+                    v-model="form.location"
+                    type="text"
+                    name="location"
+                    id="location"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Lokasi"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="google_maps"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Google Maps</label
+                  >
+                  <input
+                    v-model="form.google_maps"
+                    type="text"
+                    name="google_maps"
+                    id="google_maps"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Google Maps"
+                  />
+                </div>
+
                 <div class="col-span-2">
                   <label
-                    for="graduation"
+                    for="alamat"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Graduation</label
+                    >Alamat</label
                   >
-                  <select id="graduation" name="graduation" v-model="formCheckbox.status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                    <option selected value="">Choose a graduation</option>
-                    <option value="Diterima">Diterima</option>
-                    <option value="Ditolak">Ditolak</option>
-                    <option value="Lulus">Lulus</option>
-                  </select>
+                  <textarea
+                    v-model="form.address"
+                    id="alamat"
+                    name="alamat"
+                    rows="4"
+                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    placeholder="Alamat"
+                  ></textarea>
+                </div>
+                <div class="col-span-2">
+                  <label
+                    for="image"
+                    class="w-2block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Surat Pengajuan</label
+                  >
+                  <img :src="previewImage" class="w-5/12 py-2" />
+                  <div class="flex items-center">
+                    <div class="w-2/12">
+                      <input
+                        @change="uploadImage"
+                        type="file"
+                        name="image"
+                        id="image"
+                        accept="image/jpg, jpeg, png"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      />
+                    </div>
+                    <!-- <a :href="linkFile" class="ml-2 text-blue-500 underline">{{
+                      form.file
+                    }}</a> -->
+                  </div>
                 </div>
               </div>
               <button
-                title="Tambah Kelas"
+                title="Update Jadwal"
                 type="submit"
                 class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
-                {{ form.id ? "Update" : "Update" }}
+                {{ form.id ? "Update Jadwal" : "Add Jadwal" }}
               </button>
             </form>
           </div>
         </div>
       </div>
-    </AuthenticatedLayout>
+    </AuthenticatedLayoutCommittee>
   </div>
 </template>

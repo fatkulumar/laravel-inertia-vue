@@ -47,6 +47,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->prefix('committee/schedule')
                 ->name('committee.schedule.')
                 ->group(base_path('routes/committee/schedule.php'));
+
+            Route::middleware('web')
+                ->prefix('committee/participant')
+                ->name('committee.participant.')
+                ->group(base_path('routes/committee/participant.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
