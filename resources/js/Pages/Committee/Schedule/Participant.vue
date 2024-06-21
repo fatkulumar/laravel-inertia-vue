@@ -9,263 +9,281 @@ import { Modal } from "flowbite";
 import TabMenu from "@/Components/Committee/TabMenu.vue";
 
 const props = defineProps({
-    participants: {
-        type: Object,
-        default: () => ({}),
-    },
-    regionals: {
-        type: Object,
-        default: () => ({}),
-    },
-    filters: {
-        type: Object,
-        default: () => ({}),
-    },
-    errors: {
-        type: Object,
-        default: () => ({}),
-    },
+  participants: {
+    type: Object,
+    default: () => ({}),
+  },
+  users: {
+    type: Object,
+    default: () => ({}),
+  },
+  regionals: {
+    type: Object,
+    default: () => ({}),
+  },
+  filters: {
+    type: Object,
+    default: () => ({}),
+  },
+  errors: {
+    type: Object,
+    default: () => ({}),
+  },
 });
 
 let search = ref(props.filters.search);
 
 watch(search, (value) => {
-    router.get(
-        "/dashboard/user", { search: value }, {
-            preserveState: true,
-            replace: true,
-        }
-    );
+  router.get(
+    "/dashboard/user",
+    { search: value },
+    {
+      preserveState: true,
+      replace: true,
+    }
+  );
 });
 
 const form = useForm({
-    id: "",
-    name: "",
-    email: "",
-    role: "",
-    password: "mmpj12345",
-    regional_id: "",
+    user_id: "",
+  id: "",
+  name: "",
+  email: "",
+  hp: "",
+  role: "",
+  password: "mmpj12345",
+  regional: "",
+  regional_id: "",
 });
 
 function resetForm() {
-    form.id = "";
-    form.name = "";
-    form.email = "";
-    form.role = "";
-    form.password = "mmpj12345";
-    form.regional_id = null;
+    form.user_id = "",
+  form.id = "";
+  form.name = "";
+  form.email = "";
+  form.hp = "";
+  form.role = "";
+  form.password = "mmpj12345";
+  form.regional = null;
+  form.regional_id = "";
 }
 
-function modalUser(opt) {
-    const $targetEl = document.getElementById("crud-modal");
-    // options with default values
-    const options = {
-        placement: "bottom-right",
-        backdrop: "dynamic",
-        backdropClasses: "bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40",
-        closable: false,
-    };
+function modalDetailPeserta(opt) {
+  const $targetEl = document.getElementById("crud-modal");
+  // options with default values
+  const options = {
+    placement: "bottom-right",
+    backdrop: "dynamic",
+    backdropClasses: "bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40",
+    closable: false,
+  };
 
-    // instance options object
-    const instanceOptions = {
-        id: "crud-modal",
-        override: true,
-    };
+  // instance options object
+  const instanceOptions = {
+    id: "crud-modal",
+    override: true,
+  };
 
-    const modal = new Modal($targetEl, options, instanceOptions);
-    if (opt == "hide") {
-        modal.hide();
-    }
-    if (opt == "show") {
-        modal.show();
-    }
+  const modal = new Modal($targetEl, options, instanceOptions);
+  if (opt == "hide") {
+    modal.hide();
+  }
+  if (opt == "show") {
+    modal.show();
+  }
 }
 
-function addUser() {
-    form.post("/dashboard/user/store", {
-        preserveScroll: true,
-        onSuccess: (e) => {
-            toast("success", "Berhasil");
-            resetForm();
-            modalUser("hide");
-        },
-    });
+function addParticipant() {
+  form.post("/dashboard/user/store", {
+    preserveScroll: true,
+    onSuccess: (e) => {
+      toast("success", "Berhasil");
+      resetForm();
+      modalDetailPeserta("hide");
+    },
+  });
 }
 
-function editUser(data, role, regional) {
-    form.id = data.id;
-    form.name = data.name;
-    form.email = data.email;
-    form.role = role[0].name;
-    form.regional_id = regional.regional_id;
-    modalUser("show");
+function detailPeserta(data) {
+  form.id = 1;
+  form.name = data.participant?.name;
+  form.email = data.participant?.email;
+  form.hp = data.participant?.profile?.hp;
+  form.role = data.participant?.roles[0]?.name;
+  form.regional = data.participant?.profile?.regional?.name;
+  form.regional_id = data.participant?.profile?.regional?.id;
+  modalDetailPeserta("show");
 }
 
 function deleteUser(id, name) {
-    const konfirm = confirm(`Apakah anda yakin ingin menghapus ${name}?`);
-    if (!konfirm) return;
-    form.delete(`/dashboard/user/delete/${id}`, {
-        preserveScroll: true,
-        onSuccess: () => {
-            resetForm();
-            toast("success", "Data Berhasil Dihapus");
-        },
-    });
+  const konfirm = confirm(`Apakah anda yakin ingin menghapus ${name}?`);
+  if (!konfirm) return;
+  form.delete(`/dashboard/user/delete/${id}`, {
+    preserveScroll: true,
+    onSuccess: () => {
+      resetForm();
+      toast("success", "Data Berhasil Dihapus");
+    },
+  });
 }
 
 function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
-    const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-            toast.onmouseenter = Swal.stopTimer;
-            toast.onmouseleave = Swal.resumeTimer;
-        },
-    });
-    Toast.fire({
-        icon: icon,
-        title: text,
-    });
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    },
+  });
+  Toast.fire({
+    icon: icon,
+    title: text,
+  });
 }
 
 const closeModal = (targetModal = "crud-modal") => {
-    resetForm()
-    formCheckbox.id = []
-    const $targetEl = document.getElementById(targetModal);
-    const modal = new Modal($targetEl);
-    modal.hide();
+  resetForm();
+  formCheckbox.id = [];
+  const $targetEl = document.getElementById(targetModal);
+  const modal = new Modal($targetEl);
+  modal.hide();
 };
 
 const showModal = (targetModal = "crud-modal") => {
-    resetForm()
-    const $targetEl = document.getElementById(targetModal);
-    const modal = new Modal($targetEl);
-    modal.show();
+  resetForm();
+  const $targetEl = document.getElementById(targetModal);
+  const modal = new Modal($targetEl);
+  modal.show();
 };
 
 const formCheckbox = useForm({
-    id: [],
+  id: [],
 });
 
-const deleteChoice = ref(false)
+const deleteChoice = ref(false);
 
 function toggleCheckbox(id) {
-    let checkbox = document.getElementById(`checkbox${id}`);
-    let checkboxAll = document.getElementById(`checkboxAll`);
-    if (checkboxAll.checked) {
-        checkboxAll.checked = false;
-    }
+  let checkbox = document.getElementById(`checkbox${id}`);
+  let checkboxAll = document.getElementById(`checkboxAll`);
+  if (checkboxAll.checked) {
+    checkboxAll.checked = false;
+  }
 
-    if (checkbox.checked == true) {
-        const articleId = formCheckbox.id.includes(id);
-        if (!articleId) {
-            formCheckbox.id.push(id);
-        }
-    } else {
-        formCheckbox.id = formCheckbox.id.filter((checkId) => checkId !== id); // Memfilter id pengguna yang cocok
+  if (checkbox.checked == true) {
+    const articleId = formCheckbox.id.includes(id);
+    if (!articleId) {
+      formCheckbox.id.push(id);
     }
+  } else {
+    formCheckbox.id = formCheckbox.id.filter((checkId) => checkId !== id); // Memfilter id pengguna yang cocok
+  }
 
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
-    // Inisialisasi jumlah total checkbox yang dicentang
-    let totalChecked = 0;
+  // Inisialisasi jumlah total checkbox yang dicentang
+  let totalChecked = 0;
 
-    // Iterasi melalui setiap elemen checkbox
-    checkboxes.forEach((checkbox) => {
-        // Periksa apakah checkbox dicentang
-        if (checkbox.checked) {
-            // Jika dicentang, tambahkan 1 ke jumlah total
-            totalChecked++;
-        }
-    });
-    if (props.participants.to == totalChecked) {
-        checkboxAll.checked = true;
+  // Iterasi melalui setiap elemen checkbox
+  checkboxes.forEach((checkbox) => {
+    // Periksa apakah checkbox dicentang
+    if (checkbox.checked) {
+      // Jika dicentang, tambahkan 1 ke jumlah total
+      totalChecked++;
     }
-    if (formCheckbox.id.length > 0) {
-        deleteChoice.value = true
-    } else {
-        deleteChoice.value = false
-    }
+  });
+  if (props.participants.to == totalChecked) {
+    checkboxAll.checked = true;
+  }
+  if (formCheckbox.id.length > 0) {
+    deleteChoice.value = true;
+  } else {
+    deleteChoice.value = false;
+  }
 }
 
 const countCheckbox = ref(0);
 
 function checkedAll() {
-    countCheckbox.value = 0;
-    let checkedCheckboxes = document.querySelectorAll(
-        'input[type="checkbox"]:not(#checkboxAll):not(:checked)'
-    );
-    let uncheckedCheckboxes = document.querySelectorAll(
-        'input[type="checkbox"]:not(#checkboxAll)'
-    );
-    let checboxAll = document.getElementById("checkboxAll");
-    if (checboxAll.checked == true) {
-        checkedCheckboxes.forEach((checkbox) => {
-            checkbox.checked = true;
-        });
-        props.participants.data.forEach((data) => {
-            formCheckbox.id.push(data.id);
-            countCheckbox.value++;
-        });
-    } else {
-        uncheckedCheckboxes.forEach((checkbox) => {
-            checkbox.checked = false;
-        });
-        formCheckbox.id = [];
-    }
+  countCheckbox.value = 0;
+  let checkedCheckboxes = document.querySelectorAll(
+    'input[type="checkbox"]:not(#checkboxAll):not(:checked)'
+  );
+  let uncheckedCheckboxes = document.querySelectorAll(
+    'input[type="checkbox"]:not(#checkboxAll)'
+  );
+  let checboxAll = document.getElementById("checkboxAll");
+  if (checboxAll.checked == true) {
+    checkedCheckboxes.forEach((checkbox) => {
+      checkbox.checked = true;
+    });
+    props.participants.data.forEach((data) => {
+      formCheckbox.id.push(data.id);
+      countCheckbox.value++;
+    });
+  } else {
+    uncheckedCheckboxes.forEach((checkbox) => {
+      checkbox.checked = false;
+    });
+    formCheckbox.id = [];
+  }
 
-    if (formCheckbox.id.length > 0) {
-        deleteChoice.value = true
-    } else {
-        deleteChoice.value = false
-    }
+  if (formCheckbox.id.length > 0) {
+    deleteChoice.value = true;
+  } else {
+    deleteChoice.value = false;
+  }
 }
 
 function deleteUserChoice() {
-    const konfirm = confirm(
-        `Apakah anda yakin ingin menghapus data ini?`
-    );
-    if (!konfirm) return;
-    formCheckbox.post("/dashboard/user/destroy", {
-        preserveScroll: true,
-        onSuccess: () => {
-            formCheckbox.id = [];
-            toast("success", "Data Berhasil Dihapus");
-            let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-            checkedCheckboxes.forEach(element => {
-                element.checked = false
-            });
-        },
-    });
+  const konfirm = confirm(`Apakah anda yakin ingin menghapus data ini?`);
+  if (!konfirm) return;
+  formCheckbox.post("/dashboard/user/destroy", {
+    preserveScroll: true,
+    onSuccess: () => {
+      formCheckbox.id = [];
+      toast("success", "Data Berhasil Dihapus");
+      let checkedCheckboxes = document.querySelectorAll(
+        'input[type="checkbox"]:checked'
+      );
+      checkedCheckboxes.forEach((element) => {
+        element.checked = false;
+      });
+    },
+  });
 }
 
 function uploadImage(e) {
-    const image = e.target.files[0];
-    if (image.type == 'image/png' | image.type == 'image/jpg' | image.type == 'image/jpeg') {
-        const reader = new FileReader();
-        reader.readAsDataURL(image);
-        reader.onload = e => {
-            previewImage.value = e.target.result;
-            form.image = image;
-        };
-    } else {
-        form.image = null;
-        closeModal('crud-modal');
-        toast('warning', 'Harus Format Gambar')
-    }
+  const image = e.target.files[0];
+  if (
+    (image.type == "image/png") |
+    (image.type == "image/jpg") |
+    (image.type == "image/jpeg")
+  ) {
+    const reader = new FileReader();
+    reader.readAsDataURL(image);
+    reader.onload = (e) => {
+      previewImage.value = e.target.result;
+      form.image = image;
+    };
+  } else {
+    form.image = null;
+    closeModal("crud-modal");
+    toast("warning", "Harus Format Gambar");
+  }
 }
 </script>
 
 <template>
-    <Head title="Article" />
-    <div>
-        <AuthenticatedLayoutCommittee>
-            <template #header>
-                <TabMenu />
-            </template>
+  <Head title="Article" />
+  <div>
+    <AuthenticatedLayoutCommittee>
+      <template #header>
+        <TabMenu />
+      </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -350,6 +368,9 @@ function uploadImage(e) {
                         <p>Email</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
+                        <p>HP</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
                         <p>Regional</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
@@ -384,7 +405,33 @@ function uploadImage(e) {
                                 stroke-linejoin="round"
                               ></g>
                               <g id="SVGRepo_iconCarrier">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M3 6.38597C3 5.90152 3.34538 5.50879 3.77143 5.50879L6.43567 5.50832C6.96502 5.49306 7.43202 5.11033 7.61214 4.54412C7.61688 4.52923 7.62232 4.51087 7.64185 4.44424L7.75665 4.05256C7.8269 3.81241 7.8881 3.60318 7.97375 3.41617C8.31209 2.67736 8.93808 2.16432 9.66147 2.03297C9.84457 1.99972 10.0385 1.99986 10.2611 2.00002H13.7391C13.9617 1.99986 14.1556 1.99972 14.3387 2.03297C15.0621 2.16432 15.6881 2.67736 16.0264 3.41617C16.1121 3.60318 16.1733 3.81241 16.2435 4.05256L16.3583 4.44424C16.3778 4.51087 16.3833 4.52923 16.388 4.54412C16.5682 5.11033 17.1278 5.49353 17.6571 5.50879H20.2286C20.6546 5.50879 21 5.90152 21 6.38597C21 6.87043 20.6546 7.26316 20.2286 7.26316H3.77143C3.34538 7.26316 3 6.87043 3 6.38597Z" fill="#1C274C"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M11.5956 22.0001H12.4044C15.1871 22.0001 16.5785 22.0001 17.4831 21.1142C18.3878 20.2283 18.4803 18.7751 18.6654 15.8686L18.9321 11.6807C19.0326 10.1037 19.0828 9.31524 18.6289 8.81558C18.1751 8.31592 17.4087 8.31592 15.876 8.31592H8.12404C6.59127 8.31592 5.82488 8.31592 5.37105 8.81558C4.91722 9.31524 4.96744 10.1037 5.06788 11.6807L5.33459 15.8686C5.5197 18.7751 5.61225 20.2283 6.51689 21.1142C7.42153 22.0001 8.81289 22.0001 11.5956 22.0001ZM10.2463 12.1886C10.2051 11.7548 9.83753 11.4382 9.42537 11.4816C9.01321 11.525 8.71251 11.9119 8.75372 12.3457L9.25372 17.6089C9.29494 18.0427 9.66247 18.3593 10.0746 18.3159C10.4868 18.2725 10.7875 17.8856 10.7463 17.4518L10.2463 12.1886ZM14.5746 11.4816C14.9868 11.525 15.2875 11.9119 15.2463 12.3457L14.7463 17.6089C14.7051 18.0427 14.3375 18.3593 13.9254 18.3159C13.5132 18.2725 13.2125 17.8856 13.2537 17.4518L13.7537 12.1886C13.7949 11.7548 14.1625 11.4382 14.5746 11.4816Z" fill="#1C274C"></path> </g></svg>
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <g
+                                    id="SVGRepo_bgCarrier"
+                                    stroke-width="0"
+                                  ></g>
+                                  <g
+                                    id="SVGRepo_tracerCarrier"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  ></g>
+                                  <g id="SVGRepo_iconCarrier">
+                                    <path
+                                      d="M3 6.38597C3 5.90152 3.34538 5.50879 3.77143 5.50879L6.43567 5.50832C6.96502 5.49306 7.43202 5.11033 7.61214 4.54412C7.61688 4.52923 7.62232 4.51087 7.64185 4.44424L7.75665 4.05256C7.8269 3.81241 7.8881 3.60318 7.97375 3.41617C8.31209 2.67736 8.93808 2.16432 9.66147 2.03297C9.84457 1.99972 10.0385 1.99986 10.2611 2.00002H13.7391C13.9617 1.99986 14.1556 1.99972 14.3387 2.03297C15.0621 2.16432 15.6881 2.67736 16.0264 3.41617C16.1121 3.60318 16.1733 3.81241 16.2435 4.05256L16.3583 4.44424C16.3778 4.51087 16.3833 4.52923 16.388 4.54412C16.5682 5.11033 17.1278 5.49353 17.6571 5.50879H20.2286C20.6546 5.50879 21 5.90152 21 6.38597C21 6.87043 20.6546 7.26316 20.2286 7.26316H3.77143C3.34538 7.26316 3 6.87043 3 6.38597Z"
+                                      fill="#1C274C"
+                                    ></path>
+                                    <path
+                                      fill-rule="evenodd"
+                                      clip-rule="evenodd"
+                                      d="M11.5956 22.0001H12.4044C15.1871 22.0001 16.5785 22.0001 17.4831 21.1142C18.3878 20.2283 18.4803 18.7751 18.6654 15.8686L18.9321 11.6807C19.0326 10.1037 19.0828 9.31524 18.6289 8.81558C18.1751 8.31592 17.4087 8.31592 15.876 8.31592H8.12404C6.59127 8.31592 5.82488 8.31592 5.37105 8.81558C4.91722 9.31524 4.96744 10.1037 5.06788 11.6807L5.33459 15.8686C5.5197 18.7751 5.61225 20.2283 6.51689 21.1142C7.42153 22.0001 8.81289 22.0001 11.5956 22.0001ZM10.2463 12.1886C10.2051 11.7548 9.83753 11.4382 9.42537 11.4816C9.01321 11.525 8.71251 11.9119 8.75372 12.3457L9.25372 17.6089C9.29494 18.0427 9.66247 18.3593 10.0746 18.3159C10.4868 18.2725 10.7875 17.8856 10.7463 17.4518L10.2463 12.1886ZM14.5746 11.4816C14.9868 11.525 15.2875 11.9119 15.2463 12.3457L14.7463 17.6089C14.7051 18.0427 14.3375 18.3593 13.9254 18.3159C13.5132 18.2725 13.2125 17.8856 13.2537 17.4518L13.7537 12.1886C13.7949 11.7548 14.1625 11.4382 14.5746 11.4816Z"
+                                      fill="#1C274C"
+                                    ></path>
+                                  </g>
+                                </svg>
                               </g>
                             </svg>
                           </div>
@@ -406,26 +453,34 @@ function uploadImage(e) {
                         {{ item.participant?.email }}
                       </td>
                       <td class="px-6 py-4">
+                        {{ item.participant?.profile?.hp }}
+                      </td>
+                      <td class="px-6 py-4">
                         {{ item.participant?.profile?.regional?.name }}
                       </td>
                       <td class="px-6 py-4">
-                        <div v-for="(itemRole, indexRole) in item.participant?.roles" :key="indexRole">
-                            {{ itemRole.name }}
+                        <div
+                          v-for="(itemRole, indexRole) in item.participant
+                            ?.roles"
+                          :key="indexRole"
+                        >
+                          {{ itemRole.name }}
                         </div>
                       </td>
                       <td class="px-6 py-4">
                         <div class="flex gap-2">
                           <div
-                            @click="editUser(item, item.roles, item.profile)"
-                            title="Edit"
-                            class="bg-green-100 p-0.5 rounded-md"
+                            @click="
+                              detailPeserta(item)
+                            "
+                            title="Detail Peserta"
+                            class="bg-green-100 p-0.5 rounded-md cursor-pointer"
                           >
                             <svg
-                              class="h-6 w-6 cursor-pointer"
-                              viewBox="0 0 192 192"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xml:space="preserve"
+                              class="h-6 w-6"
+                              viewBox="0 0 24 24"
                               fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
                             >
                               <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                               <g
@@ -435,36 +490,18 @@ function uploadImage(e) {
                               ></g>
                               <g id="SVGRepo_iconCarrier">
                                 <path
-                                  d="m104.175 90.97-4.252 38.384 38.383-4.252L247.923 15.427V2.497L226.78-18.646h-12.93zm98.164-96.96 31.671 31.67"
-                                  class="cls-1"
-                                  style="
-                                    fill: none;
-                                    fill-opacity: 1;
-                                    fill-rule: nonzero;
-                                    stroke: #000000;
-                                    stroke-width: 12;
-                                    stroke-linecap: round;
-                                    stroke-linejoin: round;
-                                    stroke-dasharray: none;
-                                    stroke-opacity: 1;
-                                  "
-                                  transform="translate(-77.923 40.646)"
+                                  d="M15.0007 12C15.0007 13.6569 13.6576 15 12.0007 15C10.3439 15 9.00073 13.6569 9.00073 12C9.00073 10.3431 10.3439 9 12.0007 9C13.6576 9 15.0007 10.3431 15.0007 12Z"
+                                  stroke="#000000"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
                                 ></path>
                                 <path
-                                  d="m195.656 33.271-52.882 52.882"
-                                  style="
-                                    fill: none;
-                                    fill-opacity: 1;
-                                    fill-rule: nonzero;
-                                    stroke: #000000;
-                                    stroke-width: 12;
-                                    stroke-linecap: round;
-                                    stroke-linejoin: round;
-                                    stroke-miterlimit: 5;
-                                    stroke-dasharray: none;
-                                    stroke-opacity: 1;
-                                  "
-                                  transform="translate(-77.923 40.646)"
+                                  d="M12.0012 5C7.52354 5 3.73326 7.94288 2.45898 12C3.73324 16.0571 7.52354 19 12.0012 19C16.4788 19 20.2691 16.0571 21.5434 12C20.2691 7.94291 16.4788 5 12.0012 5Z"
+                                  stroke="#000000"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
                                 ></path>
                               </g>
                             </svg>
@@ -533,17 +570,20 @@ function uploadImage(e) {
           <!-- Modal content -->
           <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
             <!-- Modal header -->
-            <div class="text-red-600 text-sm ml-2" v-for="error, index in props.errors" :key="index">
-                *{{ error }}
+            <div
+              class="text-red-600 text-sm ml-2"
+              v-for="(error, index) in props.errors"
+              :key="index"
+            >
+              *{{ error }}
             </div>
 
             <div
               class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
             >
-
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                 {{ form.id ? "Update User" : "Tambah User" }}
-            </h3>
+              </h3>
 
               <button
                 type="button"
@@ -570,12 +610,38 @@ function uploadImage(e) {
             </div>
             <!-- Modal body -->
             <form
-              @submit.prevent="addUser"
+              @submit.prevent="addParticipant"
               enctype="multipart/form-data"
               class="p-4 md:p-5"
             >
               <div class="grid gap-4 mb-4 grid-cols-2">
-                <div class="col-span-2">
+
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="email"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Email</label
+                  >
+                  <input
+                    v-show="form.id"
+                    v-model="form.email"
+                    type="text"
+                    name="email"
+                    id="email"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Email"
+                    :readonly="form.id ? true : false"
+                  />
+
+                  <select v-show="!form.id" v-model="form.user_id" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    <option :selected="form.user_id == null" value="">Choose a Email</option>
+                    <option v-for="item, index in props.users" :key="index" :value="item.id">
+                      {{ item.email }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="col-span-2 sm:col-span-1">
                   <label
                     for="name"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -588,49 +654,59 @@ function uploadImage(e) {
                     id="name"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder="Nama"
+                    :readonly="form.id ? true : false"
                   />
                 </div>
-                <div class="col-span-2">
+
+                <div class="col-span-2 sm:col-span-1">
                     <label
-                      for="email"
+                      for="hp"
                       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >Email</label
+                      >HP</label
                     >
                     <input
-                      v-model="form.email"
+                      v-model="form.hp"
                       type="text"
-                      name="email"
-                      id="email"
+                      name="hp"
+                      id="hp"
                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Email"
+                      placeholder="HP"
+                      :readonly="form.id ? true : false"
                     />
                 </div>
-                <div class="col-span-2">
+
+                <div class="col-span-2 sm:col-span-1" :class="form.id ? 'block' : 'hidden'">
                     <label
-                      for="role"
-                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >Role</label
-                    >
-                    {{ form.role }}
-                    <select v-model="form.role" name="role" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                        <option :selected="form.role == null" value="">Choose a Role</option>
-                        <option value="peserta">Peserta</option>
-                        <option value="admin">Admin</option>
-                        <option value="panitia">Panitia</option>
-                    </select>
-                </div>
-                <div class="col-span-2">
-                    <label
-                      for="regional_id"
+                      for="regional"
                       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                       >Regional</label
                     >
-                    <select v-model="form.regional_id" name="regional_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                        <option :selected="form.regional_id == null" value="">Choose a Regional</option>
-                        <option v-for="item, index in regionals" :key="index" :value="item.id" :selected="form.regionId === item.id">
-                            {{ item.name }}
-                        </option>
-                    </select>
+                    <input
+                      v-model="form.regional"
+                      type="text"
+                      name="regional"
+                      id="regional"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      placeholder="Regional"
+                      :readonly="form.id ? true : false"
+                    />
+                </div>
+
+                <div class="col-span-2 sm:col-span-1" :class="form.id ? 'block' : 'hidden'">
+                    <label
+                      for="role"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >Level</label
+                    >
+                    <input
+                      v-model="form.role"
+                      type="text"
+                      name="role"
+                      id="role"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      placeholder="Level"
+                      :readonly="form.id ? true : false"
+                    />
                 </div>
               </div>
               <button

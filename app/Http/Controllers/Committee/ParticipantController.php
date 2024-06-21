@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Committee;
 
 use App\Http\Controllers\Controller;
 use App\Models\Submission;
+use App\Models\User;
 use App\Traits\EntityValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -42,9 +43,16 @@ class ParticipantController extends Controller
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);
-            // return $participants;
-            return Inertia::render('Committee/Participant', [
+
+            $users = User::with('roles', 'profile.regional')
+                        ->whereHas('roles', function($query) {
+                            $query->where('name', 'peserta'); // Gantilah 'name' dengan kolom yang sesuai dalam tabel roles
+                        })
+                        ->get();
+            // return $users;
+            return Inertia::render('Committee/Schedule/Participant', [
                 'participants' => $participants,
+                'users' => $users,
             ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
