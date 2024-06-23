@@ -45,25 +45,35 @@ watch(search, (value) => {
 });
 
 const form = useForm({
-    user_id: "",
+  participant_id: "",
+  committee_id: "",
+  category_id: "",
   id: "",
   name: "",
   email: "",
   hp: "",
   role: "",
-  password: "mmpj12345",
   regional: "",
   regional_id: "",
+  class_room_id: "",
+  periode: "",
+  location: "",
+  google_maps: "",
+  status: "pending",
+  address: "",
+  start_date_class: "",
+  end_date_class: "",
+  file: "",
 });
 
 function resetForm() {
-    form.user_id = "",
+  form.participant_id = "",
+  form.committee_id = "",
   form.id = "";
   form.name = "";
   form.email = "";
   form.hp = "";
   form.role = "";
-  form.password = "mmpj12345";
   form.regional = null;
   form.regional_id = "";
 }
@@ -94,7 +104,7 @@ function modalDetailPeserta(opt) {
 }
 
 function addParticipant() {
-  form.post("/dashboard/user/store", {
+  form.post("/committee/participant/store", {
     preserveScroll: true,
     onSuccess: (e) => {
       toast("success", "Berhasil");
@@ -105,13 +115,20 @@ function addParticipant() {
 }
 
 function detailPeserta(data) {
-  form.id = 1;
+  form.id = data.id;
   form.name = data.participant?.name;
   form.email = data.participant?.email;
   form.hp = data.participant?.profile?.hp;
   form.role = data.participant?.roles[0]?.name;
   form.regional = data.participant?.profile?.regional?.name;
   form.regional_id = data.participant?.profile?.regional?.id;
+//   form.class_room_id = data.class_room_id;
+//   form.periode = data.periode;
+//   form.google_maps = data.google_maps;
+//   form.address = data.address;
+//   form.start_date_class = data.start_date_class;
+//   form.end_date_class = data.end_date_class;
+
   modalDetailPeserta("show");
 }
 
@@ -153,8 +170,19 @@ const closeModal = (targetModal = "crud-modal") => {
   modal.hide();
 };
 
-const showModal = (targetModal = "crud-modal") => {
-  resetForm();
+const showModal = (data, targetModal = "crud-modal") => {
+//   console.log(data[0].committee_id)
+  form.class_room_id = data[0].class_room_id;
+  form.periode = data[0].periode;
+  form.google_maps = data[0].google_maps;
+  form.address = data[0].address;
+  form.start_date_class = data[0].start_date_class;
+  form.end_date_class = data[0].end_date_class;
+  form.committee_id = data[0].committee_id;
+  form.location = data[0].location;
+  form.file = data[0].file;
+  form.category_id = data[0].category_id;
+//   resetForm();
   const $targetEl = document.getElementById(targetModal);
   const modal = new Modal($targetEl);
   modal.show();
@@ -295,7 +323,7 @@ function uploadImage(e) {
                   <div>
                     <!-- icon plus -->
                     <div
-                      @click="showModal()"
+                      @click="showModal(props.participants.data)"
                       title="Tambah Artikel"
                       class="cursor-pointer"
                     >
@@ -610,7 +638,7 @@ function uploadImage(e) {
             </div>
             <!-- Modal body -->
             <form
-              @submit.prevent="addParticipant"
+              @submit.prevent="addParticipant()"
               enctype="multipart/form-data"
               class="p-4 md:p-5"
             >
@@ -633,46 +661,12 @@ function uploadImage(e) {
                     :readonly="form.id ? true : false"
                   />
 
-                  <select v-show="!form.id" v-model="form.user_id" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                    <option :selected="form.user_id == null" value="">Choose a Email</option>
+                  <select v-show="!form.id" v-model="form.participant_id" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    <option :selected="form.participant_id == null" value="">Choose a Email</option>
                     <option v-for="item, index in props.users" :key="index" :value="item.id">
                       {{ item.email }}
                     </option>
                   </select>
-                </div>
-
-                <div class="col-span-2 sm:col-span-1">
-                  <label
-                    for="name"
-                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Nama</label
-                  >
-                  <input
-                    v-model="form.name"
-                    type="text"
-                    name="name"
-                    id="name"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Nama"
-                    :readonly="form.id ? true : false"
-                  />
-                </div>
-
-                <div class="col-span-2 sm:col-span-1">
-                    <label
-                      for="hp"
-                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >HP</label
-                    >
-                    <input
-                      v-model="form.hp"
-                      type="text"
-                      name="hp"
-                      id="hp"
-                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="HP"
-                      :readonly="form.id ? true : false"
-                    />
                 </div>
 
                 <div class="col-span-2 sm:col-span-1" :class="form.id ? 'block' : 'hidden'">

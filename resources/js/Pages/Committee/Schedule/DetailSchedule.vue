@@ -605,9 +605,9 @@ function updateSchedule() {
                         class="w-2block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >Surat Pengajuan</label
                       >
-                      <img :src="linkFile" class="w-5/12 py-2" />
-                      <div class="flex items-center">
-                        <div class="w-2/12">
+                      <img :src="linkFile" class="w-6/12 lg:w-2/12 py-2" />
+                      <div class="flex flex-col lg:flex-row items-center">
+                        <div class="w-full lg:w-2/12">
                           <input
                             @change="uploadImage"
                             type="file"
@@ -617,7 +617,10 @@ function updateSchedule() {
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                           />
                         </div>
-                        <a target="_blank" :href="linkFile" class="ml-2 text-blue-500 underline">{{ form.file }}</a>
+                        <div class="w-6/12 flex">
+                            <a target="_blank" :href="linkFile" class="lg:ml-2 text-wrap text-blue-500 underline flex-grow">{{ form.file }}</a>
+                        </div>
+
                       </div>
                     </div>
                   </div>

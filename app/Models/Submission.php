@@ -37,4 +37,9 @@ class Submission extends Model
     {
         return $this->belongsTo(User::class, 'committee_id');
     }
+
+    // public function user()
+    // {
+    //     return $this->belongsTo(User::class, 'participant_id', 'id');
+    // }
 }

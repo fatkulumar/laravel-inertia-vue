@@ -44,11 +44,12 @@ class ParticipantController extends Controller
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);
 
-            $users = User::with('roles', 'profile.regional')
-                        ->whereHas('roles', function($query) {
-                            $query->where('name', 'peserta'); // Gantilah 'name' dengan kolom yang sesuai dalam tabel roles
-                        })
-                        ->get();
+        $users = User::with('roles', 'profile.regional')
+                ->whereHas('roles', function ($query) {
+                    $query->where('name', 'peserta'); // Gantilah 'name' dengan kolom yang sesuai dalam tabel roles
+                })
+                ->doesntHave('submissions') // Pastikan User tidak memiliki relasi dengan tabel submissions
+                ->get();
             // return $users;
             return Inertia::render('Committee/Schedule/Participant', [
                 'participants' => $participants,
@@ -76,6 +77,7 @@ class ParticipantController extends Controller
      */
     public function store(Request $request)
     {
+        // return $request;
         try {
             $validasiData = $this->storeValidator($request);
             if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
@@ -85,13 +87,15 @@ class ParticipantController extends Controller
 
                 $submissions = Submission::where('id', $id)->first();
                 $saveData = [
-                    'regional_id' => $request->post('regional_id'),
-                    'committeee_id' => $request->post('committeee_id'),
-                    'hp' => $request->post('hp'),
+                    'participant_id' => $request->post('participant_id'),
+                    'committee_id' => $request->post('committee_id'),
+                    'category_id' => $request->post('category_id'),
+                    'class_room_id' => $request->post('class_room_id'),
                     'start_date_class' => $request->post('start_date_class'),
                     'end_date_class' => $request->post('end_date_class'),
                     'location' => $request->post('location'),
                     'goggle_maps' => $request->post('goggle_maps'),
+                    'status' => $request->post('status'),
                     'address' => $request->post('address'),
                     'periode' => $request->post('periode'),
                     'file' => $request->post('file'),
@@ -100,21 +104,19 @@ class ParticipantController extends Controller
                 if (!$result) return redirect()->back()->withErrors($result)->withInput();
             } else {
 
-                $this->fileSettings();
-                $file = $request->file('file');
-                $upload = $this->uploadFile($file);
-
                 $saveData = [
-                    'regional_id' => $request->post('regional_id'),
+                    'participant_id' => $request->post('participant_id'),
                     'committee_id' => $request->post('committee_id'),
-                    'hp' => $request->post('hp'),
+                    'category_id' => $request->post('category_id'),
+                    'class_room_id' => $request->post('class_room_id'),
                     'start_date_class' => $request->post('start_date_class'),
                     'end_date_class' => $request->post('end_date_class'),
                     'location' => $request->post('location'),
                     'google_maps' => $request->post('google_maps'),
+                    'status' => $request->post('status'),
                     'address' => $request->post('address'),
                     'periode' => $request->post('periode'),
-                    'file' => $upload,
+                    'file' => $request->post('file'),
                 ];
 
                 $result = Submission::create($saveData);
@@ -133,28 +135,32 @@ class ParticipantController extends Controller
     {
         try {
             $rules = [
-                'regional_id' => 'required|string|max:36',
+                'participant_id' => 'required|string|max:36',
                 'committee_id' => 'required|string|max:36',
-                'hp' => 'required|string|min:8|max:13',
+                'class_room_id' => 'required|string|max:36',
+                'category_id' => 'required|string|max:36',
                 'start_date_class' => 'required|string|max:15',
                 'end_date_class' => 'required|string|max:15',
-                'location' => 'required|string|max:15',
+                'location' => 'required|string|max:255',
                 'google_maps' => 'required|string|max:20000',
+                'status' => 'required|string|max:10',
                 'address' => 'required|string|max:20000',
-                'periode' => 'required|string|max:10',
-                'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'periode' => 'required|integer|max:10000',
+                'file' => 'required|string|max:20000',
             ];
             $Validatedata = [
-                'regional_id' => $request->post('regional_id'),
-                'committeee_id' => $request->post('committee_id'),
-                'hp' => $request->post('hp'),
+                'participant_id' => $request->post('participant_id'),
+                'committee_id' => $request->post('committee_id'),
+                'category_id' => $request->post('category_id'),
+                'class_room_id' => $request->post('class_room_id'),
                 'start_date_class' => $request->post('start_date_class'),
                 'end_date_class' => $request->post('end_date_class'),
                 'location' => $request->post('location'),
-                'goggle_maps' => $request->post('goggle_maps'),
+                'google_maps' => $request->post('google_maps'),
+                'status' => $request->post('status'),
                 'address' => $request->post('address'),
                 'periode' => $request->post('periode'),
-                'file' => $request->file('file'),
+                'file' => $request->post('file'),
             ];
             $validator = EntityValidator::validate($Validatedata, $rules);
             if ($validator->fails()) return $validator->errors();

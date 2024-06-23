@@ -58,4 +58,9 @@ class User extends Authenticatable
     {
         return $this->morphOne(Profile::class, 'profileable');
     }
+
+    public function submissions()
+    {
+        return $this->hasMany(Submission::class, 'participant_id');
+    }
 }
