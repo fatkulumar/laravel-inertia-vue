@@ -16,7 +16,19 @@ class Submission extends Model
         'committee_id',
         'category_id',
         'class_room_id',
+        'chief_id', //ketua pelaksana
+        'type_activity_id', //jenis kegiatan
         'periode',
+        'poster', //konsep kegiatan
+        'concept', //konsep kegiatan
+        'committee_layout', //susunan panitia
+        'target_participant', //target peserta
+        'speaker', //pemateri
+        'total_activity', // total kegiatan yang sudah dikerjakan
+        'price', // harga
+        'facility', // fasiliitas
+        'total_rooms_stay', // jumlah ruang menginap
+        'benefit', // jumlah ruang menginap
         'location',
         'google_maps',
         'address',

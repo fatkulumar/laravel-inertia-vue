@@ -8,6 +8,7 @@ use App\Models\ClassRoom;
 use App\Models\Profile;
 use App\Models\Regional;
 use App\Models\Submission;
+use App\Models\TypeActivity;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -135,21 +136,40 @@ class DatabaseSeeder extends Seeder
                     'hp' => '6281234567890',
                 ]);
 
+                $type_activity_id = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                TypeActivity::create([
+                    'id' => $type_activity_id,
+                    'name' => 'Kopdar Meida',
+                ]);
+
                 $submissionId = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 Submission::create([
                     'id' => $submissionId,
                     'participant_id' => $userId2,
                     'committee_id' => $userId3,
-                    'class_room_id' => $kclassRoom3->id,
                     'category_id' => $Category3->id,
-                    'status' => 'pending',
-                    'file' => 'Link File',
-                    'start_date_class' => now(),
-                    'end_date_class' => now(),
+                    'class_room_id' => $kclassRoom3->id,
+                    'chief_id' => $userId3, //ketua pelaksana
+                    'type_activity_id' => $type_activity_id,
                     'periode' => 14,
+                    'poster' => 'Link Poster', //konsep kegiatan
+                    'concept' => 'konsep', //konsep kegiatan
+                    'committee_layout' => 'ketua pelaksana', //susunan panitia
+                    'target_participant' => 'target peserta', //target peserta
+                    'speaker' => 'pemateri umar', //pemateri //opsioanl
+                    'total_activity' => 14, // total kegiatan yang sudah dikerjakan
+                    'price' => 65000, // harga
+                    'facility' => 'apapun fasilitas ada', // fasiliitas
+                    'total_rooms_stay' => 2, // jumlah ruang menginap
+                    'benefit' => 'benefitnya barokah', // jumlah ruang menginap
                     'location' => 'SMK Hati Patah 21',
                     'google_maps' => 'https://googlemaps.com',
                     'address' => 'Jl. Yang di ridhoi No. 3',
+                    'status' => 'pending',
+                    'start_date_class' => now(),
+                    'end_date_class' => now(),
+                    'graduation_date' => now(),
+                    'file' => 'Link File',
                 ]);
             }
         }

@@ -20,7 +20,9 @@ Route::get('/dashboard', function () {
 
 Route::get('/dashboard-panitia', function () {
     return Inertia::render('DashboardPanitia');
-})->middleware(['auth', 'verified', 'role:panitia'])->name('dashboard.committee');
+})
+// ->middleware(['auth', 'verified', 'role:panitia'])
+->name('dashboard.committee');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
