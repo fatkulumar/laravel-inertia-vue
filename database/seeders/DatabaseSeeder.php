@@ -169,7 +169,7 @@ class DatabaseSeeder extends Seeder
                     'start_date_class' => now(),
                     'end_date_class' => now(),
                     'graduation_date' => now(),
-                    'file' => 'Link File',
+                    'proposal' => 'Link File',
                 ]);
             }
         }

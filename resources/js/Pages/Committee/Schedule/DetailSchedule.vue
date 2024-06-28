@@ -55,13 +55,28 @@ const form = useForm({
   category_id: props.schedule[0].category_id,
   class_room_id: props.schedule[0].class_room_id,
   hp: props.schedule[0].committee?.profile?.hp,
-  start_date_class: props.schedule[0].start_date_class,
-  end_date_class: props.schedule[0].end_date_class,
+  start_date_class: props.schedule[0].formatted_start_date_class,
+  end_date_class: props.schedule[0].formatted_end_date_class,
   location: props.schedule[0].location,
   google_maps: props.schedule[0].location,
   address: props.schedule[0].address,
   periode: props.schedule[0].periode,
-  file: props.schedule[0].file,
+  proposal: props.schedule[0].proposal,
+  poster: props.schedule[0].poster,
+  status: "pending",
+
+  chief_id: "",
+  hp_chief: "",
+  type_activity_id: "",
+  concept: props.schedule[0].concept,
+  committee_layout: props.schedule[0].committee_layout,
+  target_participant: props.schedule[0].target_participant,
+  speaker: props.schedule[0].speaker,
+  total_activity: props.schedule[0].total_activity,
+  price: props.schedule[0].price,
+  facility: props.schedule[0].facility,
+  total_rooms_stay: props.schedule[0].total_rooms_stay,
+  benefit: props.schedule[0].benefit,
 });
 
 function resetForm() {
@@ -495,7 +510,354 @@ function updateSchedule() {
                             </option>
                         </select>
                     </div>
-                    <div class="col-span-2 sm:col-span-1">
+
+                    <div class="col-span-2">
+                        <label
+                          for="poster"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Poster</label
+                        >
+                        <img :src="previewPoster" class="w-5/12 py-2" />
+                        <input
+                          @change="uploadPoster"
+                          type="file"
+                          name="poster"
+                          id="poster"
+                          accept="poster/*"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        />
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="chief_id"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Ketua Pelaksana</label
+                        >
+                        <select
+                          v-model="form.chief_id"
+                          id="chief_id"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        >
+                          <option value="" selected>Pilih Ketua Pelaksana</option>
+                          <option v-for="item, index in committees" :key="index" :value="item.id">
+                              {{item.name}}
+                          </option>
+                        </select>
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="hp"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >HP Ketua Pelaksaa</label
+                        >
+                        <input
+                          v-model="form.hp_chief"
+                          type="text"
+                          name="hp"
+                          id="hp"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="HP"
+                        />
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="class_room_id"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Kelas</label
+                        >
+                        <select
+                          v-model="form.class_room_id"
+                          id="class_room_id"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        >
+                          <option value="" selected>Pilih Kelas</option>
+                          <option
+                            v-for="(item, index) in props.classRooms"
+                            :key="index"
+                            :value="item.id"
+                          >
+                            {{ item.name }}
+                          </option>
+                        </select>
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="class_room_id"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Jenis Kegiatan</label
+                        >
+                        <select
+                          v-model="form.type_activity_id"
+                          id="class_room_id"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        >
+                          <option value="" selected>Pilih Jenis Kegiatan</option>
+                          <option
+                            v-for="(item, index) in props.typeActivities"
+                            :key="index"
+                            :value="item.id"
+                          >
+                            {{ item.name }}
+                          </option>
+                        </select>
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="category_id"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Tingkatan Kelas</label
+                        >
+                        <select
+                          v-model="form.category_id"
+                          id="category_id"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        >
+                          <option value="" selected>Pilih Tingkatan</option>
+                          <option
+                            v-for="(item, index) in props.categories"
+                            :key="index"
+                            :value="item.id"
+                          >
+                            {{ item.name }}
+                          </option>
+                        </select>
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="periode"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Periode Ke</label
+                        >
+                        <input
+                          v-model="form.periode"
+                          type="text"
+                          name="periode"
+                          id="periode"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="Periode Ke"
+                        />
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="concept"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Konsep Kegiatan</label
+                        >
+                        <textarea
+                          v-model="form.concept"
+                          type="text"
+                          name="concept"
+                          id="concept"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="Konsep Ke"
+                        ></textarea>
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="committee_layout"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Susunan Panitia</label
+                        >
+                        <textarea
+                          v-model="form.committee_layout"
+                          type="text"
+                          name="committee_layout"
+                          id="committee_layout"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="Susunan Panitia"
+                        ></textarea>
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="target_participant"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Target Peserta</label
+                        >
+                        <textarea
+                          v-model="form.target_participant"
+                          type="text"
+                          name="target_participant"
+                          id="target_participant"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="Target Peserta"
+                        ></textarea>
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="speaker"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Pemateri</label
+                        >
+                        <input
+                          v-model="form.speaker"
+                          type="text"
+                          name="speaker"
+                          id="speaker"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="Pemateri"
+                        />
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="total_activity"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Total Kegiatan Yang Sudah Dilaksanakan</label
+                        >
+                        <input
+                          v-model="form.total_activity"
+                          type="number"
+                          name="total_activity"
+                          id="total_activity"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="Total Kegiatan Yang Sudah Dilaksanakan"
+                        />
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="price"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Harga Tiket Masuk</label
+                        >
+                        <input
+                          v-model="form.price"
+                          type="number"
+                          name="price"
+                          id="price"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="Harga Tiket Masuk"
+                        />
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="total_rooms_stay"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Total Ruangan</label
+                        >
+                        <input
+                          v-model="form.total_rooms_stay"
+                          type="number"
+                          name="total_rooms_stay"
+                          id="total_rooms_stay"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="Total Ruangan"
+                        />
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="benefit"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Fasilitas Yang Diberikan Ke Peserta</label
+                        >
+                        <textarea
+                          v-model="form.benefit"
+                          type="number"
+                          name="benefit"
+                          id="benefit"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="Fasilitas Yang Diberikan Ke Peserta"
+                        ></textarea>
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="start_date_class"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Mulai</label
+                        >
+                        <input
+                          v-model="form.start_date_class"
+                          type="date"
+                          name="start_date_class"
+                          id="start_date_class"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="Tanggal Muali"
+                        />
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="end_date_class"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Selesai</label
+                        >
+                        <input
+                          v-model="form.end_date_class"
+                          type="date"
+                          name="end_date_class"
+                          id="end_date_class"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="Tanggal Selesai"
+                        />
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="location"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Lokasi</label
+                        >
+                        <input
+                          v-model="form.location"
+                          type="text"
+                          name="location"
+                          id="location"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="Lokasi"
+                        />
+                      </div>
+                      <div class="col-span-2 sm:col-span-1">
+                        <label
+                          for="google_maps"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Google Maps</label
+                        >
+                        <input
+                          v-model="form.google_maps"
+                          type="text"
+                          name="google_maps"
+                          id="google_maps"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder="Google Maps"
+                        />
+                      </div>
+
+                      <div class="col-span-2">
+                        <label
+                          for="alamat"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Alamat</label
+                        >
+                        <textarea
+                          v-model="form.address"
+                          id="alamat"
+                          name="alamat"
+                          rows="4"
+                          class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                          placeholder="Alamat"
+                        ></textarea>
+                      </div>
+                      <div class="col-span-2">
+                        <label
+                          for="image"
+                          class="w-2block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Surat Pengajuan</label
+                        >
+                        <img :src="previewProposal" class="w-5/12 py-2" />
+                        <div class="flex items-center">
+                          <div class="w-2/12">
+                            <input
+                              @change="uploadProposal"
+                              type="file"
+                              name="image"
+                              id="image"
+                              accept="image/jpg, jpeg, png"
+                              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                            />
+                          </div>
+                          <!-- <a :href="linkFile" class="ml-2 text-blue-500 underline">{{
+                            form.file
+                          }}</a> -->
+                        </div>
+                      </div>
+
+                    <!-- <div class="col-span-2 sm:col-span-1">
                         <label
                           for="category_id"
                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -622,7 +984,7 @@ function updateSchedule() {
                         </div>
 
                       </div>
-                    </div>
+                    </div> -->
                   </div>
                   <button
                     title="Update Jadwal"

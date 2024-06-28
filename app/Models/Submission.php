@@ -37,7 +37,7 @@ class Submission extends Model
         'end_date_class',
         'approval_date',
         'graduation_date',
-        'file',
+        'proposal',
     ];
 
     public function participant()

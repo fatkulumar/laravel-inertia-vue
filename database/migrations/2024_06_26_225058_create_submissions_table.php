@@ -29,7 +29,7 @@ return new class extends Migration
             $table->integer('price'); // harga
             $table->text('facility')->nullable(); // fasiliitas // total fasilitas
             $table->integer('total_rooms_stay')->nullable(); // jumlah ruang menginap
-            $table->text('benefit'); // jumlah ruang menginap
+            $table->text('benefit'); //
             $table->string('location');
             $table->text('google_maps');
             $table->text('address');
@@ -38,7 +38,7 @@ return new class extends Migration
             $table->dateTime('end_date_class');
             $table->date('approval_date')->nullable();
             $table->date('graduation_date')->nullable();
-            $table->text('file');
+            $table->text('proposal');
             $table->timestamps();
 
             $table->foreign('participant_id')->references('id')->on('users');

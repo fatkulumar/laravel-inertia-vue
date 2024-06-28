@@ -32,6 +32,14 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  committees: {
+    type: Object,
+    default: () => ({}),
+  },
+  typeActivities: {
+    type: Object,
+    default: () => ({}),
+  },
 });
 
 let search = ref(props.filters.search);
@@ -53,29 +61,66 @@ const regionalName = computed(() => props.committee.profile?.regional?.name);
 
 const form = useForm({
   id: "",
+  participant_id: "",
   committee_id: props.committee.id,
-  class_room_id: "",
-  category_id: "",
   hp: props.committee.profile?.hp,
-  start_date_class: "",
-  end_date_class: "",
+  category_id: "",
+  class_room_id: "",
+  chief_id: "", //ketua pelaksana
+  hp_chief: "", //ketua pelaksana
+  type_activity_id: "", //jenis kegiatan
+  periode: "",
+  poster: "", //konsep kegiatan
+  concept: "", //konsep kegiatan
+  committee_layout: "", //susunan panitia
+  target_participant: "", //target peserta
+  speaker: "", //pemateri
+  total_activity: "", // total kegiatan yang sudah dikerjakan
+  price: "", // harga
+  facility: "", // fasiliitas
+  total_rooms_stay: "", // jumlah ruang menginap
+  benefit: "", // jumlah ruang menginap
   location: "",
   google_maps: "",
   address: "",
-  periode: "",
-  file: "",
+  status: "pending",
+  start_date_class: "",
+  end_date_class: "",
+  approval_date: "",
+  graduation_date: "",
+  proposal: "",
 });
 
 function resetForm() {
-  form.class_room_id = "";
-  form.category_id = "";
-  form.start_date_class = "";
-  form.end_date_class = "";
-  form.location = "";
-  form.google_maps = "";
-  form.address = "";
-  form.file = "";
-  previewImage.value = "";
+  form.id = "",
+  form.participant_id = "",
+  form.committee_id = "",
+  form.category_id = "",
+  form.class_room_id = "",
+  form.chief_id = "", //ketua pelaksana
+  form.type_activity_id = "", //jenis kegiatan
+  form.periode = "",
+  form.poster = "", //konsep kegiatan
+  form.concept = "", //konsep kegiatan
+  form.committee_layout = "", //susunan panitia
+  form.target_participant = "", //target peserta
+  form.speaker = "", //pemateri
+  form.total_activity = "", // total kegiatan yang sudah dikerjakan
+  form.price = "", // harga
+  form.facility = "", // fasiliitas
+  form.total_rooms_stay = "", // jumlah ruang menginap
+  form.benefit = "", // jumlah ruang menginap
+  form.location = "",
+  form.google_maps = "",
+  form.address = "",
+  form.status = "",
+  form.start_date_class = "",
+  form.end_date_class = "",
+  form.approval_date = "",
+  form.graduation_date = "",
+  form.proposal = "",
+  previewPoster.value = "";
+  previewProposal.value = "";
 }
 
 function modalAddSchedule(opt) {
@@ -114,58 +159,58 @@ function addSchedule() {
   });
 }
 
-function editClassRoom(data) {
-  form.id = data.id;
-  form.participant_id = data.participant_id;
-  form.committee_id = data.committee_id;
-  form.status = data.status;
-  form.approval_date = data.approval_date;
-  form.graduation_date = data.graduation_date;
-  form.file = data.file;
-  modalAddSchedule("show");
-}
+// function editClassRoom(data) {
+//     form.id = data.id;
+//     form.participant_id = data.participant_id;
+//     form.committee_id = data.committee_id;
+//     form.status = data.status;
+//     form.approval_date = data.approval_date;
+//     form.graduation_date = data.graduation_date;
+//     form.file = data.file;
+//     modalAddSchedule("show");
+// }
 
-function rejectSubmission(id, namePeserta) {
-  form.id = id;
-  const konfirm = confirm(`Apakah anda yakin ingin menolak ${namePeserta}?`);
-  if (!konfirm) return;
-  form.post(`/dashboard/submission/reject-submission`, {
-    preserveScroll: true,
-    onSuccess: (e) => {
-      toast("success", "Berhasil");
-      resetForm();
-      modalUser("hide");
-    },
-  });
-}
+// function rejectSubmission(id, namePeserta) {
+//     form.id = id;
+//     const konfirm = confirm(`Apakah anda yakin ingin menolak ${namePeserta}?`);
+//     if (!konfirm) return;
+//     form.post(`/dashboard/submission/reject-submission`, {
+//         preserveScroll: true,
+//         onSuccess: (e) => {
+//             toast("success", "Berhasil");
+//             resetForm();
+//             modalUser("hide");
+//         },
+//     });
+// }
 
-function approvalSubmission(id, namePeserta) {
-  form.id = id;
-  const konfirm = confirm(`Apakah anda yakin ingin menerima ${namePeserta}?`);
-  if (!konfirm) return;
-  form.post(`/dashboard/submission/approval-submission`, {
-    preserveScroll: true,
-    onSuccess: (e) => {
-      toast("success", "Berhasil");
-      resetForm();
-      modalUser("hide");
-    },
-  });
-}
+// function approvalSubmission(id, namePeserta) {
+//     form.id = id;
+//     const konfirm = confirm(`Apakah anda yakin ingin menerima ${namePeserta}?`);
+//     if (!konfirm) return;
+//     form.post(`/dashboard/submission/approval-submission`, {
+//         preserveScroll: true,
+//         onSuccess: (e) => {
+//             toast("success", "Berhasil");
+//             resetForm();
+//             modalUser("hide");
+//         },
+//     });
+// }
 
-function graduationSubmission(id, namePeserta) {
-  form.id = id;
-  const konfirm = confirm(`Apakah anda yakin ingin meluluskan ${namePeserta}?`);
-  if (!konfirm) return;
-  form.post(`/dashboard/submission/graduation-submission`, {
-    preserveScroll: true,
-    onSuccess: (e) => {
-      toast("success", "Berhasil");
-      resetForm();
-      modalUser("hide");
-    },
-  });
-}
+// function graduationSubmission(id, namePeserta) {
+//     form.id = id;
+//     const konfirm = confirm(`Apakah anda yakin ingin meluluskan ${namePeserta}?`);
+//     if (!konfirm) return;
+//     form.post(`/dashboard/submission/graduation-submission`, {
+//         preserveScroll: true,
+//         onSuccess: (e) => {
+//             toast("success", "Berhasil");
+//             resetForm();
+//             modalUser("hide");
+//         },
+//     });
+// }
 
 function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
   const Toast = Swal.mixin({
@@ -318,8 +363,8 @@ function handleOptionSubmission() {
 //   });
 // }
 
-const previewImage = ref(null);
-function uploadImage(e) {
+const previewPoster = ref(null);
+function uploadPoster(e) {
   const image = e.target.files[0];
   if (
     (image.type == "image/png") |
@@ -329,8 +374,28 @@ function uploadImage(e) {
     const reader = new FileReader();
     reader.readAsDataURL(image);
     reader.onload = (e) => {
-      previewImage.value = e.target.result;
-      form.file = image;
+      previewPoster.value = e.target.result;
+      form.poster = image;
+    };
+  } else {
+    form.image = null;
+    toast("warning", "Harus Format Gambar");
+  }
+}
+
+const previewProposal = ref(null);
+function uploadProposal(e) {
+  const image = e.target.files[0];
+  if (
+    (image.type == "image/png") |
+    (image.type == "image/jpg") |
+    (image.type == "image/jpeg")
+  ) {
+    const reader = new FileReader();
+    reader.readAsDataURL(image);
+    reader.onload = (e) => {
+      previewProposal.value = e.target.result;
+      form.proposal = image;
     };
   } else {
     form.image = null;
@@ -729,61 +794,47 @@ function deleteSchedule(id) {
               class="p-4 md:p-5"
             >
               <div class="grid gap-4 mb-4 grid-cols-2">
-                <!-- <div class="col-span-2">
-                    <label
-                      for="image"
-                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >Image</label
-                    >
-                    <img :src="previewImage" class="w-32" />
-                    <input
-                      @change="uploadImage"
-                      type="file"
-                      name="image"
-                      id="image"
-                      accept="image/*"
-                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    />
-                  </div>
-                  <div class="col-span-2">
-                    <label
-                      for="title"
-                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >Judul</label
-                    >
-                    <input
-                      v-model="form.title"
-                      type="text"
-                      name="title"
-                      id="title"
-                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Judul Artikel"
-                    />
-                  </div> -->
+                <div class="col-span-2">
+                  <label
+                    for="poster"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Poster</label
+                  >
+                  <img :src="previewPoster" class="w-5/12 py-2" />
+                  <input
+                    @change="uploadPoster"
+                    type="file"
+                    name="poster"
+                    id="poster"
+                    accept="poster/*"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                  />
+                </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label
-                    for="committee_id"
+                    for="chief_id"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Pengusul</label
+                    >Ketua Pelaksana</label
                   >
-                  <input
-                    :value="committeeName"
-                    type="text"
-                    name="committee_id"
-                    id="committee_id"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Pengusul"
-                    readonly
-                  />
+                  <select
+                    v-model="form.chief_id"
+                    id="chief_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" selected>Pilih Ketua Pelaksana</option>
+                    <option v-for="item, index in committees" :key="index" :value="item.id">
+                        {{item.name}}
+                    </option>
+                  </select>
                 </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label
                     for="hp"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >HP</label
+                    >HP Ketua Pelaksaa</label
                   >
                   <input
-                    v-model="form.hp"
+                    v-model="form.hp_chief"
                     type="text"
                     name="hp"
                     id="hp"
@@ -792,36 +843,73 @@ function deleteSchedule(id) {
                   />
                 </div>
                 <div class="col-span-2 sm:col-span-1">
-                    <label
-                      for="class_room_id"
-                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >Kelas</label
+                  <label
+                    for="class_room_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Kelas</label
+                  >
+                  <select
+                    v-model="form.class_room_id"
+                    id="class_room_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" selected>Pilih Kelas</option>
+                    <option
+                      v-for="(item, index) in props.classRooms"
+                      :key="index"
+                      :value="item.id"
                     >
-                    <select v-model="form.class_room_id" id="class_room_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                        <option value="" selected>Pilih Kelas</option>
-                        <option v-for="item, index in props.classRooms" :key="index" :value="item.id">
-                            {{ item.name }}
-                        </option>
-                    </select>
+                      {{ item.name }}
+                    </option>
+                  </select>
                 </div>
                 <div class="col-span-2 sm:col-span-1">
-                    <label
-                      for="category_id"
-                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >Tingkatan</label
+                  <label
+                    for="class_room_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Jenis Kegiatan</label
+                  >
+                  <select
+                    v-model="form.type_activity_id"
+                    id="class_room_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" selected>Pilih Jenis Kegiatan</option>
+                    <option
+                      v-for="(item, index) in props.typeActivities"
+                      :key="index"
+                      :value="item.id"
                     >
-                    <select v-model="form.category_id" id="category_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                        <option value="" selected>Pilih Tingkatan</option>
-                        <option v-for="item, index in props.categories" :key="index" :value="item.id">
-                            {{ item.name }}
-                        </option>
-                    </select>
+                      {{ item.name }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="category_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Tingkatan Kelas</label
+                  >
+                  <select
+                    v-model="form.category_id"
+                    id="category_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" selected>Pilih Tingkatan</option>
+                    <option
+                      v-for="(item, index) in props.categories"
+                      :key="index"
+                      :value="item.id"
+                    >
+                      {{ item.name }}
+                    </option>
+                  </select>
                 </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label
                     for="periode"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Angkatan Ke</label
+                    >Periode Ke</label
                   >
                   <input
                     v-model="form.periode"
@@ -831,6 +919,126 @@ function deleteSchedule(id) {
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder="Periode Ke"
                   />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="concept"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Konsep Kegiatan</label
+                  >
+                  <textarea
+                    v-model="form.concept"
+                    type="text"
+                    name="concept"
+                    id="concept"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Konsep Ke"
+                  ></textarea>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="committee_layout"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Susunan Panitia</label
+                  >
+                  <textarea
+                    v-model="form.committee_layout"
+                    type="text"
+                    name="committee_layout"
+                    id="committee_layout"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Susunan Panitia"
+                  ></textarea>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="target_participant"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Target Peserta</label
+                  >
+                  <textarea
+                    v-model="form.target_participant"
+                    type="text"
+                    name="target_participant"
+                    id="target_participant"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Target Peserta"
+                  ></textarea>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="speaker"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Pemateri</label
+                  >
+                  <input
+                    v-model="form.speaker"
+                    type="text"
+                    name="speaker"
+                    id="speaker"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Pemateri"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="total_activity"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Total Kegiatan Yang Sudah Dilaksanakan</label
+                  >
+                  <input
+                    v-model="form.total_activity"
+                    type="number"
+                    name="total_activity"
+                    id="total_activity"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Total Kegiatan Yang Sudah Dilaksanakan"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="price"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Harga Tiket Masuk</label
+                  >
+                  <input
+                    v-model="form.price"
+                    type="number"
+                    name="price"
+                    id="price"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Harga Tiket Masuk"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="total_rooms_stay"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Total Ruangan</label
+                  >
+                  <input
+                    v-model="form.total_rooms_stay"
+                    type="number"
+                    name="total_rooms_stay"
+                    id="total_rooms_stay"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Total Ruangan"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="benefit"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Fasilitas Yang Diberikan Ke Peserta</label
+                  >
+                  <textarea
+                    v-model="form.benefit"
+                    type="number"
+                    name="benefit"
+                    id="benefit"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Fasilitas Yang Diberikan Ke Peserta"
+                  ></textarea>
                 </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label
@@ -914,11 +1122,11 @@ function deleteSchedule(id) {
                     class="w-2block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >Surat Pengajuan</label
                   >
-                  <img :src="previewImage" class="w-5/12 py-2" />
+                  <img :src="previewProposal" class="w-5/12 py-2" />
                   <div class="flex items-center">
                     <div class="w-2/12">
                       <input
-                        @change="uploadImage"
+                        @change="uploadProposal"
                         type="file"
                         name="image"
                         id="image"

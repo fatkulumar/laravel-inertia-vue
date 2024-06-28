@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\ClassRoom;
 use App\Models\Submission;
+use App\Models\TypeActivity;
 use App\Models\User;
 use App\Traits\EntityValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use App\Traits\FileUpload;
+use Carbon\Carbon;
 
 class ScheduleController extends Controller
 {
@@ -47,12 +49,17 @@ class ScheduleController extends Controller
             $categories = Category::all(['id', 'name']);
 
             $committee = User::with('profile.regional')->where('id', Auth()->user()->id)->first();
-            // return $classRooms;
+            $committees = User::with('profile.regional')->role('panitia')->get();
+            $typeActivities = TypeActivity::all(['id', 'name']);
+            // return $typeActivities;
+
             return Inertia::render('Committee/Schedule/Schedule', [
                 'schedules' => $schedules,
                 'committee' => $committee,
+                'committees' => $committees,
                 'classRooms' => $classRooms,
                 'categories' => $categories,
+                'typeActivities' => $typeActivities,
             ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
@@ -76,7 +83,7 @@ class ScheduleController extends Controller
      */
     public function store(Request $request)
     {
-        // return $request->post('committee_id');
+        return $request;
         try {
 
             $id = $request->post('id');
@@ -242,6 +249,8 @@ class ScheduleController extends Controller
             } else {
                 $schedule['linkFile'] = null;
             }
+            $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('Y-m-d');
+            $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('Y-m-d');
             return $schedule;
         });
 
