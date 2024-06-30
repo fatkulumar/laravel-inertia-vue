@@ -21,6 +21,14 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  chiefs: {
+    type: Object,
+    default: () => ({}),
+  },
+  typeActivities: {
+    type: Object,
+    default: () => ({}),
+  },
   filters: {
     type: Object,
     default: () => ({}),
@@ -44,7 +52,6 @@ watch(search, (value) => {
   );
 });
 
-const linkFile = ref(props.schedule[0].linkFile);
 const committeeName = ref(props.schedule[0].committee?.name)
 const regionalName = ref(props.schedule[0].committee?.profile?.regional?.name)
 
@@ -65,9 +72,9 @@ const form = useForm({
   poster: props.schedule[0].poster,
   status: "pending",
 
-  chief_id: "",
-  hp_chief: "",
-  type_activity_id: "",
+  chief_id: props.schedule[0].chief?.id,
+  hp_chief: props.schedule[0].chief?.profile?.hp,
+  type_activity_id: props.schedule[0].type_activity_id,
   concept: props.schedule[0].concept,
   committee_layout: props.schedule[0].committee_layout,
   target_participant: props.schedule[0].target_participant,
@@ -334,8 +341,8 @@ function handleOptionSubmission() {
 //   });
 // }
 
-const previewImage = ref(null)
-function uploadImage(e) {
+const previewPoster = ref(props.schedule[0].poster)
+function uploadPoster(e) {
   const image = e.target.files[0];
   if (
     (image.type == "image/png") |
@@ -345,9 +352,30 @@ function uploadImage(e) {
     const reader = new FileReader();
     reader.readAsDataURL(image);
     reader.onload = (e) => {
-      previewImage.value = e.target.result;
-      linkFile.value = e.target.result;
-      form.file = image;
+      previewPoster.value = e.target.result;
+      form.poster = image;
+    };
+  } else {
+    form.image = null;
+    closeModal("crud-modal");
+    toast("warning", "Harus Format Gambar");
+  }
+}
+
+
+const previewProposal = ref(props.schedule[0].proposal)
+function uploadProposal(e) {
+  const image = e.target.files[0];
+  if (
+    (image.type == "image/png") |
+    (image.type == "image/jpg") |
+    (image.type == "image/jpeg")
+  ) {
+    const reader = new FileReader();
+    reader.readAsDataURL(image);
+    reader.onload = (e) => {
+    previewProposal.value = e.target.result;
+      form.proposal = image;
     };
   } else {
     form.image = null;
@@ -377,6 +405,13 @@ function updateSchedule() {
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
+             <div
+                class="text-red-600 text-sm ml-2"
+                v-for="(error, index) in props.errors"
+                :key="index"
+              >
+                *{{ error }}
+              </div>
               <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
                 <!-- <div
                   class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
@@ -427,7 +462,7 @@ function updateSchedule() {
                       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                       >Image</label
                     >
-                    <img :src="previewImage" class="w-32" />
+                    <img :src="previewPoster" class="w-32" />
                     <input
                       @change="uploadImage"
                       type="file"
@@ -465,6 +500,7 @@ function updateSchedule() {
                         id="committee_id"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="Pengusul"
+                        readonly
                       />
                     </div>
                     <div class="col-span-2 sm:col-span-1">
@@ -480,6 +516,7 @@ function updateSchedule() {
                         id="hp"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="HP"
+                        readonly
                       />
                     </div>
                     <div class="col-span-2 sm:col-span-1">
@@ -495,6 +532,7 @@ function updateSchedule() {
                         id="regional_id"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="Regional"
+                        readonly
                       />
                     </div>
                     <div class="col-span-2 sm:col-span-1">
@@ -517,7 +555,7 @@ function updateSchedule() {
                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                           >Poster</label
                         >
-                        <img :src="previewPoster" class="w-5/12 py-2" />
+                        <img :src="previewPoster" class="md:w-5/12 py-2" />
                         <input
                           @change="uploadPoster"
                           type="file"
@@ -539,7 +577,7 @@ function updateSchedule() {
                           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         >
                           <option value="" selected>Pilih Ketua Pelaksana</option>
-                          <option v-for="item, index in committees" :key="index" :value="item.id">
+                          <option v-for="item, index in chiefs" :key="index" :value="item.id" :selected="item.id == form.chief_id">
                               {{item.name}}
                           </option>
                         </select>
@@ -596,6 +634,7 @@ function updateSchedule() {
                             v-for="(item, index) in props.typeActivities"
                             :key="index"
                             :value="item.id"
+                            :selected="item.id == form.type_activity_id"
                           >
                             {{ item.name }}
                           </option>
@@ -839,7 +878,7 @@ function updateSchedule() {
                           class="w-2block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                           >Surat Pengajuan</label
                         >
-                        <img :src="previewProposal" class="w-5/12 py-2" />
+                        <img :src="previewProposal" class="md:w-5/12 py-2" />
                         <div class="flex items-center">
                           <div class="w-2/12">
                             <input
@@ -883,7 +922,7 @@ function updateSchedule() {
                         id="periode"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="Periode Ke"
-                      />
+                      />chiefs
                     </div>
                     <div class="col-span-2 sm:col-span-1">
                       <label

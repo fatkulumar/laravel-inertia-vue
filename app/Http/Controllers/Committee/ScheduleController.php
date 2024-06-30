@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Committee;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\ClassRoom;
-use App\Models\Submission;
+use App\Models\Schedule;
 use App\Models\TypeActivity;
 use App\Models\User;
 use App\Traits\EntityValidator;
@@ -28,13 +28,14 @@ class ScheduleController extends Controller
             'softdelete'  => false
         ];
     }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
         try {
-            $schedules = Submission::orderBy('created_at', 'desc')
+            $schedules = Schedule::orderBy('created_at', 'desc')
                 ->when($request['search'], function($query, $request) {
                     $query->whereHas('participant', function ($query) use ($request) {
                         $query->where('name', 'like', '%' . $request . '%');
@@ -49,9 +50,9 @@ class ScheduleController extends Controller
             $categories = Category::all(['id', 'name']);
 
             $committee = User::with('profile.regional')->where('id', Auth()->user()->id)->first();
-            $committees = User::with('profile.regional')->role('panitia')->get();
+            $committees = User::with('profile.regional', 'chief')->role('panitia')->get();
             $typeActivities = TypeActivity::all(['id', 'name']);
-            // return $typeActivities;
+            // return $schedules;
 
             return Inertia::render('Committee/Schedule/Schedule', [
                 'schedules' => $schedules,
@@ -83,37 +84,64 @@ class ScheduleController extends Controller
      */
     public function store(Request $request)
     {
-        return $request;
         try {
 
             $id = $request->post('id');
             if ($id) {
                 $validasiData = $this->updateValidator($request);
                 if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+                // return $validasiData;
 
-                $submissions = Submission::where('id', $id)->first();
-                $file = $request->file('file');
-                if($file) {
+                // return $validasiData;
+                $schedule = Schedule::where('id', $id)->first();
+
+                $poster = $request->file('poster');
+                if($poster) {
                     $this->fileSettings();
-                    $upload = $this->uploadFile($file);
+                    $uploadPoster = $this->uploadFile($poster);
                 }else{
-                    $upload = $submissions->file;
+                    $uploadPoster = $schedule->poster;
                 }
+
+                $proposal = $request->file('proposal');
+                if($proposal) {
+                    $this->fileSettings();
+                    $uploadProposal = $this->uploadFile($proposal);
+                }else{
+                    $uploadProposal = $schedule->proposal;
+                }
+
 
                 $saveData = [
                     'committee_id' => $request->post('committee_id'),
                     'class_room_id' => $request->post('class_room_id'),
                     'category_id' => $request->post('category_id'),
-                    'status' => 'pending',
-                    'file' => $upload,
+                    'status' => $request->post('status'),
                     'start_date_class' => $request->post('start_date_class'),
                     'end_date_class' => $request->post('end_date_class'),
                     'periode' => $request->post('periode'),
                     'location' => $request->post('location'),
                     'google_maps' => $request->post('google_maps'),
                     'address' => $request->post('address'),
+                    'chief_id' => $request->post('chief_id'),
+                    'type_activity_id' => $request->post('type_activity_id'), //jenis kegiatan
+                    'poster' => $uploadPoster,
+                    'concept' => $request->post('concept'), //konsep kegiatan
+                    'committee_layout' => $request->post('committee_layout'), //susunan panitia
+                    'target_participant' => $request->post('target_participant'), //target peserta
+                    'speaker' => $request->post('speaker'), //pemateri
+                    'total_activity' => $request->post('total_activity'), // total kegiatan yang sudah dikerjakan
+                    'price' => $request->post('price'), // harga
+                    'facility' => $request->post('facility'), // fasiliitas
+                    'total_rooms_stay' => $request->post('total_rooms_stay'), // jumlah ruang menginap
+                    'benefit' => $request->post('benefit'), // jumlah ruang menginap
+                    'proposal' => $uploadProposal,
                 ];
-                $result = $submissions->update($saveData);
+
+                $result = $schedule->update($saveData);
+
+                // return $schedule;
+                // return $request->post('periode');
                 if (!$result) return redirect()->back()->withErrors($result)->withInput();
             } else {
                 // return "umar";
@@ -142,7 +170,7 @@ class ScheduleController extends Controller
                     'address' => $request->post('address'),
                 ];
 
-                $result = Submission::create($saveData);
+                $result = Schedule::create($saveData);
                 if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
             }
         } catch (\Exception $exception) {
@@ -150,7 +178,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function store in SubmissionController', $errors);
+            Log::channel('daily')->info('function store in Committee/ScheduleController', $errors);
         }
     }
 
@@ -190,7 +218,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function storeValidator in ArticleController', $errors);
+            Log::channel('daily')->info('function storeValidator in Committee/ScheduleController', $errors);
         }
     }
 
@@ -201,27 +229,52 @@ class ScheduleController extends Controller
                 'committee_id' => 'required|string|max:36',
                 'class_room_id' => 'required|string|max:36',
                 'category_id' => 'required|string|max:36',
-                'hp' => 'required|string|min:8|max:13',
                 'start_date_class' => 'required|string|max:15',
                 'end_date_class' => 'required|string|max:15',
                 'location' => 'required|string|max:255',
-                'google_maps' => 'required|string|max:20000',
-                'address' => 'required|string|max:20000',
-                'periode' => 'required|string|max:10',
-                'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'google_maps' => 'required|string|max:10000',
+                'address' => 'required|string|max:2000',
+                'periode' => 'required|integer',
+                'poster' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'status' => 'required|string|max:10',
+                'chief_id' => 'required|string|max:36',
+                'type_activity_id' => 'required|string|max:36',
+                'concept' => 'required|string',
+                'committee_layout' => 'required|string',
+                'target_participant' => 'required|string',
+                'speaker' => 'required|string|max:100',
+                'total_activity' => 'required|integer',
+                'price' => 'required|integer',
+                'facility' => 'required|string|max:20000',
+                'total_rooms_stay' => 'required|integer',
+                'benefit' => 'required|string|max:20000',
+                'proposal' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
             ];
             $Validatedata = [
-                'committeee_id' => $request->post('committee_id'),
+                'committee_id' => $request->post('committee_id'),
                 'class_room_id' => $request->post('class_room_id'),
                 'category_id' => $request->post('category_id'),
-                'hp' => $request->post('hp'),
+                'status' => $request->post('status'),
                 'start_date_class' => $request->post('start_date_class'),
                 'end_date_class' => $request->post('end_date_class'),
-                'location' => $request->post('location'),
-                'goggle_maps' => $request->post('goggle_maps'),
-                'address' => $request->post('address'),
                 'periode' => $request->post('periode'),
-                'file' => $request->file('file'),
+                'location' => $request->post('location'),
+                'google_maps' => $request->post('google_maps'),
+                'address' => $request->post('address'),
+                'chief_id' => $request->post('chief_id'),
+                'type_activity_id' => $request->post('type_activity_id'),
+                'poster' => $request->file('poster'),
+                'concept' => $request->post('concept'),
+                'committee_layout' => $request->post('committee_layout'),
+                'target_participant' => $request->post('target_participant'),
+                'speaker' => $request->post('speaker'),
+                'total_activity' => $request->post('total_activity'),
+                'price' => $request->post('price'),
+                'facility' => $request->post('facility'),
+                'total_rooms_stay' => $request->post('total_rooms_stay'),
+                'benefit' => $request->post('benefit'),
+                'proposal' => $request->file('proposal'),
             ];
             $validator = EntityValidator::validate($Validatedata, $rules);
             if ($validator->fails()) return $validator->errors();
@@ -230,7 +283,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function updateValidator in ArticleController', $errors);
+            Log::channel('daily')->info('function updateValidator in Committee/ScheduleController', $errors);
         }
     }
 
@@ -239,28 +292,40 @@ class ScheduleController extends Controller
      */
     public function show(string $id)
     {
-        $schedule = Submission::with('participant', 'committee', 'committee.profile.regional')
+        $schedule = Schedule::with('participant', 'committee', 'committee.profile.regional', 'chief.profile')
                                 ->where('id',$id)
                                 ->get();
+
         $schedule->map(function ($schedule) {
             $this->fileSettings();
-            if (isset($schedule['file'])) {
-                $schedule['linkFile'] = $this->getFileAttribute($schedule['file']);
+            if (isset($schedule['poster'])) {
+                $schedule['poster'] = $this->getFileAttribute($schedule['poster']);
             } else {
-                $schedule['linkFile'] = null;
+                $schedule['link_poster'] = null;
+            }
+            if (isset($schedule['proposal'])) {
+                $schedule['proposal'] = $this->getFileAttribute($schedule['proposal']);
+            } else {
+                $schedule['link_proposal'] = null;
             }
             $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('Y-m-d');
             $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('Y-m-d');
             return $schedule;
         });
 
+        // return $schedule;
+
         $classRooms = ClassRoom::all(['id', 'name']);
         $categories = Category::all(['id', 'name']);
-        // return $schedule;
+        $chiefs = User::with('profile.regional')->role('panitia')->get();
+        $typeActivities = TypeActivity::all(['id', 'name']);
+        // return $chiefs;
         return Inertia::render('Committee/Schedule/DetailSchedule', [
             'schedule' => $schedule,
             'classRooms' => $classRooms,
             'categories' => $categories,
+            'chiefs' => $chiefs,
+            'typeActivities' => $typeActivities,
         ]);
     }
 
@@ -278,7 +343,7 @@ class ScheduleController extends Controller
     public function delete(string $id)
     {
         try {
-            Submission::findOrFail($id)->delete();
+            Schedule::findOrFail($id)->delete();
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
@@ -296,7 +361,7 @@ class ScheduleController extends Controller
         try {
             $ids = $request->post('id');
             foreach ($ids as $id) {
-                Submission::findOrFail($id)->delete();
+                Schedule::findOrFail($id)->delete();
             }
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
@@ -311,7 +376,7 @@ class ScheduleController extends Controller
     // {
     //     try {
     //         $id = $request->post('id');
-    //         Submission::where('id', $id)->update([
+    //         Schedule::where('id', $id)->update([
     //             'status' => 'Ditolak',
     //             'approval_date' => Carbon::now(),
     //         ]);
@@ -328,7 +393,7 @@ class ScheduleController extends Controller
     // {
     //     try {
     //         $id = $request->post('id');
-    //         Submission::where('id', $id)->update([
+    //         Schedule::where('id', $id)->update([
     //             'status' => 'Diterima',
     //             'approval_date' => Carbon::now(),
     //         ]);
@@ -345,7 +410,7 @@ class ScheduleController extends Controller
     // {
     //     try {
     //         $id = $request->post('id');
-    //         Submission::where('id', $id)->update([
+    //         Schedule::where('id', $id)->update([
     //             'status' => 'Lulus',
     //             'graduation_date' => Carbon::now(),
     //         ]);
@@ -364,7 +429,7 @@ class ScheduleController extends Controller
     //         $ids = $request->post('id');
     //         $status = $request->post('status');
     //         foreach($ids as $id) {
-    //             Submission::where('id', $id)->update([
+    //             Schedule::where('id', $id)->update([
     //                 'status' => $status,
     //                 'graduation_date' => Carbon::now(),
     //             ]);

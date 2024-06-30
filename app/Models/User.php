@@ -63,4 +63,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Submission::class, 'participant_id');
     }
+
+    public function chief()
+    {
+        return $this->hasMany(User::class, 'id');
+    }
 }

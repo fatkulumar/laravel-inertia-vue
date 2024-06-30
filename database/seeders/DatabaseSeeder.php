@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\ClassRoom;
 use App\Models\Profile;
 use App\Models\Regional;
+use App\Models\Schedule;
 use App\Models\Submission;
 use App\Models\TypeActivity;
 use App\Models\User;
@@ -142,10 +143,9 @@ class DatabaseSeeder extends Seeder
                     'name' => 'Kopdar Meida',
                 ]);
 
-                $submissionId = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
-                Submission::create([
-                    'id' => $submissionId,
-                    'participant_id' => $userId2,
+                $scheduleId = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                Schedule::create([
+                    'id' => $scheduleId,
                     'committee_id' => $userId3,
                     'category_id' => $Category3->id,
                     'class_room_id' => $kclassRoom3->id,
