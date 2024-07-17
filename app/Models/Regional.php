@@ -14,4 +14,9 @@ class Regional extends Model
     protected $fillable = [
         'name',
     ];
+
+    public function schedule()
+    {
+        return $this->hasMany(Schedule::class, 'regional_id');
+    }
 }

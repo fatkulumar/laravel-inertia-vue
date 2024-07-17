@@ -41,7 +41,7 @@ class ScheduleController extends Controller
                         $query->where('name', 'like', '%' . $request . '%');
                     });
                 })
-                ->with('participant', 'committee')
+                ->with('committee.profile.regional')
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);
@@ -113,6 +113,7 @@ class ScheduleController extends Controller
 
 
                 $saveData = [
+                    'regional_id' => $request->post('regional_id'),
                     'committee_id' => $request->post('committee_id'),
                     'class_room_id' => $request->post('class_room_id'),
                     'category_id' => $request->post('category_id'),
@@ -149,25 +150,47 @@ class ScheduleController extends Controller
                 $validasiData = $this->storeValidator($request);
                 if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
 
-                $file = $request->file('file');
-                if($file) {
+                $poster = $request->file('poster');
+                if($poster) {
                     $this->fileSettings();
-                    $upload = $this->uploadFile($file);
+                    $uploadPoster = $this->uploadFile($poster);
                 }else{
-                    $upload = null;
+                    $uploadPoster = "Poster Tidak Ada";
                 }
+
+                $proposal = $request->file('proposal');
+                if($proposal) {
+                    $this->fileSettings();
+                    $uploadProposal = $this->uploadFile($proposal);
+                }else{
+                    $uploadProposal = "Proposal Tidak Ada";
+                }
+
                 $saveData = [
+                    'regional_id' => $request->post('regional_id'),
                     'committee_id' => $request->post('committee_id'),
                     'class_room_id' => $request->post('class_room_id'),
                     'category_id' => $request->post('category_id'),
-                    'status' => 'pending',
-                    'file' => $upload,
+                    'status' => $request->post('status'),
                     'start_date_class' => $request->post('start_date_class'),
                     'end_date_class' => $request->post('end_date_class'),
                     'periode' => $request->post('periode'),
                     'location' => $request->post('location'),
                     'google_maps' => $request->post('google_maps'),
                     'address' => $request->post('address'),
+                    'chief_id' => $request->post('chief_id'),
+                    'type_activity_id' => $request->post('type_activity_id'), //jenis kegiatan
+                    'poster' => $uploadPoster,
+                    'concept' => $request->post('concept'), //konsep kegiatan
+                    'committee_layout' => $request->post('committee_layout'), //susunan panitia
+                    'target_participant' => $request->post('target_participant'), //target peserta
+                    'speaker' => $request->post('speaker'), //pemateri
+                    'total_activity' => $request->post('total_activity'), // total kegiatan yang sudah dikerjakan
+                    'price' => $request->post('price'), // harga
+                    'facility' => $request->post('facility'), // fasiliitas
+                    'total_rooms_stay' => $request->post('total_rooms_stay'), // jumlah ruang menginap
+                    'benefit' => $request->post('benefit'), // jumlah ruang menginap
+                    'proposal' => $uploadProposal,
                 ];
 
                 $result = Schedule::create($saveData);
@@ -186,30 +209,57 @@ class ScheduleController extends Controller
     {
         try {
             $rules = [
+                'regional_id' => 'required|string|max:36',
                 'committee_id' => 'required|string|max:36',
                 'class_room_id' => 'required|string|max:36',
                 'category_id' => 'required|string|max:36',
-                'hp' => 'required|string|min:8|max:13',
                 'start_date_class' => 'required|string|max:15',
                 'end_date_class' => 'required|string|max:15',
                 'location' => 'required|string|max:255',
-                'google_maps' => 'required|string|max:20000',
-                'address' => 'required|string|max:20000',
-                'periode' => 'required|string|max:10',
-                'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'google_maps' => 'required|string|max:10000',
+                'address' => 'required|string|max:2000',
+                'periode' => 'required|integer',
+                'poster' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'status' => 'required|string|max:10',
+                'chief_id' => 'required|string|max:36',
+                'type_activity_id' => 'required|string|max:36',
+                'concept' => 'required|string',
+                'committee_layout' => 'required|string',
+                'target_participant' => 'required|string',
+                'speaker' => 'required|string|max:100',
+                'total_activity' => 'required|integer',
+                'price' => 'required|integer',
+                'facility' => 'required|string|max:20000',
+                'total_rooms_stay' => 'required|integer',
+                'benefit' => 'required|string|max:20000',
+                'proposal' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
             ];
             $Validatedata = [
+                'regional_id' => $request->post('regional_id'),
                 'committee_id' => $request->post('committee_id'),
                 'class_room_id' => $request->post('class_room_id'),
                 'category_id' => $request->post('category_id'),
-                'hp' => $request->post('hp'),
+                'status' => $request->post('status'),
                 'start_date_class' => $request->post('start_date_class'),
                 'end_date_class' => $request->post('end_date_class'),
+                'periode' => $request->post('periode'),
                 'location' => $request->post('location'),
                 'google_maps' => $request->post('google_maps'),
                 'address' => $request->post('address'),
-                'periode' => $request->post('periode'),
-                'file' => $request->file('file'),
+                'chief_id' => $request->post('chief_id'),
+                'type_activity_id' => $request->post('type_activity_id'),
+                'poster' => $request->file('poster'),
+                'concept' => $request->post('concept'),
+                'committee_layout' => $request->post('committee_layout'),
+                'target_participant' => $request->post('target_participant'),
+                'speaker' => $request->post('speaker'),
+                'total_activity' => $request->post('total_activity'),
+                'price' => $request->post('price'),
+                'facility' => $request->post('facility'),
+                'total_rooms_stay' => $request->post('total_rooms_stay'),
+                'benefit' => $request->post('benefit'),
+                'proposal' => $request->file('proposal'),
             ];
             $validator = EntityValidator::validate($Validatedata, $rules);
             if ($validator->fails()) return $validator->errors();
@@ -226,6 +276,7 @@ class ScheduleController extends Controller
     {
         try {
             $rules = [
+                'regional_id' => 'required|string|max:36',
                 'committee_id' => 'required|string|max:36',
                 'class_room_id' => 'required|string|max:36',
                 'category_id' => 'required|string|max:36',
@@ -252,6 +303,7 @@ class ScheduleController extends Controller
 
             ];
             $Validatedata = [
+                'regional_id' => $request->post('regional_id'),
                 'committee_id' => $request->post('committee_id'),
                 'class_room_id' => $request->post('class_room_id'),
                 'category_id' => $request->post('category_id'),

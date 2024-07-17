@@ -19,10 +19,16 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified', 'role:admin'])->name('dashboard.admin');
 
 Route::get('/dashboard-panitia', function () {
-    return Inertia::render('DashboardPanitia');
+    return Inertia::render('DashboardCommittee');
 })
-// ->middleware(['auth', 'verified', 'role:panitia'])
+->middleware(['auth', 'verified', 'role:panitia'])
 ->name('dashboard.committee');
+
+Route::get('/dashboard-peserta', function () {
+    return Inertia::render('DashboardParticipant');
+})
+->middleware(['auth', 'verified', 'role:peserta'])
+->name('dashboard.participant');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

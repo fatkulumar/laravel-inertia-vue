@@ -61,7 +61,8 @@ const regionalName = computed(() => props.committee.profile?.regional?.name);
 
 const form = useForm({
   id: "",
-  participant_id: "",
+  regional_id: props.committee.profile?.regional?.id,
+//   participant_id: "",
   committee_id: props.committee.id,
   hp: props.committee.profile?.hp,
   category_id: "",
@@ -93,7 +94,7 @@ const form = useForm({
 
 function resetForm() {
   form.id = "",
-  form.participant_id = "",
+//   form.participant_id = "",
   form.committee_id = "",
   form.category_id = "",
   form.class_room_id = "",
@@ -502,6 +503,9 @@ function deleteSchedule(id) {
                         <p>No</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
+                        <p>Regional</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
                         <p>Tanggal Mulai Kelas</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
@@ -563,6 +567,9 @@ function deleteSchedule(id) {
                     >
                       <td class="px-6 py-4">
                         {{ props.schedules.from + index }}
+                      </td>
+                      <td class="px-6 py-4">
+                        {{ item.committee?.profile?.regional?.name }}
                       </td>
                       <td class="px-6 py-4">
                         {{
@@ -932,7 +939,7 @@ function deleteSchedule(id) {
                     name="concept"
                     id="concept"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Konsep Ke"
+                    placeholder="Konsep Kegiatan"
                   ></textarea>
                 </div>
                 <div class="col-span-2 sm:col-span-1">
@@ -1032,13 +1039,28 @@ function deleteSchedule(id) {
                     >Fasilitas Yang Diberikan Ke Peserta</label
                   >
                   <textarea
-                    v-model="form.benefit"
+                    v-model="form.facility"
                     type="number"
                     name="benefit"
                     id="benefit"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder="Fasilitas Yang Diberikan Ke Peserta"
                   ></textarea>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                <label
+                    for="benefit"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Benefit Peserta</label
+                >
+                <textarea
+                    v-model="form.benefit"
+                    type="number"
+                    name="benefit"
+                    id="benefit"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Benefit Peserta"
+                ></textarea>
                 </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->uuid('id')->primary()->unique();
-            $table->foreignUuid('participant_id')->nullable();
+            $table->foreignUuid('regional_id');
             $table->foreignUuid('committee_id');
             $table->foreignUuid('category_id'); // kategori kelas
             $table->foreignUuid('class_room_id');
@@ -34,6 +34,7 @@ return new class extends Migration
             $table->text('google_maps');
             $table->text('address');
             $table->string('status');
+            $table->enum('pending', ['approval', 'accepted', 'rejected'])->default('pending');
             $table->dateTime('start_date_class');
             $table->dateTime('end_date_class');
             $table->date('approval_date')->nullable();
@@ -41,7 +42,7 @@ return new class extends Migration
             $table->text('proposal');
             $table->timestamps();
 
-            $table->foreign('participant_id')->references('id')->on('users');
+            $table->foreign('regional_id')->references('id')->on('regionals');
             $table->foreign('committee_id')->references('id')->on('users');
             $table->foreign('chief_id')->references('id')->on('users');
             $table->foreign('category_id')->references('id')->on('categories');

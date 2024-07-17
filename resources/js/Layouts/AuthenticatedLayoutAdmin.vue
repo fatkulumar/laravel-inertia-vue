@@ -8,7 +8,6 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
 import { initFlowbite } from 'flowbite';
 import SidebarAdmin from '@/Components/SIdebar/SidebarAdmin.vue';
-import SidebarPanitia from '@/Components/SIdebar/SidebarPanitia.vue';
 
 const showingNavigationDropdown = ref(false);
 

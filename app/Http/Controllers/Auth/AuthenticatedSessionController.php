@@ -48,7 +48,9 @@ class AuthenticatedSessionController extends Controller
                 $request->session()->regenerate();
                 return redirect()->intended(route('dashboard.committee', absolute: false));
             } else {
-                return $role = 'user';
+                //role == peserta
+                $request->session()->regenerate();
+                return redirect()->intended(route('dashboard.participant', absolute: false));
             }
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Acessor\ConverDateToIndonesia;
 use App\Traits\GenUid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,7 @@ class Schedule extends Model
     use HasFactory, GenUid;
 
     protected $fillable = [
+        'regional_id',
         'committee_id',
         'category_id',
         'class_room_id',
@@ -51,5 +53,15 @@ class Schedule extends Model
     public function chief()
     {
         return $this->belongsTo(User::class, 'chief_id');
+    }
+
+    public function classRoom()
+    {
+        return $this->belongsTo(ClassRoom::class, 'class_room_id');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 }

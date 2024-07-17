@@ -146,6 +146,7 @@ class DatabaseSeeder extends Seeder
                 $scheduleId = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 Schedule::create([
                     'id' => $scheduleId,
+                    'regional_id' => $id_regional3,
                     'committee_id' => $userId3,
                     'category_id' => $Category3->id,
                     'class_room_id' => $kclassRoom3->id,
