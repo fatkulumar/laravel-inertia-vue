@@ -24,9 +24,64 @@ class ParticipantController extends Controller
     {
         $this->settings = [
             'attributes'  => ['jpeg', 'jpg', 'png'],
-            'path'        => 'file/proposal/',
+            'path'        => 'file/proof/',
             'softdelete'  => false
         ];
+    }
+
+    public function RegisterClass(Request $request)
+    {
+        try {
+            $validasiData = $this->storeValidator($request);
+            if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+
+            $proof = $request->file('proof');
+            if($proof) {
+                $this->fileSettings();
+                $uploadProof = $this->uploadFile($proof);
+            }else{
+                $uploadProof = "Proof Tidak Ada";
+            }
+
+            $saveData = [
+                'schedule_id' => $request->post('schedule_id'),
+                'user_id' => Auth::user()->id,
+                'proof' => $uploadProof,
+            ];
+
+            $result = Submission::create($saveData);
+            if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
+
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function RegisterClass in Participant/ParticipantController', $errors);
+        }
+    }
+
+    private function storeValidator(Request $request)
+    {
+        try {
+            $rules = [
+                'schedule_id' => 'required|string|max:36',
+                'proof' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
+            ];
+            $Validatedata = [
+                'schedule_id' => $request->post('schedule_id'),
+                'proof' => $request->file('poster'),
+            ];
+            $validator = EntityValidator::validate($Validatedata, $rules);
+            if ($validator->fails()) return $validator->errors();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function storeValidator in Committee/ScheduleController', $errors);
+        }
     }
 
     public function eventAvailable()
@@ -37,6 +92,7 @@ class ParticipantController extends Controller
             $schedules = Schedule::with('classRoom', 'category')->where('regional_id', $profile->regional_id)
                 ->where('status', 'approval')
                 ->whereDate('end_date_class', '>=', Carbon::now())
+                ->whereDoesntHave('submissions')
                 ->get();
 
             $schedules->map(function ($schedule) {
@@ -68,218 +124,17 @@ class ParticipantController extends Controller
             Log::channel('daily')->info('function index in Participant/ParticipantController', $errors);
         }
     }
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request, $idSubmission)
+
+    public function eventActive()
     {
         try {
-            $participants = Submission::orderBy('created_at', 'desc')
-                ->when($request['search'], function ($query, $request) {
-                    $query->whereHas('participant', function ($query) use ($request) {
-                        $query->where('name', 'like', '%' . $request . '%');
-                    });
-                })
-                ->whereHas('participant.roles')
-                ->whereHas('participant.profile.regional')
-                ->with('participant.roles', 'participant.profile.regional')
-                ->where('committee_id', Auth()->user()->id)
-                ->paginate(5)
-                ->withQueryString()
-                ->appends(['search' => $request['search']]);
-
-            $users = User::with('roles', 'profile.regional')
-                ->whereHas('roles', function ($query) {
-                    $query->where('name', 'peserta'); // Gantilah 'name' dengan kolom yang sesuai dalam tabel roles
-                })
-                ->doesntHave('submissions') // Pastikan User tidak memiliki relasi dengan tabel submissions
-                ->get();
-            // return $users;
-            return Inertia::render('Committee/Schedule/Participant', [
-                'participants' => $participants,
-                'users' => $users,
-            ]);
+            //code...
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function index in Committee/ScheduleController', $errors);
-        }
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        // return $request;
-        try {
-            $validasiData = $this->storeValidator($request);
-            if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
-
-            $id = $request->post('id');
-            if ($id) {
-
-                $submissions = Submission::where('id', $id)->first();
-                $saveData = [
-                    'participant_id' => $request->post('participant_id'),
-                    'committee_id' => $request->post('committee_id'),
-                    'category_id' => $request->post('category_id'),
-                    'class_room_id' => $request->post('class_room_id'),
-                    'start_date_class' => $request->post('start_date_class'),
-                    'end_date_class' => $request->post('end_date_class'),
-                    'location' => $request->post('location'),
-                    'goggle_maps' => $request->post('goggle_maps'),
-                    'status' => $request->post('status'),
-                    'address' => $request->post('address'),
-                    'periode' => $request->post('periode'),
-                    'file' => $request->post('file'),
-                ];
-                $result = $submissions->update($saveData);
-                if (!$result) return redirect()->back()->withErrors($result)->withInput();
-            } else {
-
-                $saveData = [
-                    'participant_id' => $request->post('participant_id'),
-                    'committee_id' => $request->post('committee_id'),
-                    'category_id' => $request->post('category_id'),
-                    'class_room_id' => $request->post('class_room_id'),
-                    'start_date_class' => $request->post('start_date_class'),
-                    'end_date_class' => $request->post('end_date_class'),
-                    'location' => $request->post('location'),
-                    'google_maps' => $request->post('google_maps'),
-                    'status' => $request->post('status'),
-                    'address' => $request->post('address'),
-                    'periode' => $request->post('periode'),
-                    'file' => $request->post('file'),
-                ];
-
-                $result = Submission::create($saveData);
-                if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
-            }
-        } catch (\Exception $exception) {
-            $errors['message'] = $exception->getMessage();
-            $errors['file'] = $exception->getFile();
-            $errors['line'] = $exception->getLine();
-            $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function store in SubmissionController', $errors);
-        }
-    }
-
-    private function storeValidator(Request $request)
-    {
-        try {
-            $rules = [
-                'participant_id' => 'required|string|max:36',
-                'committee_id' => 'required|string|max:36',
-                'class_room_id' => 'required|string|max:36',
-                'category_id' => 'required|string|max:36',
-                'start_date_class' => 'required|string|max:15',
-                'end_date_class' => 'required|string|max:15',
-                'location' => 'required|string|max:255',
-                'google_maps' => 'required|string|max:20000',
-                'status' => 'required|string|max:10',
-                'address' => 'required|string|max:20000',
-                'periode' => 'required|integer|max:10000',
-                'file' => 'required|string|max:20000',
-            ];
-            $Validatedata = [
-                'participant_id' => $request->post('participant_id'),
-                'committee_id' => $request->post('committee_id'),
-                'category_id' => $request->post('category_id'),
-                'class_room_id' => $request->post('class_room_id'),
-                'start_date_class' => $request->post('start_date_class'),
-                'end_date_class' => $request->post('end_date_class'),
-                'location' => $request->post('location'),
-                'google_maps' => $request->post('google_maps'),
-                'status' => $request->post('status'),
-                'address' => $request->post('address'),
-                'periode' => $request->post('periode'),
-                'file' => $request->post('file'),
-            ];
-            $validator = EntityValidator::validate($Validatedata, $rules);
-            if ($validator->fails()) return $validator->errors();
-        } catch (\Exception $exception) {
-            $errors['message'] = $exception->getMessage();
-            $errors['file'] = $exception->getFile();
-            $errors['line'] = $exception->getLine();
-            $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function storeValidator in SubmissionController', $errors);
-        }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        $schedule = Submission::with('participant', 'committee', 'committee.profile.regional')
-            ->where('id', $id)
-            ->get();
-        $schedule->map(function ($schedule) {
-            $this->fileSettings();
-            if (isset($schedule['file'])) {
-                $schedule['linkFile'] = $this->getFileAttribute($schedule['file']);
-            } else {
-                $schedule['linkFile'] = null;
-            }
-            return $schedule;
-        });
-        // return $schedule;
-        return Inertia::render('Committee/Schedule/DetailSchedule', [
-            'schedule' => $schedule,
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function delete(string $id)
-    {
-        try {
-            Submission::findOrFail($id)->delete();
-        } catch (\Exception $exception) {
-            $errors['message'] = $exception->getMessage();
-            $errors['file'] = $exception->getFile();
-            $errors['line'] = $exception->getLine();
-            $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function delete in SubmissionController', $errors);
-        }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Request $request)
-    {
-        try {
-            $ids = $request->post('id');
-            foreach ($ids as $id) {
-                Submission::findOrFail($id)->delete();
-            }
-        } catch (\Exception $exception) {
-            $errors['message'] = $exception->getMessage();
-            $errors['file'] = $exception->getFile();
-            $errors['line'] = $exception->getLine();
-            $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function delete in SubmissionController', $errors);
+            Log::channel('daily')->info('function eventActive in Participant/ParticipantController', $errors);
         }
     }
 }

@@ -33,8 +33,7 @@ return new class extends Migration
             $table->string('location');
             $table->text('google_maps');
             $table->text('address');
-            $table->string('status');
-            $table->enum('pending', ['approval', 'accepted', 'rejected'])->default('pending');
+            $table->enum('status', ['pending', 'approval', 'accepted', 'rejected'])->default('pending');
             $table->dateTime('start_date_class');
             $table->dateTime('end_date_class');
             $table->date('approval_date')->nullable();

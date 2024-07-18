@@ -64,4 +64,9 @@ class Schedule extends Model
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
+
+     public function submissions()
+    {
+        return $this->hasMany(Submission::class);
+    }
 }

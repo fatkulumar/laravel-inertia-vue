@@ -24,7 +24,7 @@ class ScheduleController extends Controller
     {
         $this->settings = [
             'attributes'  => ['jpeg', 'jpg', 'png'],
-            'path'        => 'file/proposal/',
+            'path'        => 'file/schedule/',
             'softdelete'  => false
         ];
     }
