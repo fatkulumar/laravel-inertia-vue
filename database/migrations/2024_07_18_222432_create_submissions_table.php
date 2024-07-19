@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignUuid('schedule_id')->references('id')->on('schedules');
             $table->foreignUuid('user_id')->references('id')->on('users');
             $table->text('proof');
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'rejected', 'graduated'])->default('pending');
             $table->timestamps();
         });
     }

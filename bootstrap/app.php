@@ -38,14 +38,19 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/dashboard/user.php'));
 
             Route::middleware('web')
-                ->prefix('dashboard/submission')
-                ->name('dashboard.submission.')
-                ->group(base_path('routes/dashboard/submission.php'));
+                ->prefix('dashboard/schedule')
+                ->name('dashboard.schedule.')
+                ->group(base_path('routes/dashboard/schedule.php'));
 
             Route::middleware('web')
                 ->prefix('dashboard/type-activity')
                 ->name('dashboard.typeActivity.')
                 ->group(base_path('routes/dashboard/type_activity.php'));
+
+            Route::middleware('web')
+                ->prefix('dashboard/submission')
+                ->name('dashboard.submission.')
+                ->group(base_path('routes/dashboard/submission.php'));
 
             //committee
             Route::middleware('web')

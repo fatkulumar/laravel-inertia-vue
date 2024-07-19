@@ -113,7 +113,7 @@ class ParticipantController extends Controller
             });
 
             // return $schedules;
-            return Inertia::render('Participant/Participant', [
+            return Inertia::render('Participant/ClassAvailable', [
                 'schedule' => $schedules,
             ]);
         } catch (\Exception $exception) {
@@ -128,13 +128,134 @@ class ParticipantController extends Controller
     public function eventActive()
     {
         try {
-            //code...
+            try {
+                $users = Auth::user();
+                $profile = Profile::where('profileable_id', $users->id)->first();
+                $schedules = Schedule::with('classRoom', 'category', 'submissions')
+                    ->where('regional_id', $profile->regional_id)
+                    ->whereHas('submissions', function ($query) {
+                        $query->where('status', 'approved'); // Sesuaikan dengan kondisi yang Anda inginkan
+                    })
+                    ->whereDate('end_date_class', '>=', Carbon::now())
+                    ->get();
+
+                $schedules->map(function ($schedule) {
+                    $this->fileSettings();
+                    if (isset($schedule['poster'])) {
+                        $schedule['poster'] = $this->getFileAttribute($schedule['poster']);
+                    } else {
+                        $schedule['link_poster'] = null;
+                    }
+                    if (isset($schedule['proposal'])) {
+                        $schedule['proposal'] = $this->getFileAttribute($schedule['proposal']);
+                    } else {
+                        $schedule['link_proposal'] = null;
+                    }
+                    $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('Y-m-d');
+                    $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('Y-m-d');
+                    return $schedule;
+                });
+                // return $schedules;
+                return Inertia::render('Participant/ClassActive', [
+                    'schedule' => $schedules,
+                ]);
+            } catch (\Exception $exception) {
+                $errors['message'] = $exception->getMessage();
+                $errors['file'] = $exception->getFile();
+                $errors['line'] = $exception->getLine();
+                $errors['trace'] = $exception->getTrace();
+                Log::channel('daily')->info('function waitingApproval in Participant/ParticipantController', $errors);
+            }
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function eventActive in Participant/ParticipantController', $errors);
+        }
+    }
+
+    public function waitingApproval()
+    {
+        try {
+            $users = Auth::user();
+            $profile = Profile::where('profileable_id', $users->id)->first();
+            $schedules = Schedule::with('classRoom', 'category', 'submissions')
+                ->where('regional_id', $profile->regional_id)
+                ->whereHas('submissions', function ($query) {
+                    $query->where('status', 'pending'); // Sesuaikan dengan kondisi yang Anda inginkan
+                })
+                ->whereDate('end_date_class', '>=', Carbon::now())
+                ->get();
+
+            $schedules->map(function ($schedule) {
+                $this->fileSettings();
+                if (isset($schedule['poster'])) {
+                    $schedule['poster'] = $this->getFileAttribute($schedule['poster']);
+                } else {
+                    $schedule['link_poster'] = null;
+                }
+                if (isset($schedule['proposal'])) {
+                    $schedule['proposal'] = $this->getFileAttribute($schedule['proposal']);
+                } else {
+                    $schedule['link_proposal'] = null;
+                }
+                $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('Y-m-d');
+                $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('Y-m-d');
+                return $schedule;
+            });
+            // return $schedules;
+            return Inertia::render('Participant/WaitingApproval', [
+                'schedule' => $schedules,
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function waitingApproval in Participant/ParticipantController', $errors);
+        }
+    }
+
+    public function historyClass()
+    {
+        try {
+            $users = Auth::user();
+            $profile = Profile::where('profileable_id', $users->id)->first();
+            $schedules = Schedule::with('classRoom', 'category', 'submissions')
+                ->where('regional_id', $profile->regional_id)
+                ->whereHas('submissions', function ($query) {
+                    $query->where('status', 'graduated'); // Sesuaikan dengan kondisi yang Anda inginkan
+                })
+                ->whereDate('end_date_class', '>=', Carbon::now())
+                ->get();
+
+            $schedules->map(function ($schedule) {
+                $this->fileSettings();
+                if (isset($schedule['poster'])) {
+                    $schedule['poster'] = $this->getFileAttribute($schedule['poster']);
+                } else {
+                    $schedule['link_poster'] = null;
+                }
+                if (isset($schedule['proposal'])) {
+                    $schedule['proposal'] = $this->getFileAttribute($schedule['proposal']);
+                } else {
+                    $schedule['link_proposal'] = null;
+                }
+                $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('Y-m-d');
+                $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('Y-m-d');
+                return $schedule;
+            });
+            // return $schedules;
+            return Inertia::render('Participant/HistoryClass', [
+                'schedule' => $schedules,
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function waitingApproval in Participant/ParticipantController', $errors);
         }
     }
 }

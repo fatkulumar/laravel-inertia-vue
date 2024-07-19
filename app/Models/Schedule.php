@@ -65,6 +65,11 @@ class Schedule extends Model
         return $this->belongsTo(Category::class, 'category_id');
     }
 
+     public function regional()
+    {
+        return $this->belongsTo(Regional::class, 'regional_id');
+    }
+
      public function submissions()
     {
         return $this->hasMany(Submission::class);
