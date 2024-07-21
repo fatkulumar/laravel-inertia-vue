@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
-class ScheduleController extends Controller
+class SubmissionController extends Controller
 {
     use EntityValidator;
     use FileUpload;
@@ -21,7 +21,7 @@ class ScheduleController extends Controller
     {
         $this->settings = [
             'attributes'  => ['jpeg', 'jpg', 'png'],
-            'path'        => 'file/schedule/',
+            'path'        => 'file/proof/',
             'softdelete'  => false
         ];
     }
@@ -31,36 +31,31 @@ class ScheduleController extends Controller
     public function index(Request $request)
     {
         try {
-            $schedules = Schedule::orderBy('created_at', 'desc')
+            $submissions = Submission::orderBy('created_at', 'desc')
                 ->when($request['search'], function($query, $request) {
                     $query->whereHas('committee', function ($query) use ($request) {
                         $query->where('name', 'like', '%' . $request . '%');
                     });
                 })
-                ->with('committee', 'classRoom', 'category', 'regional')
+                ->with('participant', 'schedule', 'schedule.regional', 'schedule.classRoom','schedule.category')
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);
 
-            $schedules->map(function ($submission) {
+            $submissions->map(function ($submission) {
                 $this->fileSettings();
-                if (isset($submission['poster'])) {
-                    $submission['poster'] = $this->getFileAttribute($submission['poster']);
+                if (isset($submission['proof'])) {
+                    $submission['link_proof'] = $this->getFileAttribute($submission['proof']);
                 } else {
-                    $submission['link_poster'] = null;
+                    $submission['link_proof'] = null;
                 }
-                if (isset($submission['proposal'])) {
-                    $submission['link_proposal'] = $this->getFileAttribute($submission['proposal']);
-                } else {
-                    $submission['link_proposal'] = null;
-                }
-                $submission->formatted_end_date_class = Carbon::parse($submission->end_date_class)->format('Y-m-d');
-                $submission->formatted_start_date_class = Carbon::parse($submission->start_date_class)->format('Y-m-d');
+                $submission->formatted_end_date_class = Carbon::parse($submission->end_date_class)->format('d-m-Y');
+                $submission->formatted_start_date_class = Carbon::parse($submission->start_date_class)->format('d-m-Y');
                 return $submission;
             });
-            // return $schedules;
-            return Inertia::render('Dashboard/Schedule', [
-                'schedules' => $schedules,
+            // return $submissions;
+            return Inertia::render('Dashboard/Submission', [
+                'submissions' => $submissions,
             ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
@@ -198,13 +193,13 @@ class ScheduleController extends Controller
         }
     }
 
-    public function rejectSchedule(Request $request)
+    public function rejectSubmission(Request $request)
     {
         try {
             $id = $request->post('id');
-            Schedule::where('id', $id)->update([
+            // return $id;
+            Submission::where('id', $id)->update([
                 'status' => 'rejected',
-                'approval_date' => Carbon::now(),
             ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
@@ -215,13 +210,12 @@ class ScheduleController extends Controller
         }
     }
 
-    public function approvalSchedule(Request $request)
+    public function approvalSubmission(Request $request)
     {
         try {
             $id = $request->post('id');
-            Schedule::where('id', $id)->update([
-                'status' => 'approval',
-                'approval_date' => Carbon::now(),
+            Submission::where('id', $id)->update([
+                'status' => 'approved',
             ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
@@ -232,10 +226,10 @@ class ScheduleController extends Controller
         }
     }
 
-    public function deleteSchedule(Request $request, $id)
+    public function deleteSubmission(Request $request, $id)
     {
         try {
-            Schedule::where('id', $id)->delete();
+            Submission::where('id', $id)->delete();
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
@@ -245,15 +239,14 @@ class ScheduleController extends Controller
         }
     }
 
-    public function optionSchedule(Request $request)
+    public function optionSubmission(Request $request)
     {
         try {
             $ids = $request->post('id');
             $status = $request->post('status');
             foreach($ids as $id) {
-                Schedule::where('id', $id)->update([
+                Submission::where('id', $id)->update([
                     'status' => $status,
-                    'graduation_date' => Carbon::now(),
                 ]);
             }
         } catch (\Exception $exception) {

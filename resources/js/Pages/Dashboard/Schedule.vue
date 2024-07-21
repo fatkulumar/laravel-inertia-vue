@@ -8,7 +8,7 @@ import Swal from "sweetalert2";
 import { Modal } from "flowbite";
 
 const props = defineProps({
-  submissions: {
+  schedules: {
     type: Object,
     default: () => ({}),
   },
@@ -80,16 +80,16 @@ function modalRoom(opt) {
   }
 }
 
-function addsubmission() {
-  form.post("/dashboard/schedule/store", {
-    preserveScroll: true,
-    onSuccess: () => {
-        resetForm();
-        modalRoom("hide");
-        toast("success", "Data Berhasil Ditambah");
-    }
-    });
-}
+// function addsubmission() {
+//   form.post("/dashboard/schedule/store", {
+//     preserveScroll: true,
+//     onSuccess: () => {
+//         resetForm();
+//         modalRoom("hide");
+//         toast("success", "Data Berhasil Ditambah");
+//     }
+//     });
+// }
 
 function editClassRoom(data) {
   form.id = data.id;
@@ -129,9 +129,9 @@ function approvalSchedule(id, namePeserta) {
 }
 
 function deleteSchedule(id, nameClass, category) {
-    form.id = id;
     const konfirm = confirm(`Hapus ${nameClass} ${category}?`);
     if (!konfirm) return;
+    form.id = id;
     form.delete(`/dashboard/schedule/delete-schedule/${id}`, {
         preserveScroll: true,
         onSuccess: (e) => {
@@ -209,7 +209,7 @@ function toggleCheckbox(id) {
       totalChecked++;
     }
   });
-  if (props.submissions.to == totalChecked) {
+  if (props.schedules.to == totalChecked) {
     checkboxAll.checked = true;
   }
   if(formCheckbox.id.length > 0) {
@@ -233,7 +233,7 @@ function checkedAll() {
     checkedCheckboxes.forEach((checkbox) => {
       checkbox.checked = true;
     });
-    props.submissions.data.forEach((data) => {
+    props.schedules.data.forEach((data) => {
       formCheckbox.id.push(data.id);
       countCheckbox.value++;
     });
@@ -380,7 +380,7 @@ function uploadImage(e) {
                       type="text"
                       id="table-search-users"
                       class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="Search for users"
+                      placeholder="Search for Schedule"
                     />
                   </div>
                 </div>
@@ -454,12 +454,12 @@ function uploadImage(e) {
                   </thead>
                   <tbody>
                     <tr
-                      v-for="(item, index) in props.submissions.data"
+                      v-for="(item, index) in props.schedules.data"
                       :key="index"
                       class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                     >
                       <td class="px-6 py-4">
-                        {{ props.submissions.from + index }}
+                        {{ props.schedules.from + index }}
                       </td>
                       <td class="px-6 py-4">
                         {{ item.class_room?.name }}
@@ -548,7 +548,7 @@ function uploadImage(e) {
                           </div>
                           <div
                             @click="deleteSchedule(item.id, item.class_room?.name, item.category?.name)"
-                            title="Lulus"
+                            title="Hapus"
                             class="bg-purple-100 p-0.5 rounded-md cursor-pointer"
                           >
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
@@ -573,7 +573,7 @@ function uploadImage(e) {
 
                 <Pagination
                   class="my-6 flex justify-center md:justify-end"
-                  :links="props.submissions.links"
+                  :links="props.schedules.links"
                 />
               </div>
             </div>
@@ -639,7 +639,7 @@ function uploadImage(e) {
                   >
                   <select id="graduation" name="graduation" v-model="formCheckbox.status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                     <option selected value="">Choose a Option</option>
-                    <option value="approval">Approval</option>
+                    <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
                     <option value="pending">Pending</option>
                   </select>

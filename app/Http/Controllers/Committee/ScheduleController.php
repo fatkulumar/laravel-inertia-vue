@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Committee;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\ClassRoom;
+use App\Models\Profile;
 use App\Models\Schedule;
 use App\Models\TypeActivity;
 use App\Models\User;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use App\Traits\FileUpload;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class ScheduleController extends Controller
 {
@@ -35,6 +37,8 @@ class ScheduleController extends Controller
     public function index(Request $request)
     {
         try {
+            $users = Auth::user();
+            $profile = Profile::where('profileable_id', $users->id)->first();
             $schedules = Schedule::orderBy('created_at', 'desc')
                 ->when($request['search'], function($query, $request) {
                     $query->whereHas('participant', function ($query) use ($request) {
@@ -42,6 +46,7 @@ class ScheduleController extends Controller
                     });
                 })
                 ->with('committee.profile.regional')
+                ->where('regional_id', $profile->regional_id)
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);

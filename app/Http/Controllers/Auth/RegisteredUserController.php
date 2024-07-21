@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Regional;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -20,7 +21,10 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Auth/Register');
+        $regionals = Regional::all();
+        return Inertia::render('Auth/Register', [
+            'regionals' => $regionals,
+        ]);
     }
 
     /**
@@ -37,19 +41,28 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $controller = new Controller();
-
+        $user_id = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
         $user = User::create([
-            'id' => $controller->createUUID36(),
+            'id' => $user_id,
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
+        $saveProfile = [
+            'profileable_id' => $user_id,
+            'profileable_type' => 'App\Models\User',
+            'regional_id' => $request->regional_id,
+        ];
+
+        $user->profile()->create($saveProfile);
+
+        $user->assignRole('peserta');
+
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect(route('dashboard.participant', absolute: false));
     }
 }

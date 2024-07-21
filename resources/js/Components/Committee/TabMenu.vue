@@ -11,7 +11,7 @@
         <Link :href="`/committee/schedule/detail/${idSubmissionLastSegment}`">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight border-2 border-black px-5 py-1">Detail Jadwal</h2>
         </Link>
-        <Link :href="`/committee/participant/${idSubmissionLastSegment}`">
+        <Link :href="`/committee/participant`">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight border-2 border-black px-5 py-1">Data Peserta</h2>
         </Link>
     </div>

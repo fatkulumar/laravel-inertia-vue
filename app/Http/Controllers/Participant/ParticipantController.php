@@ -45,7 +45,7 @@ class ParticipantController extends Controller
 
             $saveData = [
                 'schedule_id' => $request->post('schedule_id'),
-                'user_id' => Auth::user()->id,
+                'participant_id' => Auth::user()->id,
                 'proof' => $uploadProof,
             ];
 

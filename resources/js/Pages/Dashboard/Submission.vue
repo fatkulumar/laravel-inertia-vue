@@ -26,7 +26,7 @@ let search = ref(props.filters.search);
 
 watch(search, (value) => {
   router.get(
-    "/dashboard/schedule",
+    "/dashboard/submission",
     { search: value },
     {
       preserveState: true,
@@ -91,22 +91,22 @@ function addsubmission() {
     });
 }
 
-function editClassRoom(data) {
-  form.id = data.id;
-  form.participant_id = data.participant_id;
-  form.committee_id = data.committee_id;
-  form.status = data.status;
-  form.approval_date = data.approval_date;
-  form.graduation_date = data.graduation_date;
-  form.file = data.file;
-  modalRoom("show");
-}
+// function editClassRoom(data) {
+//   form.id = data.id;
+//   form.participant_id = data.participant_id;
+//   form.committee_id = data.committee_id;
+//   form.status = data.status;
+//   form.approval_date = data.approval_date;
+//   form.graduation_date = data.graduation_date;
+//   form.file = data.file;
+//   modalRoom("show");
+// }
 
-function rejectSchedule(id, namePeserta) {
+function rejectSubmission(id, namePeserta) {
   form.id = id;
   const konfirm = confirm(`Apakah anda yakin ingin menolak ${namePeserta}?`);
   if (!konfirm) return;
-  form.post(`/dashboard/schedule/reject-schedule`, {
+  form.post(`/dashboard/submission/reject-submission`, {
     preserveScroll: true,
     onSuccess: (e) => {
         toast("success", "Berhasil");
@@ -115,11 +115,11 @@ function rejectSchedule(id, namePeserta) {
   });
 }
 
-function approvalSchedule(id, namePeserta) {
+function approvalSubmission(id, namePeserta) {
     form.id = id;
     const konfirm = confirm(`Apakah anda yakin ingin menerima ${namePeserta}?`);
     if (!konfirm) return;
-    form.post(`/dashboard/schedule/approval-schedule`, {
+    form.post(`/dashboard/submission/approval-submission`, {
         preserveScroll: true,
         onSuccess: (e) => {
             toast("success", "Berhasil");
@@ -128,11 +128,11 @@ function approvalSchedule(id, namePeserta) {
     });
 }
 
-function deleteSchedule(id, nameClass, category) {
+function deleteSubmission(id, nameClass, category) {
     form.id = id;
     const konfirm = confirm(`Hapus ${nameClass} ${category}?`);
     if (!konfirm) return;
-    form.delete(`/dashboard/schedule/delete-schedule/${id}`, {
+    form.delete(`/dashboard/submission/delete-submission/${id}`, {
         preserveScroll: true,
         onSuccess: (e) => {
             toast("success", "Berhasil");
@@ -256,8 +256,8 @@ function optionSubmission() {
     showModal()
 }
 
-function handleOptionSchedule() {
-    formCheckbox.post("/dashboard/schedule/option-schedule", {
+function handleOptionSubmission() {
+    formCheckbox.post("/dashboard/submission/option-submission", {
     preserveScroll: true,
     onSuccess: () => {
       choice.value = false
@@ -290,21 +290,21 @@ function handleOptionSchedule() {
 //   });
 // }
 
-function uploadImage(e) {
-    const image = e.target.files[0];
-    if (image.type == 'image/png' | image.type == 'image/jpg' | image.type == 'image/jpeg') {
-        const reader = new FileReader();
-        reader.readAsDataURL(image);
-        reader.onload = e => {
-            previewImage.value = e.target.result;
-            form.image = image;
-        };
-    } else {
-        form.image = null;
-        closeModal('crud-modal');
-        toast('warning', 'Harus Format Gambar')
-    }
-}
+// function uploadImage(e) {
+//     const image = e.target.files[0];
+//     if (image.type == 'image/png' | image.type == 'image/jpg' | image.type == 'image/jpeg') {
+//         const reader = new FileReader();
+//         reader.readAsDataURL(image);
+//         reader.onload = e => {
+//             previewImage.value = e.target.result;
+//             form.image = image;
+//         };
+//     } else {
+//         form.image = null;
+//         closeModal('crud-modal');
+//         toast('warning', 'Harus Format Gambar')
+//     }
+// }
 </script>
 
 <template>
@@ -395,22 +395,19 @@ function uploadImage(e) {
                         <p>No</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Kelas</p>
-                      </th>
-                      <th scope="col" class="px-6 py-3">
-                        <p>Kategori</p>
-                      </th>
-                      <th scope="col" class="px-6 py-3">
-                        <p>Regional</p>
+                        <p>Nama</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <p>Email Peserta</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Panitia</p>
+                        <p>Kelas</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Proposal</p>
+                        <p>Regional</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
+                        <p>Bukti Pembayaran</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <p>Status</p>
@@ -420,15 +417,6 @@ function uploadImage(e) {
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <p>Tanggal Selesai Kelas</p>
-                      </th>
-                      <th scope="col" class="px-6 py-3">
-                        <p>Tanggal Terkirim</p>
-                      </th>
-                      <th scope="col" class="px-6 py-3">
-                        <p>Tanggal Diterima</p>
-                      </th>
-                      <th scope="col" class="px-6 py-3">
-                        <p>Tanggal Kelulusan</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <div class="flex gap-1 items-center">
@@ -462,45 +450,33 @@ function uploadImage(e) {
                         {{ props.submissions.from + index }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.class_room?.name }}
+                        {{ item.participant?.name }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.category?.name }}
+                        {{ item.participant?.email }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.regional?.name }}
+                        {{ item.schedule?.class_room?.name }} {{ item.schedule?.category?.name }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.committee?.email }}
+                        {{ item.schedule?.regional?.name }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.committee?.name }}
-                      </td>
-                      <td class="px-6 py-4">
-                        <a class="text-blue-500 underline" :href="item.link_proposal" target="_blank" rel="noopener noreferrer">{{ item.proposal }}</a>
+                        <img width="100%" :src="item.link_proof" alt="" srcset="">
                       </td>
                       <td class="px-6 py-4">
                         {{ item.status }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.created_at }}
+                        {{ item.formatted_start_date_class }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.start_date_class ? item.start_date_class : '-----' }}
-                      </td>
-                      <td class="px-6 py-4">
-                        {{ item.end_date_class ? item.end_date_class : '-----' }}
-                      </td>
-                      <td class="px-6 py-4">
-                        {{ item.approval_date ? item.approval_date : '-----' }}
-                      </td>
-                      <td class="px-6 py-4">
-                        {{ item.graduation_date ? item.graduation_date : '-----' }}
+                        {{ item.formatted_end_date_class }}
                       </td>
                       <td class="px-6 py-4">
                         <div class="flex gap-2">
                           <div
-                            @click="approvalSchedule(item)"
+                            @click="approvalSubmission(item.id, item.participant?.name)"
                             title="Diterima"
                             class="bg-green-100 p-0.5 rounded-md"
                           >
@@ -508,7 +484,7 @@ function uploadImage(e) {
                           </div>
 
                           <div
-                            @click="rejectSchedule(item.id, item.participant?.name)"
+                            @click="rejectSubmission(item.id, item.participant?.name)"
                             title="Diterima"
                             class="bg-red-100 p-0.5 rounded-md cursor-pointer flex items-center"
                           >
@@ -547,7 +523,7 @@ function uploadImage(e) {
                             </svg>
                           </div>
                           <div
-                            @click="deleteSchedule(item.id, item.class_room?.name, item.category?.name)"
+                            @click="deleteSubmission(item.id, item.class_room?.name, item.category?.name)"
                             title="Lulus"
                             class="bg-purple-100 p-0.5 rounded-md cursor-pointer"
                           >
@@ -626,7 +602,7 @@ function uploadImage(e) {
             </div>
             <!-- Modal body -->
             <form
-              @submit.prevent="handleOptionSchedule"
+              @submit.prevent="handleOptionSubmission"
               enctype="multipart/form-data"
               class="p-4 md:p-5"
             >
@@ -639,9 +615,10 @@ function uploadImage(e) {
                   >
                   <select id="graduation" name="graduation" v-model="formCheckbox.status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                     <option selected value="">Choose a Option</option>
-                    <option value="approval">Approval</option>
+                    <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
                     <option value="pending">Pending</option>
+                    <option value="graduated">Graduated</option>
                   </select>
                 </div>
               </div>

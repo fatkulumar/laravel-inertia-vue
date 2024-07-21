@@ -20,14 +20,14 @@ class ParticipantController extends Controller
     {
         $this->settings = [
             'attributes'  => ['jpeg', 'jpg', 'png'],
-            'path'        => 'file/proposal/',
+            'path'        => 'file/schedule/',
             'softdelete'  => false
         ];
     }
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request, $idSubmission)
+    public function index(Request $request)
     {
         try {
             $participants = Submission::orderBy('created_at', 'desc')
@@ -178,22 +178,56 @@ class ParticipantController extends Controller
      */
     public function show(string $id)
     {
-        $schedule = Submission::with('participant', 'committee', 'committee.profile.regional')
-                                ->where('id',$id)
-                                ->get();
-        $schedule->map(function ($schedule) {
-            $this->fileSettings();
-            if (isset($schedule['file'])) {
-                $schedule['linkFile'] = $this->getFileAttribute($schedule['file']);
-            } else {
-                $schedule['linkFile'] = null;
-            }
-            return $schedule;
-        });
-        // return $schedule;
-        return Inertia::render('Committee/Schedule/DetailSchedule', [
-            'schedule' => $schedule,
-        ]);
+        // $submissions = Submission::orderBy('created_at', 'desc')
+        //         ->whereHas('participant.roles')
+        //         ->whereHas('participant.profile.regional')
+        //         ->with('schedule.classRoom', 'schedule.category', 'participant.roles', 'participant.profile.regional')
+        //         ->get();
+
+        //         $submissions->map(function ($submission) {
+        //             $this->fileSettings();
+        //             if (isset($submission->participant->image)) {
+        //                 $submission->participant->image = $this->getFileAttribute($submission->participant->image);
+        //             } else {
+        //                 $submission->participant->image = null;
+        //             }
+
+        //             if (isset($submission->schedule->poster)) {
+        //                 $submission->schedule->poster = $this->getFileAttribute($submission->schedule->poster);
+        //             } else {
+        //                 $submission->schedule->poster = null;
+        //             }
+        //             return $submission;
+        //         });
+
+            $participant = User::with('profile.regional', 'submissions.schedule')->where('id', $id)->get();
+            $participant->each(function ($user) {
+                $this->fileSettings();
+
+                // Proses gambar profil pengguna jika ada
+                if (isset($user->profile->image)) {
+                    $user->profile->image = $this->getFileAttribute($user->profile->image);
+                } else {
+                    $user->profile->image = null;
+                }
+
+                // Proses setiap submission pengguna
+                $user->submissions->each(function ($submission) {
+                    if (isset($submission->schedule->poster)) {
+                        $submission->schedule->poster = $this->getFileAttribute($submission->schedule->poster);
+                    } else {
+                        $submission->schedule->poster = null;
+                    }
+
+                    return $submission;
+                });
+
+                return $user;
+            });
+            // return $participant;
+            return Inertia::render('Committee/DetailParticipant', [
+                'participant' => $participant,
+            ]);
     }
 
     /**
@@ -239,74 +273,118 @@ class ParticipantController extends Controller
         }
     }
 
-    public function rejectSubmission(Request $request)
+    // public function rejectSubmission(Request $request)
+    // {
+    //     try {
+    //         $id = $request->post('id');
+    //         Submission::where('id', $id)->update([
+    //             'hp' => 'Ditolak',
+    //             'approval_date' => Carbon::now(),
+    //         ]);
+    //     } catch (\Exception $exception) {
+    //         $errors['message'] = $exception->getMessage();
+    //         $errors['file'] = $exception->getFile();
+    //         $errors['line'] = $exception->getLine();
+    //         $errors['trace'] = $exception->getTrace();
+    //         Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+    //     }
+    // }
+
+    // public function approvalSubmission(Request $request)
+    // {
+    //     try {
+    //         $id = $request->post('id');
+    //         Submission::where('id', $id)->update([
+    //             'hp' => 'Diterima',
+    //             'approval_date' => Carbon::now(),
+    //         ]);
+    //     } catch (\Exception $exception) {
+    //         $errors['message'] = $exception->getMessage();
+    //         $errors['file'] = $exception->getFile();
+    //         $errors['line'] = $exception->getLine();
+    //         $errors['trace'] = $exception->getTrace();
+    //         Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+    //     }
+    // }
+
+    // public function graduationSubmission(Request $request)
+    // {
+    //     try {
+    //         $id = $request->post('id');
+    //         Submission::where('id', $id)->update([
+    //             'hp' => 'Lulus',
+    //             'graduation_date' => Carbon::now(),
+    //         ]);
+    //     } catch (\Exception $exception) {
+    //         $errors['message'] = $exception->getMessage();
+    //         $errors['file'] = $exception->getFile();
+    //         $errors['line'] = $exception->getLine();
+    //         $errors['trace'] = $exception->getTrace();
+    //         Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+    //     }
+    // }
+
+    // public function optionSubmission(Request $request)
+    // {
+    //     try {
+    //         $ids = $request->post('id');
+    //         $hp = $request->post('hp');
+    //         foreach($ids as $id) {
+    //             Submission::where('id', $id)->update([
+    //                 'hp' => $hp,
+    //                 'graduation_date' => Carbon::now(),
+    //             ]);
+    //         }
+    //     } catch (\Exception $exception) {
+    //         $errors['message'] = $exception->getMessage();
+    //         $errors['file'] = $exception->getFile();
+    //         $errors['line'] = $exception->getLine();
+    //         $errors['trace'] = $exception->getTrace();
+    //         Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+    //     }
+    // }
+
+    public function participantClassRoom(Request $request)
     {
         try {
-            $id = $request->post('id');
-            Submission::where('id', $id)->update([
-                'hp' => 'Ditolak',
-                'approval_date' => Carbon::now(),
+            $submissions = Submission::orderBy('created_at', 'desc')
+                ->when($request['search'], function($query, $request) {
+                    $query->whereHas('participant', function ($query) use ($request) {
+                        $query->where('name', 'like', '%' . $request . '%');
+                    });
+                })
+                ->whereHas('participant.roles')
+                ->whereHas('participant.profile.regional')
+                ->with('schedule.classRoom', 'schedule.category', 'participant.roles', 'participant.profile.regional')
+                ->paginate(5)
+                ->withQueryString()
+                ->appends(['search' => $request['search']]);
+
+                $submissions->map(function ($submission) {
+                    $this->fileSettings();
+                    if (isset($submission->participant->image)) {
+                        $submission->participant->image = $this->getFileAttribute($submission->participant->image);
+                    } else {
+                        $submission->participant->image = null;
+                    }
+
+                    if (isset($submission->schedule->poster)) {
+                        $submission->schedule->poster = $this->getFileAttribute($submission->schedule->poster);
+                    } else {
+                        $submission->schedule->poster = null;
+                    }
+                    return $submission;
+                });
+            // return $submissions;
+            return Inertia::render('Committee/ParticipantClassRoom', [
+                'submissions' => $submissions,
             ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
-        }
-    }
-
-    public function approvalSubmission(Request $request)
-    {
-        try {
-            $id = $request->post('id');
-            Submission::where('id', $id)->update([
-                'hp' => 'Diterima',
-                'approval_date' => Carbon::now(),
-            ]);
-        } catch (\Exception $exception) {
-            $errors['message'] = $exception->getMessage();
-            $errors['file'] = $exception->getFile();
-            $errors['line'] = $exception->getLine();
-            $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
-        }
-    }
-
-    public function graduationSubmission(Request $request)
-    {
-        try {
-            $id = $request->post('id');
-            Submission::where('id', $id)->update([
-                'hp' => 'Lulus',
-                'graduation_date' => Carbon::now(),
-            ]);
-        } catch (\Exception $exception) {
-            $errors['message'] = $exception->getMessage();
-            $errors['file'] = $exception->getFile();
-            $errors['line'] = $exception->getLine();
-            $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
-        }
-    }
-
-    public function optionSubmission(Request $request)
-    {
-        try {
-            $ids = $request->post('id');
-            $hp = $request->post('hp');
-            foreach($ids as $id) {
-                Submission::where('id', $id)->update([
-                    'hp' => $hp,
-                    'graduation_date' => Carbon::now(),
-                ]);
-            }
-        } catch (\Exception $exception) {
-            $errors['message'] = $exception->getMessage();
-            $errors['file'] = $exception->getFile();
-            $errors['line'] = $exception->getLine();
-            $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+            Log::channel('daily')->info('function participantClassRoom in SubmissionController', $errors);
         }
     }
 }

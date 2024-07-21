@@ -12,12 +12,18 @@ class Submission extends Model
 
     protected $fillable = [
         'schedule_id',
-        'user_id',
+        'participant_id',
         'proof',
+        'status',
     ];
 
     public function schedule()
     {
         return $this->belongsTo(Schedule::class, 'schedule_id');
+    }
+
+     public function participant()
+    {
+        return $this->belongsTo(User::class, 'participant_id');
     }
 }

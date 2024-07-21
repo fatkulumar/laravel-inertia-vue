@@ -4,12 +4,12 @@
     use Illuminate\Support\Facades\Route;
 
     Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
-        Route::get('/', [Dashboard\ScheduleController::class, 'index'])->name('index');
-        Route::post('/store', [Dashboard\ScheduleController::class, 'store'])->name('store');
-        Route::delete('/delete/{id}', [Dashboard\ScheduleController::class, 'delete'])->name('delete');
-        Route::post('/destroy', [Dashboard\ScheduleController::class, 'destroy'])->name('destroy');
-        Route::post('/reject-schedule', [Dashboard\ScheduleController::class, 'rejectSchedule'])->name('rejectSchedule');
-        Route::post('/approval-schedule', [Dashboard\ScheduleController::class, 'approvalSchedule'])->name('approvalSchedule');
-        Route::delete('/delete-schedule/{id}', [Dashboard\ScheduleController::class, 'deleteSchedule'])->name('deleteSchedule');
-        Route::post('/option-schedule', [Dashboard\ScheduleController::class, 'optionSchedule'])->name('optionSchedule');
+        Route::get('/', [Dashboard\SubmissionController::class, 'index'])->name('index');
+        Route::post('/store', [Dashboard\SubmissionController::class, 'store'])->name('store');
+        Route::delete('/delete/{id}', [Dashboard\SubmissionController::class, 'delete'])->name('delete');
+        Route::post('/destroy', [Dashboard\SubmissionController::class, 'destroy'])->name('destroy');
+        Route::post('/reject-submission', [Dashboard\SubmissionController::class, 'rejectSubmission'])->name('rejectSubmission');
+        Route::post('/approval-submission', [Dashboard\SubmissionController::class, 'approvalSubmission'])->name('approvalSubmission');
+        Route::delete('/delete-submission/{id}', [Dashboard\SubmissionController::class, 'deleteSubmission'])->name('deleteSubmission');
+        Route::post('/option-submission', [Dashboard\SubmissionController::class, 'optionSubmission'])->name('optionSubmission');
     });

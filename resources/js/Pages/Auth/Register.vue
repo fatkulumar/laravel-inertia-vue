@@ -6,11 +6,20 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
+const props = defineProps({
+    regionals: {
+    type: Object,
+    default: () => ({}),
+  },
+});
+
+
 const form = useForm({
     name: '',
     email: '',
     password: '',
     password_confirmation: '',
+    regional_id: '',
 });
 
 const submit = () => {
@@ -82,6 +91,19 @@ const submit = () => {
                     required
                     autocomplete="new-password"
                 />
+
+                <InputError class="mt-2" :message="form.errors.password_confirmation" />
+            </div>
+
+            <div class="mt-4">
+                <InputLabel for="regional_id" value="Regional" />
+
+                <select name="regional_id" v-model="form.regional_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    <option value="">Pilih Regional</option>
+                    <option v-for="item, index in props.regionals" :key="index" :value="item.id">
+                        {{ item.name }}
+                    </option>
+                </select>
 
                 <InputError class="mt-2" :message="form.errors.password_confirmation" />
             </div>

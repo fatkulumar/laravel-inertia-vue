@@ -40,13 +40,6 @@ return new class extends Migration
             $table->date('graduation_date')->nullable();
             $table->text('proposal');
             $table->timestamps();
-
-            $table->foreign('regional_id')->references('id')->on('regionals');
-            $table->foreign('committee_id')->references('id')->on('users');
-            $table->foreign('chief_id')->references('id')->on('users');
-            $table->foreign('category_id')->references('id')->on('categories');
-            $table->foreign('class_room_id')->references('id')->on('class_rooms');
-            $table->foreign('type_activity_id')->references('id')->on('type_activities');
         });
     }
 
