@@ -4,10 +4,7 @@
     use Illuminate\Support\Facades\Route;
 
     Route::middleware(['auth', 'verified', 'role:panitia'])->group(function () {
-        Route::get('/', [Committee\ParticipantController::class, 'index'])->name('index');
-        Route::post('/store', [Committee\ParticipantController::class, 'store'])->name('store');
-        Route::delete('/delete/{id}', [Committee\ParticipantController::class, 'delete'])->name('delete');
-        Route::post('/destroy', [Committee\ParticipantController::class, 'destroy'])->name('destroy');
+        Route::post('/update', [Committee\ParticipantController::class, 'update'])->name('update');
         Route::get('/detail/{id}', [Committee\ParticipantController::class, 'show'])->name('detail');
         Route::get('/list-participant-class-room', [Committee\ParticipantController::class, 'participantClassRoom'])->name('participantClassRoom');
     });

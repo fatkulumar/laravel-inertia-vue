@@ -1,22 +1,17 @@
 <script setup>
 import AuthenticatedLayoutCommittee from "@/Layouts/AuthenticatedLayoutCommittee.vue";
 import { Head, useForm, router, Link } from "@inertiajs/vue3";
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
 import { Modal } from "flowbite";
-import TabMenu from "@/Components/Committee/TabMenu.vue";
+
+onMounted(() => {
+  initFlowbite();
+});
 
 const props = defineProps({
   submissions: {
-    type: Object,
-    default: () => ({}),
-  },
-  users: {
-    type: Object,
-    default: () => ({}),
-  },
-  regionals: {
     type: Object,
     default: () => ({}),
   },
@@ -69,9 +64,7 @@ const form = useForm({
 });
 
 function resetForm() {
-  form.participant_id = "",
-  form.committee_id = "",
-  form.id = "";
+  (form.participant_id = ""), (form.committee_id = ""), (form.id = "");
   form.name = "";
   form.email = "";
   form.hp = "";
@@ -116,23 +109,6 @@ function addParticipant() {
   });
 }
 
-function detailPeserta(data) {
-  form.id = data.id;
-  form.name = data.participant?.name;
-  form.email = data.participant?.email;
-  form.hp = data.participant?.profile?.hp;
-  form.role = data.participant?.roles[0]?.name;
-  form.regional = data.participant?.profile?.regional?.name;
-  form.regional_id = data.participant?.profile?.regional?.id;
-  form.address = data.participant?.profile?.address;
-  form.image = data.participant?.image;
-  form.poster = data.schedule?.poster;
-  form.class_room = data.schedule?.class_room?.name;
-  form.category = data.schedule?.category?.name;
-
-  modalDetailPeserta("show");
-}
-
 function deleteUser(id, name) {
   const konfirm = confirm(`Apakah anda yakin ingin menghapus ${name}?`);
   if (!konfirm) return;
@@ -172,7 +148,7 @@ const closeModal = (targetModal = "crud-modal") => {
 };
 
 const showModal = (data, targetModal = "crud-modal") => {
-//   console.log(data[0].committee_id)
+  //   console.log(data[0].committee_id)
   form.class_room_id = data[0].class_room_id;
   form.periode = data[0].periode;
   form.google_maps = data[0].google_maps;
@@ -183,7 +159,7 @@ const showModal = (data, targetModal = "crud-modal") => {
   form.location = data[0].location;
   form.file = data[0].file;
   form.category_id = data[0].category_id;
-//   resetForm();
+  //   resetForm();
   const $targetEl = document.getElementById(targetModal);
   const modal = new Modal($targetEl);
   modal.show();
@@ -474,15 +450,19 @@ function uploadImage(e) {
                     >
                       <td class="px-6 py-4">
                         <div class="flex flex-col items-center">
-                            <div>
-                                <img :src="item.participant?.image" :alt="item.participant?.name" srcset="">
-                            </div>
-                            <div>
-                                {{ item.participant?.name }}
-                            </div>
-                            <div>
-                                {{ item.participant?.email }}
-                            </div>
+                          <div>
+                            <img
+                              :src="item.participant?.image"
+                              :alt="item.participant?.name"
+                              srcset=""
+                            />
+                          </div>
+                          <div>
+                            {{ item.participant?.name }}
+                          </div>
+                          <div>
+                            {{ item.participant?.email }}
+                          </div>
                         </div>
                       </td>
                       <td class="px-6 py-4 text-center">
@@ -502,49 +482,13 @@ function uploadImage(e) {
                       </td>
                       <td class="px-6 py-4">
                         <div class="flex gap-2">
-                          <Link
-                            :href="`/committee/participant/detail/${item.participant?.id}`"
-                            title="Detail Peserta"
-                            class="bg-green-100 p-0.5 rounded-md cursor-pointer"
-                          >
-                            <svg
-                              class="h-6 w-6"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                              <g
-                                id="SVGRepo_tracerCarrier"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              ></g>
-                              <g id="SVGRepo_iconCarrier">
-                                <path
-                                  d="M15.0007 12C15.0007 13.6569 13.6576 15 12.0007 15C10.3439 15 9.00073 13.6569 9.00073 12C9.00073 10.3431 10.3439 9 12.0007 9C13.6576 9 15.0007 10.3431 15.0007 12Z"
-                                  stroke="#000000"
-                                  stroke-width="2"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                ></path>
-                                <path
-                                  d="M12.0012 5C7.52354 5 3.73326 7.94288 2.45898 12C3.73324 16.0571 7.52354 19 12.0012 19C16.4788 19 20.2691 16.0571 21.5434 12C20.2691 7.94291 16.4788 5 12.0012 5Z"
-                                  stroke="#000000"
-                                  stroke-width="2"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                ></path>
-                              </g>
-                            </svg>
-                          </Link>
-
                           <div
-                            @click="deleteUser(item.id, item.title)"
-                            title="Hapus"
-                            class="bg-red-100 p-0.5 rounded-md"
+                            title="Actions"
+                            class="w-5 cursor-pointer"
+                            id="dropdown-button"
+                            :data-dropdown-toggle="`dropdown${index}`"
                           >
                             <svg
-                              class="h-6 w-6 cursor-pointer"
                               viewBox="0 0 24 24"
                               fill="none"
                               xmlns="http://www.w3.org/2000/svg"
@@ -557,7 +501,7 @@ function uploadImage(e) {
                               ></g>
                               <g id="SVGRepo_iconCarrier">
                                 <path
-                                  d="M10 12L14 16M14 12L10 16M18 6L17.1991 18.0129C17.129 19.065 17.0939 19.5911 16.8667 19.99C16.6666 20.3412 16.3648 20.6235 16.0011 20.7998C15.588 21 15.0607 21 14.0062 21H9.99377C8.93927 21 8.41202 21 7.99889 20.7998C7.63517 20.6235 7.33339 20.3412 7.13332 19.99C6.90607 19.5911 6.871 19.065 6.80086 18.0129L6 6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6"
+                                  d="M12 12H12.01M12 6H12.01M12 18H12.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM13 18C13 18.5523 12.5523 19 12 19C11.4477 19 11 18.5523 11 18C11 17.4477 11.4477 17 12 17C12.5523 17 13 17.4477 13 18ZM13 6C13 6.55228 12.5523 7 12 7C11.4477 7 11 6.55228 11 6C11 5.44772 11.4477 5 12 5C12.5523 5 13 5.44772 13 6Z"
                                   stroke="#000000"
                                   stroke-width="2"
                                   stroke-linecap="round"
@@ -565,6 +509,36 @@ function uploadImage(e) {
                                 ></path>
                               </g>
                             </svg>
+                          </div>
+                          <div
+                            :id="`dropdown${index}`"
+                            class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
+                          >
+                            <ul
+                              class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                              aria-labelledby="dropdown-button"
+                            >
+                              <li
+                                class="p-2 pl-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                              >
+                                <Link
+                                  :href="`/committee/participant/detail/${item.participant?.id}`"
+                                  title="Detail Peserta"
+                                  class="cursor-pointer"
+                                  >Detail</Link
+                                >
+                              </li>
+                              <li>
+                                <button
+                                  title="Hapus Peserta"
+                                  @click="deleteUser(item.id, item.title)"
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Hapus
+                                </button>
+                              </li>
+                            </ul>
                           </div>
                           <div>
                             <input
@@ -646,7 +620,6 @@ function uploadImage(e) {
               class="p-4 md:p-5"
             >
               <div class="grid gap-4 mb-4 grid-cols-2">
-
                 <div class="col-span-2 sm:col-span-1">
                   <label
                     for="email"
@@ -664,46 +637,63 @@ function uploadImage(e) {
                     :readonly="form.id ? true : false"
                   />
 
-                  <select v-show="!form.id" v-model="form.participant_id" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                    <option :selected="form.participant_id == null" value="">Choose a Email</option>
-                    <option v-for="item, index in props.users" :key="index" :value="item.id">
+                  <select
+                    v-show="!form.id"
+                    v-model="form.participant_id"
+                    id="name"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option :selected="form.participant_id == null" value="">
+                      Choose a Email
+                    </option>
+                    <option
+                      v-for="(item, index) in props.users"
+                      :key="index"
+                      :value="item.id"
+                    >
                       {{ item.email }}
                     </option>
                   </select>
                 </div>
 
-                <div class="col-span-2 sm:col-span-1" :class="form.id ? 'block' : 'hidden'">
-                    <label
-                      for="regional"
-                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >Regional</label
-                    >
-                    <input
-                      v-model="form.regional"
-                      type="text"
-                      name="regional"
-                      id="regional"
-                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Regional"
-                      :readonly="form.id ? true : false"
-                    />
+                <div
+                  class="col-span-2 sm:col-span-1"
+                  :class="form.id ? 'block' : 'hidden'"
+                >
+                  <label
+                    for="regional"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Regional</label
+                  >
+                  <input
+                    v-model="form.regional"
+                    type="text"
+                    name="regional"
+                    id="regional"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Regional"
+                    :readonly="form.id ? true : false"
+                  />
                 </div>
 
-                <div class="col-span-2 sm:col-span-1" :class="form.id ? 'block' : 'hidden'">
-                    <label
-                      for="role"
-                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >Level</label
-                    >
-                    <input
-                      v-model="form.role"
-                      type="text"
-                      name="role"
-                      id="role"
-                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Level"
-                      :readonly="form.id ? true : false"
-                    />
+                <div
+                  class="col-span-2 sm:col-span-1"
+                  :class="form.id ? 'block' : 'hidden'"
+                >
+                  <label
+                    for="role"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Level</label
+                  >
+                  <input
+                    v-model="form.role"
+                    type="text"
+                    name="role"
+                    id="role"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Level"
+                    :readonly="form.id ? true : false"
+                  />
                 </div>
               </div>
               <button
