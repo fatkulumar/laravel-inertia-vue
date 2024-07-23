@@ -38,6 +38,8 @@ class Schedule extends Model
         'approval_date',
         'graduation_date',
         'proposal',
+        'date_overview',
+        'date_received',
     ];
 
     public function participant()

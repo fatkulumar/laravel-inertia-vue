@@ -36,13 +36,13 @@ watch(search, (value) => {
 });
 
 const form = useForm({
-    id: "",
-    participant_id: "",
-    committee_id: "",
-    status: "",
-    approval_date: "",
-    graduation_date: "",
-    file: "",
+  id: "",
+  participant_id: "",
+  committee_id: "",
+  status: "",
+  approval_date: "",
+  graduation_date: "",
+  file: "",
 });
 
 function resetForm() {
@@ -109,36 +109,62 @@ function rejectSchedule(id, namePeserta) {
   form.post(`/dashboard/schedule/reject-schedule`, {
     preserveScroll: true,
     onSuccess: (e) => {
-        toast("success", "Berhasil");
-        resetForm();
+      toast("success", "Berhasil");
+      resetForm();
+    },
+  });
+}
+
+function overviewSchedule(id, namePeserta) {
+  form.id = id;
+  const konfirm = confirm(`Apakah anda yakin ingin overview ${namePeserta}?`);
+  if (!konfirm) return;
+  form.post(`/dashboard/schedule/overview-schedule`, {
+    preserveScroll: true,
+    onSuccess: (e) => {
+      toast("success", "Berhasil");
+      resetForm();
+    },
+  });
+}
+
+function receivedSchedule(id, namePeserta) {
+  form.id = id;
+  const konfirm = confirm(`Apakah anda yakin ingin received ${namePeserta}?`);
+  if (!konfirm) return;
+  form.post(`/dashboard/schedule/received-schedule`, {
+    preserveScroll: true,
+    onSuccess: (e) => {
+      toast("success", "Berhasil");
+      resetForm();
     },
   });
 }
 
 function approvalSchedule(id, namePeserta) {
-    form.id = id;
-    const konfirm = confirm(`Apakah anda yakin ingin menerima ${namePeserta}?`);
-    if (!konfirm) return;
-    form.post(`/dashboard/schedule/approval-schedule`, {
-        preserveScroll: true,
-        onSuccess: (e) => {
-            toast("success", "Berhasil");
-            resetForm();
-        },
-    });
+  form.id = id;
+  const konfirm = confirm(`Apakah anda yakin ingin menerima ${namePeserta}?`);
+  if (!konfirm) return;
+  form.post(`/dashboard/schedule/approval-schedule`, {
+    preserveScroll: true,
+    onSuccess: (e) => {
+      toast("success", "Berhasil");
+      resetForm();
+    },
+  });
 }
 
 function deleteSchedule(id, nameClass, category) {
-    const konfirm = confirm(`Hapus ${nameClass} ${category}?`);
-    if (!konfirm) return;
-    form.id = id;
-    form.delete(`/dashboard/schedule/delete-schedule/${id}`, {
-        preserveScroll: true,
-        onSuccess: (e) => {
-            toast("success", "Berhasil");
-            resetForm();
-        },
-    });
+  const konfirm = confirm(`Hapus ${nameClass} ${category}?`);
+  if (!konfirm) return;
+  form.id = id;
+  form.delete(`/dashboard/schedule/delete-schedule/${id}`, {
+    preserveScroll: true,
+    onSuccess: (e) => {
+      toast("success", "Berhasil");
+      resetForm();
+    },
+  });
 }
 
 function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
@@ -160,9 +186,9 @@ function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
 }
 
 const closeModal = (targetModal = "crud-modal") => {
-  resetForm()
-  formCheckbox.id = []
-  formCheckbox.status = ""
+  resetForm();
+  formCheckbox.id = [];
+  formCheckbox.status = "";
   const $targetEl = document.getElementById(targetModal);
   const modal = new Modal($targetEl);
   modal.hide();
@@ -179,7 +205,7 @@ const formCheckbox = useForm({
   status: "",
 });
 
-const choice = ref(false)
+const choice = ref(false);
 function toggleCheckbox(id) {
   let checkbox = document.getElementById(`checkbox${id}`);
   let checkboxAll = document.getElementById(`checkboxAll`);
@@ -212,10 +238,10 @@ function toggleCheckbox(id) {
   if (props.schedules.to == totalChecked) {
     checkboxAll.checked = true;
   }
-  if(formCheckbox.id.length > 0) {
-    choice.value = true
-  }else{
-    choice.value = false
+  if (formCheckbox.id.length > 0) {
+    choice.value = true;
+  } else {
+    choice.value = false;
   }
 }
 
@@ -245,30 +271,32 @@ function checkedAll() {
     formCheckbox.status = "";
   }
 
-  if(formCheckbox.id.length > 0) {
-    choice.value = true
-  }else{
-    choice.value = false
+  if (formCheckbox.id.length > 0) {
+    choice.value = true;
+  } else {
+    choice.value = false;
   }
 }
 
 function optionSubmission() {
-    showModal()
+  showModal();
 }
 
 function handleOptionSchedule() {
-    formCheckbox.post("/dashboard/schedule/option-schedule", {
+  formCheckbox.post("/dashboard/schedule/option-schedule", {
     preserveScroll: true,
     onSuccess: () => {
-      choice.value = false
+      choice.value = false;
       formCheckbox.id = [];
       formCheckbox.status = "";
       toast("success", "Berhasil");
-      closeModal()
-      let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-        checkedCheckboxes.forEach(element => {
-            element.checked = false
-        });
+      closeModal();
+      let checkedCheckboxes = document.querySelectorAll(
+        'input[type="checkbox"]:checked'
+      );
+      checkedCheckboxes.forEach((element) => {
+        element.checked = false;
+      });
     },
   });
 }
@@ -291,19 +319,23 @@ function handleOptionSchedule() {
 // }
 
 function uploadImage(e) {
-    const image = e.target.files[0];
-    if (image.type == 'image/png' | image.type == 'image/jpg' | image.type == 'image/jpeg') {
-        const reader = new FileReader();
-        reader.readAsDataURL(image);
-        reader.onload = e => {
-            previewImage.value = e.target.result;
-            form.image = image;
-        };
-    } else {
-        form.image = null;
-        closeModal('crud-modal');
-        toast('warning', 'Harus Format Gambar')
-    }
+  const image = e.target.files[0];
+  if (
+    (image.type == "image/png") |
+    (image.type == "image/jpg") |
+    (image.type == "image/jpeg")
+  ) {
+    const reader = new FileReader();
+    reader.readAsDataURL(image);
+    reader.onload = (e) => {
+      previewImage.value = e.target.result;
+      form.image = image;
+    };
+  } else {
+    form.image = null;
+    closeModal("crud-modal");
+    toast("warning", "Harus Format Gambar");
+  }
 }
 </script>
 
@@ -413,22 +445,28 @@ function uploadImage(e) {
                         <p>Proposal</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Status</p>
-                      </th>
-                      <th scope="col" class="px-6 py-3">
                         <p>Tanggal Mulai Kelas</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <p>Tanggal Selesai Kelas</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Tanggal Terkirim</p>
+                        <p>Tanggal Pengajuan</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
+                        <p>Tanggal Overview</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <p>Tanggal Diterima</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
+                        <p>Tanggal Disetujui</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
                         <p>Tanggal Kelulusan</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
+                        <p>Status</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <div class="flex gap-1 items-center">
@@ -446,7 +484,31 @@ function uploadImage(e) {
                             title="Pilihan"
                             class="bg-red-100 p-0.5 rounded-md cursor-pointer"
                           >
-                            <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Edit / Select_Multiple"> <path id="Vector" d="M3 9V19.4C3 19.9601 3 20.2399 3.10899 20.4538C3.20487 20.642 3.35774 20.7952 3.5459 20.8911C3.7596 21 4.0395 21 4.59846 21H15.0001M17 8L13 12L11 10M7 13.8002V6.2002C7 5.08009 7 4.51962 7.21799 4.0918C7.40973 3.71547 7.71547 3.40973 8.0918 3.21799C8.51962 3 9.08009 3 10.2002 3H17.8002C18.9203 3 19.4801 3 19.9079 3.21799C20.2842 3.40973 20.5905 3.71547 20.7822 4.0918C21.0002 4.51962 21.0002 5.07969 21.0002 6.19978L21.0002 13.7998C21.0002 14.9199 21.0002 15.48 20.7822 15.9078C20.5905 16.2841 20.2842 16.5905 19.9079 16.7822C19.4805 17 18.9215 17 17.8036 17H10.1969C9.07899 17 8.5192 17 8.0918 16.7822C7.71547 16.5905 7.40973 16.2842 7.21799 15.9079C7 15.4801 7 14.9203 7 13.8002Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
+                            <svg
+                              class="h-8 w-8"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                              <g
+                                id="SVGRepo_tracerCarrier"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              ></g>
+                              <g id="SVGRepo_iconCarrier">
+                                <g id="Edit / Select_Multiple">
+                                  <path
+                                    id="Vector"
+                                    d="M3 9V19.4C3 19.9601 3 20.2399 3.10899 20.4538C3.20487 20.642 3.35774 20.7952 3.5459 20.8911C3.7596 21 4.0395 21 4.59846 21H15.0001M17 8L13 12L11 10M7 13.8002V6.2002C7 5.08009 7 4.51962 7.21799 4.0918C7.40973 3.71547 7.71547 3.40973 8.0918 3.21799C8.51962 3 9.08009 3 10.2002 3H17.8002C18.9203 3 19.4801 3 19.9079 3.21799C20.2842 3.40973 20.5905 3.71547 20.7822 4.0918C21.0002 4.51962 21.0002 5.07969 21.0002 6.19978L21.0002 13.7998C21.0002 14.9199 21.0002 15.48 20.7822 15.9078C20.5905 16.2841 20.2842 16.5905 19.9079 16.7822C19.4805 17 18.9215 17 17.8036 17H10.1969C9.07899 17 8.5192 17 8.0918 16.7822C7.71547 16.5905 7.40973 16.2842 7.21799 15.9079C7 15.4801 7 14.9203 7 13.8002Z"
+                                    stroke="#000000"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  ></path>
+                                </g>
+                              </g>
+                            </svg>
                           </div>
                         </div>
                       </th>
@@ -477,27 +539,47 @@ function uploadImage(e) {
                         {{ item.committee?.name }}
                       </td>
                       <td class="px-6 py-4">
-                        <a class="text-blue-500 underline" :href="item.link_proposal" target="_blank" rel="noopener noreferrer">{{ item.proposal }}</a>
+                        <a
+                          class="text-blue-500 underline"
+                          :href="item.link_proposal"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          >{{ item.proposal }}</a
+                        >
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.status }}
+                        {{
+                          item.start_date_class
+                            ? item.start_date_class
+                            : "-----"
+                        }}
+                      </td>
+                      <td class="px-6 py-4">
+                        {{
+                          item.end_date_class ? item.end_date_class : "-----"
+                        }}
                       </td>
                       <td class="px-6 py-4">
                         {{ item.created_at }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.start_date_class ? item.start_date_class : '-----' }}
+                        {{ item.date_overview ? item.date_overview : "-----" }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.end_date_class ? item.end_date_class : '-----' }}
+                        {{ item.date_received ? item.date_received : "-----" }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.approval_date ? item.approval_date : '-----' }}
+                        {{ item.approval_date ? item.approval_date : "-----" }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.graduation_date ? item.graduation_date : '-----' }}
+                        {{
+                          item.graduation_date ? item.graduation_date : "-----"
+                        }}
                       </td>
                       <td class="px-6 py-4">
+                        {{ item.status }}
+                      </td>
+                      <!-- <td class="px-6 py-4">
                         <div class="flex gap-2">
                           <div
                             @click="approvalSchedule(item)"
@@ -566,6 +648,112 @@ function uploadImage(e) {
                             />
                           </div>
                         </div>
+                      </td> -->
+                      <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                          <div
+                            title="Actions"
+                            class="w-5 cursor-pointer"
+                            id="dropdown-button"
+                            :data-dropdown-toggle="`dropdown${index}`"
+                          >
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                              <g
+                                id="SVGRepo_tracerCarrier"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              ></g>
+                              <g id="SVGRepo_iconCarrier">
+                                <path
+                                  d="M12 12H12.01M12 6H12.01M12 18H12.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM13 18C13 18.5523 12.5523 19 12 19C11.4477 19 11 18.5523 11 18C11 17.4477 11.4477 17 12 17C12.5523 17 13 17.4477 13 18ZM13 6C13 6.55228 12.5523 7 12 7C11.4477 7 11 6.55228 11 6C11 5.44772 11.4477 5 12 5C12.5523 5 13 5.44772 13 6Z"
+                                  stroke="#000000"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                ></path>
+                              </g>
+                            </svg>
+                          </div>
+                          <div
+                            :id="`dropdown${index}`"
+                            class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
+                          >
+                            <ul
+                              class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                              aria-labelledby="dropdown-button"
+                            >
+                              <li>
+                                <button
+                                  title="Hapus Jadwal"
+                                  @click="overviewSchedule(item.id, item.participant?.name)"
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Overview
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  title="Hapus Jadwal"
+                                  @click="receivedSchedule(item.id, item.participant?.name)"
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Received
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  title="Hapus Jadwal"
+                                  @click="rejectSchedule(item.id, item.participant?.name)"
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Reject
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  title="Hapus Jadwal"
+                                  @click="approvalSchedule(item)"
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Approval
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  title="Hapus Jadwal"
+                                  @click="
+                                    deleteSchedule(
+                                      item.id,
+                                      item.class_room?.name,
+                                      item.category?.name
+                                    )
+                                  "
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Hapus
+                                </button>
+                              </li>
+                            </ul>
+                          </div>
+                          <div>
+                            <input
+                              @click="toggleCheckbox(item.id)"
+                              class="h-6 w-6"
+                              type="checkbox"
+                              :id="`checkbox${item.id}`"
+                            />
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   </tbody>
@@ -592,8 +780,12 @@ function uploadImage(e) {
           <!-- Modal content -->
           <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
             <!-- Modal header -->
-            <div class="text-red-600 text-sm ml-2" v-for="error, index in props.errors" :key="index">
-                *{{ error }}
+            <div
+              class="text-red-600 text-sm ml-2"
+              v-for="(error, index) in props.errors"
+              :key="index"
+            >
+              *{{ error }}
             </div>
             <div
               class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
@@ -637,7 +829,12 @@ function uploadImage(e) {
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >Graduation</label
                   >
-                  <select id="graduation" name="graduation" v-model="formCheckbox.status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  <select
+                    id="graduation"
+                    name="graduation"
+                    v-model="formCheckbox.status"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
                     <option selected value="">Choose a Option</option>
                     <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>

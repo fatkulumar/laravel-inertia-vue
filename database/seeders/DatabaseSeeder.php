@@ -38,6 +38,12 @@ class DatabaseSeeder extends Seeder
                 $kclassRoom1 = ClassRoom::create([
                     'name' => 'Kelas ' . $i,
                 ]);
+
+                $id_regional1 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                Regional::create([
+                    'id' => $id_regional1,
+                    'name' => 'Surabaya',
+                ]);
                 $userId1 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 $user1 = User::create([
                     'id' => $userId1,
@@ -46,16 +52,11 @@ class DatabaseSeeder extends Seeder
                     'email_verified_at' => now(),
                     'password' => Hash::make('fatkulumar'),
                     'image' => 'image',
+                    'regional_id' => $id_regional1,
                 ]);
 
                 Role::create(['name' => 'admin']);
                 $user1->assignRole('admin');
-
-                $id_regional1 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
-                Regional::create([
-                    'id' => $id_regional1,
-                    'name' => 'Surabaya',
-                ]);
 
                 Profile::create([
                     'address' => 'Jl. Cempaka No. 1',
@@ -74,6 +75,13 @@ class DatabaseSeeder extends Seeder
                 $kclassRoom2 = ClassRoom::create([
                     'name' => 'Kelas ' . $i,
                 ]);
+
+                $id_regional2 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                Regional::create([
+                    'id' => $id_regional2,
+                    'name' => 'Ngawi',
+                ]);
+
                 $userId2 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 $user2 = User::create([
                     'id' => $userId2,
@@ -82,16 +90,11 @@ class DatabaseSeeder extends Seeder
                     'email_verified_at' => now(),
                     'password' => Hash::make('fatkulumar'),
                     'image' => 'image',
+                    'regional_id' => $id_regional2,
                 ]);
 
                 Role::create(['name' => 'peserta']);
                 $user2->assignRole('peserta');
-
-                $id_regional2 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
-                Regional::create([
-                    'id' => $id_regional2,
-                    'name' => 'Ngawi',
-                ]);
 
                 Profile::create([
                     'address' => 'Jl. Cempaka No. 2',
@@ -110,6 +113,12 @@ class DatabaseSeeder extends Seeder
                 $kclassRoom3 = ClassRoom::create([
                     'name' => 'Kelas ' . $i,
                 ]);
+
+                $id_regional3 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                Regional::create([
+                    'id' => $id_regional3,
+                    'name' => 'Malang',
+                ]);
                 $userId3 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 $user3 = User::create([
                     'id' => $userId3,
@@ -118,16 +127,11 @@ class DatabaseSeeder extends Seeder
                     'email_verified_at' => now(),
                     'password' => Hash::make('fatkulumar'),
                     'image' => 'image',
+                    'regional_id' => $id_regional3,
                 ]);
 
                 Role::create(['name' => 'panitia']);
                 $user3->assignRole('panitia');
-
-                $id_regional3 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
-                Regional::create([
-                    'id' => $id_regional3,
-                    'name' => 'Malang',
-                ]);
 
                 Profile::create([
                     'address' => 'Jl. Cempaka No. 3',
@@ -146,7 +150,7 @@ class DatabaseSeeder extends Seeder
                 $scheduleId = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 Schedule::create([
                     'id' => $scheduleId,
-                    'regional_id' => $id_regional2,
+                    'regional_id' => $id_regional3,
                     'committee_id' => $userId3,
                     'category_id' => $Category3->id,
                     'class_room_id' => $kclassRoom3->id,
@@ -171,6 +175,16 @@ class DatabaseSeeder extends Seeder
                     'end_date_class' => now(),
                     'graduation_date' => now(),
                     'proposal' => 'Link File',
+                    'date_overview' => now(),
+                    'date_received' => now(),
+                ]);
+
+                Submission::create([
+                    'id' => substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36),
+                    'schedule_id' => $scheduleId,
+                    'participant_id' => $userId2,
+                    'proof' => 'Link Proof',
+                    'status' => 'approved',
                 ]);
             }
         }

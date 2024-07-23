@@ -232,6 +232,40 @@ class ScheduleController extends Controller
         }
     }
 
+    public function overviewSchedule(Request $request)
+    {
+        try {
+            $id = $request->post('id');
+            Schedule::where('id', $id)->update([
+                'status' => 'overview',
+                'date_overview' => Carbon::now(),
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+        }
+    }
+
+    public function receivedSchedule(Request $request)
+    {
+        try {
+            $id = $request->post('id');
+            Schedule::where('id', $id)->update([
+                'status' => 'received',
+                'date_received' => Carbon::now(),
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+        }
+    }
+
     public function deleteSchedule(Request $request, $id)
     {
         try {

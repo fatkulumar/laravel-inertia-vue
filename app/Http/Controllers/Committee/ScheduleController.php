@@ -367,6 +367,10 @@ class ScheduleController extends Controller
             }
             $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('Y-m-d');
             $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('Y-m-d');
+            $schedule->formatted_created_at = Carbon::parse($schedule->created_at)->format('d-m-Y');
+            $schedule->formatted_date_overview = Carbon::parse($schedule->date_overview)->format('d-m-Y');
+            $schedule->formatted_date_received = Carbon::parse($schedule->date_received)->format('d-m-Y');
+            $schedule->formatted_date_done = Carbon::parse($schedule->date_done)->format('d-m-Y');
             return $schedule;
         });
 
@@ -389,10 +393,10 @@ class ScheduleController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        //
-    }
+    // public function edit(string $id)
+    // {
+    //     //
+    // }
 
     /**
      * Update the specified resource in storage.

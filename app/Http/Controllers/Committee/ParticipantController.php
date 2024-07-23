@@ -174,4 +174,48 @@ class ParticipantController extends Controller
             Log::channel('daily')->info('function participantClassRoom in SubmissionController', $errors);
         }
     }
+
+    public function participant(Request $request)
+    {
+        try {
+            $submissions = Submission::orderBy('created_at', 'desc')
+                ->when($request['search'], function ($query, $request) {
+                    $query->whereHas('participant', function ($query) use ($request) {
+                        $query->where('name', 'like', '%' . $request . '%');
+                    });
+                })
+                ->whereHas('participant.roles')
+                ->whereHas('participant.profile.regional')
+                ->with('schedule.classRoom', 'schedule.category', 'participant.roles', 'participant.profile.regional')
+                ->paginate(5)
+                ->withQueryString()
+                ->appends(['search' => $request['search']]);
+
+            $submissions->map(function ($submission) {
+                $this->fileSettings();
+                if (isset($submission->participant->image)) {
+                    $submission->participant->image = $this->getFileAttribute($submission->participant->image);
+                } else {
+                    $submission->participant->image = null;
+                }
+
+                if (isset($submission->schedule->poster)) {
+                    $submission->schedule->poster = $this->getFileAttribute($submission->schedule->poster);
+                } else {
+                    $submission->schedule->poster = null;
+                }
+                return $submission;
+            });
+            // return $submissions;
+            return Inertia::render('Committee/Schedule/Participant', [
+                'submissions' => $submissions,
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function participantClassRoom in SubmissionController', $errors);
+        }
+    }
 }

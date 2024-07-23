@@ -1,15 +1,19 @@
 <script setup>
 import AuthenticatedLayoutCommittee from "@/Layouts/AuthenticatedLayoutCommittee.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head, useForm, Link } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
 import { Modal } from "flowbite";
 import TabMenu from "@/Components/Committee/TabMenu.vue";
 
+onMounted(() => {
+    initFlowbite();
+});
+
 const props = defineProps({
-  participants: {
+  submissions: {
     type: Object,
     default: () => ({}),
   },
@@ -223,7 +227,7 @@ function toggleCheckbox(id) {
       totalChecked++;
     }
   });
-  if (props.participants.to == totalChecked) {
+  if (props.submissions.to == totalChecked) {
     checkboxAll.checked = true;
   }
   if (formCheckbox.id.length > 0) {
@@ -248,7 +252,7 @@ function checkedAll() {
     checkedCheckboxes.forEach((checkbox) => {
       checkbox.checked = true;
     });
-    props.participants.data.forEach((data) => {
+    props.submissions.data.forEach((data) => {
       formCheckbox.id.push(data.id);
       countCheckbox.value++;
     });
@@ -310,7 +314,7 @@ function uploadImage(e) {
   <div>
     <AuthenticatedLayoutCommittee>
       <template #header>
-        <TabMenu />
+        <TabMenu :id="props.submissions.data[0]?.schedule?.id"/>
       </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -323,7 +327,7 @@ function uploadImage(e) {
                   <div>
                     <!-- icon plus -->
                     <div
-                      @click="showModal(props.participants.data)"
+                      @click="showModal(props.submissions.data)"
                       title="Tambah Artikel"
                       class="cursor-pointer"
                     >
@@ -468,9 +472,9 @@ function uploadImage(e) {
                     </tr>
                   </thead>
                   <tbody>
-                    <!-- {{ props.participants.data }} -->
+                    <!-- {{ props.submissions.data }} -->
                     <tr
-                      v-for="(item, index) in props.participants.data"
+                      v-for="(item, index) in props.submissions.data"
                       :key="index"
                       class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                     >
@@ -495,7 +499,7 @@ function uploadImage(e) {
                           {{ itemRole.name }}
                         </div>
                       </td>
-                      <td class="px-6 py-4">
+                      <!-- <td class="px-6 py-4">
                         <div class="flex gap-2">
                           <div
                             @click="
@@ -572,14 +576,86 @@ function uploadImage(e) {
                             />
                           </div>
                         </div>
+                      </td> -->
+
+                      <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                          <div
+                            title="Actions"
+                            class="w-5 cursor-pointer"
+                            id="dropdown-button"
+                            :data-dropdown-toggle="`dropdown${index}`"
+                          >
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                              <g
+                                id="SVGRepo_tracerCarrier"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              ></g>
+                              <g id="SVGRepo_iconCarrier">
+                                <path
+                                  d="M12 12H12.01M12 6H12.01M12 18H12.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM13 18C13 18.5523 12.5523 19 12 19C11.4477 19 11 18.5523 11 18C11 17.4477 11.4477 17 12 17C12.5523 17 13 17.4477 13 18ZM13 6C13 6.55228 12.5523 7 12 7C11.4477 7 11 6.55228 11 6C11 5.44772 11.4477 5 12 5C12.5523 5 13 5.44772 13 6Z"
+                                  stroke="#000000"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                ></path>
+                              </g>
+                            </svg>
+                          </div>
+                          <div
+                            :id="`dropdown${index}`"
+                            class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
+                          >
+                            <ul
+                              class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                              aria-labelledby="dropdown-button"
+                            >
+                              <li
+                                class="p-2 pl-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                              >
+                                <Link
+                                  :href="`/committee/participant/detail/${item.participant_id}`"
+                                  title="Detail Peserta"
+                                  class="cursor-pointer"
+                                  >Detail</Link
+                                >
+                              </li>
+                              <li>
+                                <button
+                                  title="Hapus Peserta"
+                                  @click="deleteUser(item.id, item.title)"
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Hapus
+                                </button>
+                              </li>
+                            </ul>
+                          </div>
+                          <div>
+                            <input
+                              @click="toggleCheckbox(item.id)"
+                              class="h-6 w-6"
+                              type="checkbox"
+                              :id="`checkbox${item.id}`"
+                            />
+                          </div>
+                        </div>
                       </td>
+
                     </tr>
                   </tbody>
                 </table>
 
                 <Pagination
                   class="my-6 flex justify-center md:justify-end"
-                  :links="props.participants.links"
+                  :links="props.submissions.links"
                 />
               </div>
             </div>

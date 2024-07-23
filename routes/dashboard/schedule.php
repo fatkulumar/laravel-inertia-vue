@@ -12,4 +12,6 @@
         Route::post('/approval-schedule', [Dashboard\ScheduleController::class, 'approvalSchedule'])->name('approvalSchedule');
         Route::delete('/delete-schedule/{id}', [Dashboard\ScheduleController::class, 'deleteSchedule'])->name('deleteSchedule');
         Route::post('/option-schedule', [Dashboard\ScheduleController::class, 'optionSchedule'])->name('optionSchedule');
+        Route::post('/overview-schedule', [Dashboard\ScheduleController::class, 'overviewSchedule'])->name('overviewSchedule');
+        Route::post('/received-schedule', [Dashboard\ScheduleController::class, 'receivedSchedule'])->name('receivedSchedule');
     });

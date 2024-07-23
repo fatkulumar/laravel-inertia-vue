@@ -33,12 +33,14 @@ return new class extends Migration
             $table->string('location');
             $table->text('google_maps');
             $table->text('address');
-            $table->enum('status', ['pending', 'approval', 'accepted', 'rejected'])->default('pending');
+            $table->enum('status', ['pending', 'approval', 'accepted', 'rejected', 'received' ,'overview'])->default('pending');
             $table->dateTime('start_date_class');
             $table->dateTime('end_date_class');
             $table->date('approval_date')->nullable();
             $table->date('graduation_date')->nullable();
             $table->text('proposal');
+            $table->dateTime('date_overview')->nullable();
+            $table->dateTime('date_received')->nullable();
             $table->timestamps();
         });
     }
