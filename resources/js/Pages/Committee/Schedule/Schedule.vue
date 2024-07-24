@@ -6,6 +6,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
 import { Modal } from "flowbite";
+import axios from "axios";
 
 onMounted(() => {
   initFlowbite();
@@ -98,8 +99,6 @@ const form = useForm({
 
 function resetForm() {
   form.id = "",
-//   form.participant_id = "",
-  form.committee_id = "",
   form.category_id = "",
   form.class_room_id = "",
   form.chief_id = "", //ketua pelaksana
@@ -118,7 +117,6 @@ function resetForm() {
   form.location = "",
   form.google_maps = "",
   form.address = "",
-  form.status = "",
   form.start_date_class = "",
   form.end_date_class = "",
   form.approval_date = "",
@@ -388,19 +386,16 @@ function uploadPoster(e) {
   }
 }
 
-const previewProposal = ref(null);
 function uploadProposal(e) {
-  const image = e.target.files[0];
+  const proposal = e.target.files[0];
   if (
-    (image.type == "image/png") |
-    (image.type == "image/jpg") |
-    (image.type == "image/jpeg")
+    (proposal.type == "application/pdf")
   ) {
     const reader = new FileReader();
-    reader.readAsDataURL(image);
+    reader.readAsDataURL(proposal);
     reader.onload = (e) => {
       previewProposal.value = e.target.result;
-      form.proposal = image;
+      form.proposal = proposal;
     };
   } else {
     form.image = null;
@@ -418,6 +413,16 @@ function deleteSchedule(id) {
       toast("success", "Data Berhasil Dihapus");
     },
   });
+}
+
+const speakers = ref([]);
+const setSpeaker = async (classRoomId) => {
+    await axios
+    .get(`/committee/schedule/speaker/${classRoomId}`)
+    .then((response) => {
+        speakers.value = response.data;
+    })
+    .catch((error) => console.error(error));
 }
 </script>
 
@@ -818,6 +823,36 @@ function deleteSchedule(id) {
                   />
                 </div>
                 <div class="col-span-2 sm:col-span-1">
+                    <label
+                      for="start_date_class"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >Mulai</label
+                    >
+                    <input
+                      v-model="form.start_date_class"
+                      type="date"
+                      name="start_date_class"
+                      id="start_date_class"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      placeholder="Tanggal Muali"
+                    />
+                  </div>
+                  <div class="col-span-2 sm:col-span-1">
+                    <label
+                      for="end_date_class"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >Selesai</label
+                    >
+                    <input
+                      v-model="form.end_date_class"
+                      type="date"
+                      name="end_date_class"
+                      id="end_date_class"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      placeholder="Tanggal Selesai"
+                    />
+                  </div>
+                <div class="col-span-2 sm:col-span-1">
                   <label
                     for="chief_id"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -856,6 +891,7 @@ function deleteSchedule(id) {
                     >Kelas</label
                   >
                   <select
+                    @change="setSpeaker(form.class_room_id)"
                     v-model="form.class_room_id"
                     id="class_room_id"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -870,6 +906,52 @@ function deleteSchedule(id) {
                     </option>
                   </select>
                 </div>
+                <div class="col-span-2 sm:col-span-1">
+                    <label
+                      for="speaker"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >Pemateri</label
+                    >
+                    <select
+                      v-model="form.speaker"
+                      @change="chainedProvince(form.speaker)"
+                      id="speaker"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    >
+                      <option value="" :selected="form.speaker == null">
+                        Pilih Narasumber
+                      </option>
+                      <option
+                        v-for="(item, index) in speakers"
+                        :key="index"
+                        :value="item.id"
+                        :selected="form.speaker == item.id"
+                      >
+                        {{ item.name }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="col-span-2 sm:col-span-1">
+                    <label
+                      for="category_id"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >Tingkatan Kelas</label
+                    >
+                    <select
+                      v-model="form.category_id"
+                      id="category_id"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    >
+                      <option value="" selected>Pilih Tingkatan</option>
+                      <option
+                        v-for="(item, index) in props.categories"
+                        :key="index"
+                        :value="item.id"
+                      >
+                        {{ item.name }}
+                      </option>
+                    </select>
+                  </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label
                     for="class_room_id"
@@ -891,27 +973,7 @@ function deleteSchedule(id) {
                     </option>
                   </select>
                 </div>
-                <div class="col-span-2 sm:col-span-1">
-                  <label
-                    for="category_id"
-                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Tingkatan Kelas</label
-                  >
-                  <select
-                    v-model="form.category_id"
-                    id="category_id"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  >
-                    <option value="" selected>Pilih Tingkatan</option>
-                    <option
-                      v-for="(item, index) in props.categories"
-                      :key="index"
-                      :value="item.id"
-                    >
-                      {{ item.name }}
-                    </option>
-                  </select>
-                </div>
+
                 <div class="col-span-2 sm:col-span-1">
                   <label
                     for="periode"
@@ -920,7 +982,7 @@ function deleteSchedule(id) {
                   >
                   <input
                     v-model="form.periode"
-                    type="text"
+                    type="number"
                     name="periode"
                     id="periode"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
@@ -972,21 +1034,7 @@ function deleteSchedule(id) {
                     placeholder="Target Peserta"
                   ></textarea>
                 </div>
-                <div class="col-span-2 sm:col-span-1">
-                  <label
-                    for="speaker"
-                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Pemateri</label
-                  >
-                  <input
-                    v-model="form.speaker"
-                    type="text"
-                    name="speaker"
-                    id="speaker"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Pemateri"
-                  />
-                </div>
+
                 <div class="col-span-2 sm:col-span-1">
                   <label
                     for="total_activity"
@@ -1062,36 +1110,7 @@ function deleteSchedule(id) {
                     placeholder="Benefit Peserta"
                 ></textarea>
                 </div>
-                <div class="col-span-2 sm:col-span-1">
-                  <label
-                    for="start_date_class"
-                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Mulai</label
-                  >
-                  <input
-                    v-model="form.start_date_class"
-                    type="date"
-                    name="start_date_class"
-                    id="start_date_class"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Tanggal Muali"
-                  />
-                </div>
-                <div class="col-span-2 sm:col-span-1">
-                  <label
-                    for="end_date_class"
-                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Selesai</label
-                  >
-                  <input
-                    v-model="form.end_date_class"
-                    type="date"
-                    name="end_date_class"
-                    id="end_date_class"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Tanggal Selesai"
-                  />
-                </div>
+
                 <div class="col-span-2 sm:col-span-1">
                   <label
                     for="location"
@@ -1115,7 +1134,7 @@ function deleteSchedule(id) {
                   >
                   <input
                     v-model="form.google_maps"
-                    type="text"
+                    type="url"
                     name="google_maps"
                     id="google_maps"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
@@ -1144,7 +1163,6 @@ function deleteSchedule(id) {
                     class="w-2block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >Surat Pengajuan</label
                   >
-                  <img :src="previewProposal" class="w-5/12 py-2" />
                   <div class="flex items-center">
                     <div class="w-2/12">
                       <input
@@ -1152,13 +1170,10 @@ function deleteSchedule(id) {
                         type="file"
                         name="image"
                         id="image"
-                        accept="image/jpg, jpeg, png"
+                        accept="application/pdf"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                       />
                     </div>
-                    <!-- <a :href="linkFile" class="ml-2 text-blue-500 underline">{{
-                      form.file
-                    }}</a> -->
                   </div>
                 </div>
               </div>

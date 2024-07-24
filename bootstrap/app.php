@@ -52,6 +52,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->name('dashboard.submission.')
                 ->group(base_path('routes/dashboard/submission.php'));
 
+            Route::middleware('web')
+                ->prefix('dashboard/speaker')
+                ->name('dashboard.speaker.')
+                ->group(base_path('routes/dashboard/speaker.php'));
+
             //committee
             Route::middleware('web')
                 ->prefix('committee/schedule')
@@ -80,6 +85,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'Indonesia' => Laravolt\Indonesia\Facade::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

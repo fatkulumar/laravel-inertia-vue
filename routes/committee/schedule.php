@@ -9,4 +9,5 @@
         Route::delete('/delete/{id}', [Committee\ScheduleController::class, 'delete'])->name('delete');
         Route::post('/destroy', [Committee\ScheduleController::class, 'destroy'])->name('destroy');
         Route::get('/detail/{id}', [Committee\ScheduleController::class, 'show'])->name('detail');
+        Route::get('/speaker/{classRoomId}', [Committee\ScheduleController::class, 'speaker'])->name('speaker');
     });

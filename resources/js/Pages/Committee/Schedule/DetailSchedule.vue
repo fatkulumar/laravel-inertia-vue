@@ -343,11 +343,11 @@ function updateSchedule() {
                   enctype="multipart/form-data"
                   class="p-4 md:p-5"
                 >
-                  <div class="grid gap-4 mb-4 grid-cols-2">
+                  <div class="md:grid gap-4 mb-4 md:grid-cols-3">
                     <div class="col-span-2 sm:col-span-1">
                       <label
                         for="committee_id"
-                        class="block text-sm font-medium text-gray-900 dark:text-white"
+                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >Pengusul</label
                       >
                       <input
@@ -355,7 +355,7 @@ function updateSchedule() {
                         type="text"
                         name="committee_id"
                         id="committee_id"
-                        class="h-6 border mt-1 rounded px-4 w-full bg-gray-50"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="Pengusul"
                         readonly
                       />
@@ -363,7 +363,7 @@ function updateSchedule() {
                     <div class="col-span-2 sm:col-span-1">
                       <label
                         for="hp"
-                        class="block text-sm font-medium text-gray-900 dark:text-white"
+                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >HP</label
                       >
                       <input
@@ -371,7 +371,7 @@ function updateSchedule() {
                         type="text"
                         name="hp"
                         id="hp"
-                        class="h-6 border mt-1 rounded px-4 w-full bg-gray-50"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="HP"
                         readonly
                       />
@@ -748,15 +748,15 @@ function updateSchedule() {
                         class="w-2block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >Surat Pengajuan</label
                       >
-                      <img :src="previewProposal" class="md:w-5/12 py-2" />
+                      <!-- <img :src="previewProposal" class="md:w-5/12 py-2" /> -->
                       <div class="flex items-center">
-                        <div class="w-2/12">
+                        <div>
                           <input
                             @change="uploadProposal"
                             type="file"
                             name="image"
                             id="image"
-                            accept="image/jpg, jpeg, png"
+                            accept="application/pdf"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                           />
                         </div>
@@ -773,7 +773,7 @@ function updateSchedule() {
                 </form>
               </div>
             </div>
-            <div class="md:w-72">
+            <div class="px-10 md:px-0">
               <div class="flex border-b-2 pb-4">
                 <p class="mt-6">Status</p>
                 <small class="text-xs text-green-500 mt-5"
@@ -794,24 +794,24 @@ function updateSchedule() {
                   ></small
                 >
               </div>
-              <div class="mr-10 my-2 flex flex-col gap-2">
+              <div class="my-2 flex flex-col gap-2">
                 <div class="bg-gray-200 p-2 rounded-lg">
-                  <p>Tanggal Pengajuan</p>
+                  <p>Pengajuan</p>
                   <p>{{ form.created_at ? form.created_at : "-" }}</p>
                 </div>
 
                 <div class="bg-yellow-100 p-2 rounded-lg">
-                  <p>Tanggal Overview</p>
+                  <p>Overview</p>
                   <p>{{ form.date_overview ? form.date_overview : "-" }}</p>
                 </div>
 
                 <div class="bg-blue-200 p-2 rounded-lg">
-                  <p>Tanggal Diterima</p>
+                  <p>Diterima</p>
                   <p>{{ form.date_received ? form.date_received : "-" }}</p>
                 </div>
 
                 <div class="bg-green-200 p-2 rounded-lg">
-                  <p>Tanggal Selesai</p>
+                  <p>Selesai</p>
                   <p>{{ form.approval ? form.approval : "-" }}</p>
                 </div>
               </div>

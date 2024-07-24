@@ -8,6 +8,7 @@ use App\Models\ClassRoom;
 use App\Models\Profile;
 use App\Models\Regional;
 use App\Models\Schedule;
+use App\Models\Speaker;
 use App\Models\Submission;
 use App\Models\TypeActivity;
 use App\Models\User;
@@ -110,7 +111,7 @@ class DatabaseSeeder extends Seeder
                     'name' => 'Advanced ' . $i ,
                 ]);
 
-                $kclassRoom3 = ClassRoom::create([
+                $classRoom3 = ClassRoom::create([
                     'name' => 'Kelas ' . $i,
                 ]);
 
@@ -147,13 +148,24 @@ class DatabaseSeeder extends Seeder
                     'name' => 'Kopdar Meida',
                 ]);
 
+                $speaker_id = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                Speaker::create([
+                    'id' => $speaker_id,
+                    'image' => 'foto spealer',
+                    'name' => 'Speaker Umar',
+                    'province_code' => 11,
+                    'city_code' => 1101,
+                    'class_room_id' => $classRoom3->id,
+                    'category_id' => $Category1->id,
+                ]);
+
                 $scheduleId = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 Schedule::create([
                     'id' => $scheduleId,
                     'regional_id' => $id_regional3,
                     'committee_id' => $userId3,
                     'category_id' => $Category3->id,
-                    'class_room_id' => $kclassRoom3->id,
+                    'class_room_id' => $classRoom3->id,
                     'chief_id' => $userId3, //ketua pelaksana
                     'type_activity_id' => $type_activity_id,
                     'periode' => 14,
@@ -161,7 +173,7 @@ class DatabaseSeeder extends Seeder
                     'concept' => 'konsep', //konsep kegiatan
                     'committee_layout' => 'ketua pelaksana', //susunan panitia
                     'target_participant' => 'target peserta', //target peserta
-                    'speaker' => 'pemateri umar', //pemateri //opsioanl
+                    'speaker' => $speaker_id, //pemateri //opsioanl
                     'total_activity' => 14, // total kegiatan yang sudah dikerjakan
                     'price' => 65000, // harga
                     'facility' => 'apapun fasilitas ada', // fasiliitas

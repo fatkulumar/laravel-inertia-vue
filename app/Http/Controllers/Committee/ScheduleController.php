@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\ClassRoom;
 use App\Models\Profile;
 use App\Models\Schedule;
+use App\Models\Speaker;
 use App\Models\TypeActivity;
 use App\Models\User;
 use App\Traits\EntityValidator;
@@ -231,7 +232,7 @@ class ScheduleController extends Controller
                 'concept' => 'required|string',
                 'committee_layout' => 'required|string',
                 'target_participant' => 'required|string',
-                'speaker' => 'required|string|max:100',
+                'speaker' => 'required|string|max:36',
                 'total_activity' => 'required|integer',
                 'price' => 'required|integer',
                 'facility' => 'required|string|max:20000',
@@ -298,7 +299,7 @@ class ScheduleController extends Controller
                 'concept' => 'required|string',
                 'committee_layout' => 'required|string',
                 'target_participant' => 'required|string',
-                'speaker' => 'required|string|max:100',
+                'speaker' => 'required|string|max:36',
                 'total_activity' => 'required|integer',
                 'price' => 'required|integer',
                 'facility' => 'required|string|max:20000',
@@ -368,9 +369,9 @@ class ScheduleController extends Controller
             $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('Y-m-d');
             $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('Y-m-d');
             $schedule->formatted_created_at = Carbon::parse($schedule->created_at)->format('d-m-Y');
-            $schedule->formatted_date_overview = Carbon::parse($schedule->date_overview)->format('d-m-Y');
-            $schedule->formatted_date_received = Carbon::parse($schedule->date_received)->format('d-m-Y');
-            $schedule->formatted_date_done = Carbon::parse($schedule->date_done)->format('d-m-Y');
+            $schedule->formatted_date_overview = $schedule->date_overview ? Carbon::parse($schedule->date_overview)->format('d-m-Y') : '';
+            $schedule->formatted_date_received = $schedule->date_received ? Carbon::parse($schedule->date_received)->format('d-m-Y') : '';
+            $schedule->formatted_date_done = $schedule->date_done ? Carbon::parse($schedule->date_done)->format('d-m-Y') : '';
             return $schedule;
         });
 
@@ -410,7 +411,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function delete in SubmissionController', $errors);
+            Log::channel('daily')->info('function delete in ScheduleController', $errors);
         }
     }
 
@@ -429,7 +430,21 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function delete in SubmissionController', $errors);
+            Log::channel('daily')->info('function delete in ScheduleController', $errors);
+        }
+    }
+
+    public function speaker($classRoomId)
+    {
+        try {
+            $speakers = Speaker::where('class_room_id', $classRoomId)->get();
+            return response()->json($speakers);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function speaker in SchedlueController', $errors);
         }
     }
 
@@ -446,7 +461,7 @@ class ScheduleController extends Controller
     //         $errors['file'] = $exception->getFile();
     //         $errors['line'] = $exception->getLine();
     //         $errors['trace'] = $exception->getTrace();
-    //         Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+    //         Log::channel('daily')->info('function rejectSubmission in ScheduleController', $errors);
     //     }
     // }
 
@@ -463,7 +478,7 @@ class ScheduleController extends Controller
     //         $errors['file'] = $exception->getFile();
     //         $errors['line'] = $exception->getLine();
     //         $errors['trace'] = $exception->getTrace();
-    //         Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+    //         Log::channel('daily')->info('function rejectSubmission in ScheduleController', $errors);
     //     }
     // }
 
@@ -480,7 +495,7 @@ class ScheduleController extends Controller
     //         $errors['file'] = $exception->getFile();
     //         $errors['line'] = $exception->getLine();
     //         $errors['trace'] = $exception->getTrace();
-    //         Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+    //         Log::channel('daily')->info('function rejectSubmission in ScheduleController', $errors);
     //     }
     // }
 
@@ -500,7 +515,7 @@ class ScheduleController extends Controller
     //         $errors['file'] = $exception->getFile();
     //         $errors['line'] = $exception->getLine();
     //         $errors['trace'] = $exception->getTrace();
-    //         Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+    //         Log::channel('daily')->info('function rejectSubmission in ScheduleController', $errors);
     //     }
     // }
 }

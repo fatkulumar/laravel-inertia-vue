@@ -24,7 +24,7 @@ return new class extends Migration
             $table->text('concept'); //konsep kegiatan
             $table->text('committee_layout'); //susunan panitia
             $table->text('target_participant'); //target peserta
-            $table->string('speaker')->nullable(); //pemateri
+            $table->uuid('speaker'); //pemateri
             $table->integer('total_activity'); // total kegiatan yang sudah dikerjakan
             $table->integer('price'); // harga
             $table->text('facility')->nullable(); // fasiliitas // total fasilitas
