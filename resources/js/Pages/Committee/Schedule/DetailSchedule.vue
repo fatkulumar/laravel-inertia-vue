@@ -82,7 +82,7 @@ const form = useForm({
   concept: props.schedule[0].concept,
   committee_layout: props.schedule[0].committee_layout,
   target_participant: props.schedule[0].target_participant,
-  speaker: props.schedule[0].speaker,
+  speaker_id: props.schedule[0].speaker.name,
   total_activity: props.schedule[0].total_activity,
   price: props.schedule[0].price,
   facility: props.schedule[0].facility,
@@ -285,26 +285,26 @@ function uploadPoster(e) {
   }
 }
 
-const previewProposal = ref(props.schedule[0].proposal);
-function uploadProposal(e) {
-  const image = e.target.files[0];
-  if (
-    (image.type == "image/png") |
-    (image.type == "image/jpg") |
-    (image.type == "image/jpeg")
-  ) {
-    const reader = new FileReader();
-    reader.readAsDataURL(image);
-    reader.onload = (e) => {
-      previewProposal.value = e.target.result;
-      form.proposal = image;
-    };
-  } else {
-    form.image = null;
-    closeModal("crud-modal");
-    toast("warning", "Harus Format Gambar");
-  }
-}
+// const previewProposal = ref(props.schedule[0].proposal);
+// function uploadProposal(e) {
+//   const image = e.target.files[0];
+//   if (
+//     (image.type == "image/png") |
+//     (image.type == "image/jpg") |
+//     (image.type == "image/jpeg")
+//   ) {
+//     const reader = new FileReader();
+//     reader.readAsDataURL(image);
+//     reader.onload = (e) => {
+//       previewProposal.value = e.target.result;
+//       form.proposal = image;
+//     };
+//   } else {
+//     form.image = null;
+//     closeModal("crud-modal");
+//     toast("warning", "Harus Format Gambar");
+//   }
+// }
 
 function updateSchedule() {
   form.post("/committee/schedule/store", {
@@ -593,15 +593,15 @@ function updateSchedule() {
                     </div>
                     <div class="col-span-2 sm:col-span-1">
                       <label
-                        for="speaker"
+                        for="speaker_id"
                         class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >Pemateri</label
                       >
                       <input
-                        v-model="form.speaker"
+                        v-model="form.speaker_id"
                         type="text"
-                        name="speaker"
-                        id="speaker"
+                        name="speaker_id"
+                        id="speaker_id"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="Pemateri"
                       />
@@ -742,13 +742,13 @@ function updateSchedule() {
                         placeholder="Alamat"
                       ></textarea>
                     </div>
-                    <div class="col-span-2">
+                    <!-- <div class="col-span-2">
                       <label
                         for="image"
                         class="w-2block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >Surat Pengajuan</label
                       >
-                      <!-- <img :src="previewProposal" class="md:w-5/12 py-2" /> -->
+                      <img :src="previewProposal" class="md:w-5/12 py-2" />
                       <div class="flex items-center">
                         <div>
                           <input
@@ -761,7 +761,7 @@ function updateSchedule() {
                           />
                         </div>
                       </div>
-                    </div>
+                    </div> -->
                   </div>
                   <button
                     title="Update Jadwal"

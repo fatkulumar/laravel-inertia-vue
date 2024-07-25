@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link } from "@inertiajs/vue3";
 
+// id_schedule
 const props = defineProps({
   id: {
     type: String,
@@ -35,6 +36,32 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
         }"
       >
         Data Peserta
+      </h2>
+    </Link>
+
+    <Link :href="`/committee/schedule/speaker-list/${id}`">
+      <h2
+        class="font-semibold leading-tight border-1 border-black px-5 py-1 rounded-md"
+        :class="{
+          'bg-blue-700 text-white': route().current(
+            'committee.schedule.speaker*'
+          ),
+        }"
+      >
+        Narasumber
+      </h2>
+    </Link>
+
+    <Link :href="`/committee/schedule/letter/${id}`">
+      <h2
+        class="font-semibold leading-tight border-1 border-black px-5 py-1 rounded-md"
+        :class="{
+          'bg-blue-700 text-white': route().current(
+            'committee.schedule.letter*'
+          ),
+        }"
+      >
+        Surat Tugas
       </h2>
     </Link>
   </div>

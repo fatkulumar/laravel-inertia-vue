@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Committee;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\ClassRoom;
+use App\Models\Letter;
 use App\Models\Profile;
 use App\Models\Schedule;
 use App\Models\Speaker;
@@ -200,6 +201,11 @@ class ScheduleController extends Controller
                 ];
 
                 $result = Schedule::create($saveData);
+
+                Letter::create([
+                   'schedule_id' => $result->id
+                ]);
+
                 if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
             }
         } catch (\Exception $exception) {
@@ -350,7 +356,7 @@ class ScheduleController extends Controller
      */
     public function show(string $id)
     {
-        $schedule = Schedule::with('participant', 'committee', 'committee.profile.regional', 'chief.profile')
+        $schedule = Schedule::with('participant', 'committee', 'committee.profile.regional', 'chief.profile', 'speaker')
                                 ->where('id',$id)
                                 ->get();
 
@@ -445,6 +451,179 @@ class ScheduleController extends Controller
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function speaker in SchedlueController', $errors);
+        }
+    }
+
+    public function speakerList(Request $request, $scheduleId)
+    {
+        try {
+            $speakers = Speaker::whereHas('schedule', function ($query) use ($scheduleId) {
+                $query->where('id', $scheduleId);
+            })
+            ->when($request['search'], function($query, $request) {
+                $query->whereHas('participant', function ($query) use ($request) {
+                    $query->where('name', 'like', '%' . $request . '%');
+                });
+            })
+            ->with('schedule.speaker', 'province', 'city', 'classRoom', 'city', 'category')
+            ->paginate(10);
+
+            // return $speakers;
+            return Inertia::render('Committee/Schedule/listSpeaker', [
+                'speakers' => $speakers,
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function speakerList in SchedlueController', $errors);
+        }
+    }
+
+    public function letter(Request $request, $scheduleId)
+    {
+        try {
+            $letters = Letter::whereHas('schedule', function($query) use ($scheduleId) {
+                $query->where('id', $scheduleId);
+            })->with('schedule')->paginate(10);
+
+            // Map over the paginated results to modify each letter
+            $letters->getCollection()->transform(function ($letter) {
+                if ($letter->file) {
+                    $this->fileSettings();
+                    $letter->link_file = $this->getFileAttribute($letter->file);
+                }
+                return $letter;
+            });
+
+            // return $letters;
+            return Inertia::render('Committee/Schedule/letter', [
+                'letters' => $letters,
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function speakerList in SchedlueController', $errors);
+        }
+    }
+
+    public function uploadLetter(Request $request, $scheduleId)
+    {
+        try {
+            if($request->id) {
+                $validasiData = $this->updateLetterValidator($request);
+                $letter =  Letter::where('schedule_id', $scheduleId)->first();
+                $file = $request->file('file');
+                if($file) {
+                    $this->fileSettings();
+                    $uploadFile = $this->uploadFile($file);
+                }else{
+                    $uploadFile = $letter->file;
+                }
+
+                $result = Letter::where('schedule_id', $scheduleId)->update([
+                    'file' => $uploadFile,
+                    'name' => $request->post('name'),
+                ]);
+                if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
+            }else{
+                $validasiData = $this->storeLetterValidator($request);
+                if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+                $file = $request->file('file');
+                if($file) {
+                    $this->fileSettings();
+                    $uploadFile = $this->uploadFile($file);
+                }else{
+                    $uploadFile = '-';
+                }
+
+                $saveData = [
+                    'schedule_id' => $request->post('schedule_id'),
+                    'file' => $uploadFile,
+                    'name' => $request->post('name'),
+                ];
+
+                $result = Letter::create($saveData);
+                if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
+            }
+
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function uploadLetter in SchedlueController', $errors);
+        }
+    }
+
+    private function updateLetterValidator(Request $request)
+    {
+        try {
+            $rules = [
+                'schedule_id' => 'required|string|max:36',
+                'name' => 'required|string|max:1000',
+                'file' => 'nullable|mimes:pdf|max:2048',
+
+            ];
+            $Validatedata = [
+                'schedule_id' => $request->post('regional_id'),
+                'name' => $request->post('name'),
+                'file' => $request->file('file'),
+            ];
+            $validator = EntityValidator::validate($Validatedata, $rules);
+            if ($validator->fails()) return $validator->errors();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function updateLetterValidator in Committee/ScheduleController', $errors);
+        }
+    }
+
+    private function storeLetterValidator(Request $request)
+    {
+        try {
+            $rules = [
+                'schedule_id' => 'required|string|max:36',
+                'name' => 'required|string|max:36',
+                'file' => 'required|mimes:pdf|max:2048',
+
+            ];
+            $Validatedata = [
+                'schedule_id' => $request->post('regional_id'),
+                'name' => $request->post('name'),
+                'file' => $request->file('file'),
+            ];
+            $validator = EntityValidator::validate($Validatedata, $rules);
+            if ($validator->fails()) return $validator->errors();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function storeLetterValidator in Committee/ScheduleController', $errors);
+        }
+    }
+
+    public function deleteLetter(Request $request, $scheduleId)
+    {
+        try {
+            $letter = Letter::where('schedule_id', $scheduleId)->first();
+            $this->fileSettings();
+            if (isset($letter->file)) {
+                $this->deleteFile($letter->file);
+            }
+            $letter->delete();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function uploadLetter in SchedlueController', $errors);
         }
     }
 

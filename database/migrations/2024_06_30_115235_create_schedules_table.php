@@ -24,7 +24,7 @@ return new class extends Migration
             $table->text('concept'); //konsep kegiatan
             $table->text('committee_layout'); //susunan panitia
             $table->text('target_participant'); //target peserta
-            $table->uuid('speaker'); //pemateri
+            $table->uuid('speaker_id'); //pemateri
             $table->integer('total_activity'); // total kegiatan yang sudah dikerjakan
             $table->integer('price'); // harga
             $table->text('facility')->nullable(); // fasiliitas // total fasilitas
@@ -38,7 +38,7 @@ return new class extends Migration
             $table->dateTime('end_date_class');
             $table->date('approval_date')->nullable();
             $table->date('graduation_date')->nullable();
-            $table->text('proposal');
+            // $table->text('proposal');
             $table->dateTime('date_overview')->nullable();
             $table->dateTime('date_received')->nullable();
             $table->timestamps();

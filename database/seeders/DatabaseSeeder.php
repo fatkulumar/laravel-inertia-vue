@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\ClassRoom;
+use App\Models\Letter;
 use App\Models\Profile;
 use App\Models\Regional;
 use App\Models\Schedule;
@@ -173,7 +174,7 @@ class DatabaseSeeder extends Seeder
                     'concept' => 'konsep', //konsep kegiatan
                     'committee_layout' => 'ketua pelaksana', //susunan panitia
                     'target_participant' => 'target peserta', //target peserta
-                    'speaker' => $speaker_id, //pemateri //opsioanl
+                    'speaker_id' => $speaker_id, //pemateri //opsioanl
                     'total_activity' => 14, // total kegiatan yang sudah dikerjakan
                     'price' => 65000, // harga
                     'facility' => 'apapun fasilitas ada', // fasiliitas
@@ -186,7 +187,7 @@ class DatabaseSeeder extends Seeder
                     'start_date_class' => now(),
                     'end_date_class' => now(),
                     'graduation_date' => now(),
-                    'proposal' => 'Link File',
+                    // 'proposal' => 'Link File',
                     'date_overview' => now(),
                     'date_received' => now(),
                 ]);
@@ -197,6 +198,14 @@ class DatabaseSeeder extends Seeder
                     'participant_id' => $userId2,
                     'proof' => 'Link Proof',
                     'status' => 'approved',
+                ]);
+
+                $letter_id = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                Letter::create([
+                    'id' => $letter_id,
+                    'schedule_id' => $scheduleId,
+                    'file' => 'ini surat tugas',
+                    'name' => 'name file',
                 ]);
             }
         }

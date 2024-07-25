@@ -10,4 +10,8 @@
         Route::post('/destroy', [Committee\ScheduleController::class, 'destroy'])->name('destroy');
         Route::get('/detail/{id}', [Committee\ScheduleController::class, 'show'])->name('detail');
         Route::get('/speaker/{classRoomId}', [Committee\ScheduleController::class, 'speaker'])->name('speaker');
+        Route::get('/speaker-list/{scheduleId}', [Committee\ScheduleController::class, 'speakerList'])->name('speaker.list');
+        Route::get('/letter/{scheduleId}', [Committee\ScheduleController::class, 'letter'])->name('letter');
+        Route::post('/upload-letter/{scheduleId}', [Committee\ScheduleController::class, 'uploadLetter'])->name('upload.letter');
+        Route::delete('/delete-letter/{scheduleId}', [Committee\ScheduleController::class, 'deleteLetter'])->name('delete.letter');
     });

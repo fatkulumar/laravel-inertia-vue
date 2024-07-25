@@ -37,7 +37,7 @@ class Schedule extends Model
         'end_date_class',
         'approval_date',
         'graduation_date',
-        'proposal',
+        // 'proposal',
         'date_overview',
         'date_received',
     ];
@@ -72,8 +72,13 @@ class Schedule extends Model
         return $this->belongsTo(Regional::class, 'regional_id');
     }
 
-     public function submissions()
+    public function submissions()
     {
         return $this->hasMany(Submission::class);
+    }
+
+    public function speaker()
+    {
+        return $this->belongsTo(Speaker::class, 'speaker_id');
     }
 }

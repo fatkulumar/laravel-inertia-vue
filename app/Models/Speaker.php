@@ -38,4 +38,9 @@ class Speaker extends Model
     {
         return $this->belongsTo(Province::class, 'province_code', 'code');
     }
+
+    public function schedule()
+    {
+        return $this->belongsTo(Schedule::class, 'class_room_id', 'class_room_id');
+    }
 }
