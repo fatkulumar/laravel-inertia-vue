@@ -43,6 +43,10 @@ const props = defineProps({
   },
 });
 
+const urlPath = window.location.pathname;
+const segments = urlPath.split("/");
+const idSubmissionLastSegment = segments.pop() || segments.pop();
+
 let search = ref(props.filters.search);
 
 watch(search, (value) => {
@@ -321,7 +325,7 @@ function updateSchedule() {
   <div>
     <AuthenticatedLayoutCommittee>
       <template #header>
-        <TabMenu :id="props.schedule[0].id" />
+        <TabMenu :id="idSubmissionLastSegment" />
       </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -812,7 +816,7 @@ function updateSchedule() {
 
                 <div class="bg-green-200 p-2 rounded-lg">
                   <p>Selesai</p>
-                  <p>{{ form.approval ? form.approval : "-" }}</p>
+                   <p>{{ props.schedule[0]?.letter?.created_at ? props.schedule[0]?.letter?.created_at : "-" }}</p>
                 </div>
               </div>
             </div>

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\ClassRoom;
+use App\Models\Documentation;
 use App\Models\Letter;
 use App\Models\Profile;
 use App\Models\Regional;
@@ -206,6 +207,15 @@ class DatabaseSeeder extends Seeder
                     'schedule_id' => $scheduleId,
                     'file' => 'ini surat tugas',
                     'name' => 'name file',
+                ]);
+
+                $documentation_id = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                Documentation::create([
+                    'id' => $documentation_id,
+                    'schedule_id' => $scheduleId,
+                    'title' => 'documentation 1',
+                    'description' => 'ini adalah deslripsi 1',
+                    'image' => 'image.jpg',
                 ]);
             }
         }

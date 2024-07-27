@@ -42,11 +42,6 @@ class Schedule extends Model
         'date_received',
     ];
 
-    public function participant()
-    {
-        return $this->belongsTo(User::class, 'participant_id');
-    }
-
     public function committee()
     {
         return $this->belongsTo(User::class, 'committee_id');
@@ -80,5 +75,10 @@ class Schedule extends Model
     public function speaker()
     {
         return $this->belongsTo(Speaker::class, 'speaker_id');
+    }
+
+    public function letter()
+    {
+        return $this->hasOne(Letter::class, 'schedule_id', 'id');
     }
 }

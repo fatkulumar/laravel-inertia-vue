@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
-use App\Traits\Acessor\ConverDateToIndonesia;
 use App\Traits\GenUid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Letter extends Model
+class Documentation extends Model
 {
-    use HasFactory, GenUid, ConverDateToIndonesia;
+    use HasFactory, GenUid;
 
     protected $fillable = [
         'schedule_id',
-        'file',
-        'name',
+        'title',
+        'description',
+        'image',
     ];
 
     public function schedule()

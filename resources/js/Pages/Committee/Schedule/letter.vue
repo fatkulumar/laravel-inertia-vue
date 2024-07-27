@@ -24,9 +24,13 @@ const props = defineProps({
   },
 });
 
+const urlPath = window.location.pathname;
+const segments = urlPath.split("/");
+const idSubmissionLastSegment = segments.pop() || segments.pop();
+
 const form = useForm({
   id: props.letters.data[0]?.id,
-  schedule_id: props.letters.data[0]?.schedule_id,
+  schedule_id: idSubmissionLastSegment,
   file: "",
   name: "",
 })
@@ -36,33 +40,8 @@ function resetForm() {
   form.name = "";
 }
 
-// function modalSpeaker(opt) {
-//   const $targetEl = document.getElementById("crud-modal");
-//   // options with default values
-//   const options = {
-//     placement: "bottom-right",
-//     backdrop: "dynamic",
-//     backdropClasses: "bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40",
-//     closable: false,
-//   };
-
-//   // instance options object
-//   const instanceOptions = {
-//     id: "crud-modal",
-//     override: true,
-//   };
-
-//   const modal = new Modal($targetEl, options, instanceOptions);
-//   if (opt == "hide") {
-//     modal.hide();
-//   }
-//   if (opt == "show") {
-//     modal.show();
-//   }
-// }
-
 function addLetter() {
-  form.post("/committee/schedule/upload-letter/" + props.letters.data[0].schedule_id, {
+  form.post("/committee/schedule/upload-letter/" + idSubmissionLastSegment, {
     preserveScroll: true,
     onSuccess: (e) => {
       toast("success", "Berhasil");
@@ -71,30 +50,6 @@ function addLetter() {
     },
   });
 }
-
-// function editSpeaker(data) {
-//   form.id = data.id;
-//   form.name = data.name;
-//   form.image = data.image;
-//   form.class_room_id = data.class_room_id;
-//   form.category_id = data.category_id;
-//   form.city_code = data.city_code;
-//   form.province_code = data.province_code;
-//   previewImage.value = data.image;
-//   modalSpeaker("show");
-// }
-
-// function deleteLetter(id, name) {
-//   const konfirm = confirm(`Apakah anda yakin ingin menghapus ${name}?`);
-//   if (!konfirm) return;
-//   form.delete(`/committee/schedule/delete-letter/${id}`, {
-//     preserveScroll: true,
-//     onSuccess: () => {
-//       resetForm();
-//       toast("success", "Data Berhasil Dihapus");
-//     },
-//   });
-// }
 
 function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
   const Toast = Swal.mixin({
@@ -113,117 +68,6 @@ function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
     title: text,
   });
 }
-
-// const closeModal = (targetModal = "crud-modal") => {
-//   resetForm();
-//   formCheckbox.id = [];
-//   const $targetEl = document.getElementById(targetModal);
-//   const modal = new Modal($targetEl);
-//   modal.hide();
-// };
-
-// const showModal = (targetModal = "crud-modal") => {
-//   resetForm();
-//   const $targetEl = document.getElementById(targetModal);
-//   const modal = new Modal($targetEl);
-//   modal.show();
-// };
-
-// const formCheckbox = useForm({
-//   id: [],
-// });
-
-// const deleteChoice = ref(false);
-// function toggleCheckbox(id) {
-//   let checkbox = document.getElementById(`checkbox${id}`);
-//   let checkboxAll = document.getElementById(`checkboxAll`);
-//   if (checkboxAll.checked) {
-//     checkboxAll.checked = false;
-//   }
-
-//   if (checkbox.checked == true) {
-//     const articleId = formCheckbox.id.includes(id);
-//     if (!articleId) {
-//       formCheckbox.id.push(id);
-//     }
-//   } else {
-//     formCheckbox.id = formCheckbox.id.filter((checkId) => checkId !== id); // Memfilter id pengguna yang cocok
-//   }
-
-//   const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-
-//   // Inisialisasi jumlah total checkbox yang dicentang
-//   let totalChecked = 0;
-
-//   // Iterasi melalui setiap elemen checkbox
-//   checkboxes.forEach((checkbox) => {
-//     // Periksa apakah checkbox dicentang
-//     if (checkbox.checked) {
-//       // Jika dicentang, tambahkan 1 ke jumlah total
-//       totalChecked++;
-//     }
-//   });
-//   if (props.d.to == totalChecked) {
-//     checkboxAll.checked = true;
-//   }
-//   if (formCheckbox.id.length > 0) {
-//     deleteChoice.value = true;
-//   } else {
-//     deleteChoice.value = false;
-//   }
-// }
-
-// const countCheckbox = ref(0);
-// function checkedAll() {
-//   countCheckbox.value = 0;
-//   let checkedCheckboxes = document.querySelectorAll(
-//     'input[type="checkbox"]:not(#checkboxAll):not(:checked)'
-//   );
-//   let uncheckedCheckboxes = document.querySelectorAll(
-//     'input[type="checkbox"]:not(#checkboxAll)'
-//   );
-//   let checboxAll = document.getElementById("checkboxAll");
-//   if (checboxAll.checked == true) {
-//     checkedCheckboxes.forEach((checkbox) => {
-//       checkbox.checked = true;
-//     });
-//     props.d.data.forEach((data) => {
-//       formCheckbox.id.push(data.id);
-//       countCheckbox.value++;
-//     });
-//   } else {
-//     uncheckedCheckboxes.forEach((checkbox) => {
-//       checkbox.checked = false;
-//     });
-//     formCheckbox.id = [];
-//   }
-
-//   if (formCheckbox.id.length > 0) {
-//     deleteChoice.value = true;
-//   } else {
-//     deleteChoice.value = false;
-//   }
-// }
-
-// function deleteSpeakerChoice() {
-//   const konfirm = confirm(`Apakah anda yakin ingin menghapus data ini?`);
-//   if (!konfirm) return;
-//   formCheckbox.post("/dashboard/speaker/destroy", {
-//     preserveScroll: true,
-//     onSuccess: () => {
-//       formCheckbox.id = [];
-//       toast("success", "Data Berhasil Dihapus");
-//       let checkedCheckboxes = document.querySelectorAll(
-//         'input[type="checkbox"]:checked'
-//       );
-//       checkedCheckboxes.forEach((element) => {
-//         element.checked = false;
-//       });
-
-//       deleteChoice.value = false;
-//     },
-//   });
-// }
 
 // const previewImage = ref(null);
 function uploadLetter(e) {
@@ -259,21 +103,21 @@ function uploadLetter(e) {
   <div>
     <AuthenticatedLayoutCommittee>
       <template #header>
-            <TabMenu :id="props.letters.data[0]?.schedule_id" />
+            <TabMenu :id="idSubmissionLastSegment" />
       </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
               <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <div class="bg-gray-100 flex items-center mb-2">
+                <div class="bg-gray-100 flex items-center mb-2" v-if="props.letters.data">
                     <div class="w-1/12 bg-gray-200 flex">
                         <p class="w-1/12 p-6 text-red-500 font-bold text-lg">
                             PDF
                         </p>
                     </div>
                     <div class="ml-2">
-                        <a class="hover:underline hover:text-blue-500" :href="props.letters.data[0].link_file" target="_blank" rel="noopener noreferrer">{{ props.letters.data[0]?.name }}</a>
+                        <a class="hover:underline hover:text-blue-500" :href="props.letters.data[0]?.link_file" target="_blank" rel="noopener noreferrer">{{ props.letters.data[0]?.name }}</a>
                     </div>
                 </div>
                 <div class="bg-gray-100 flex items-center">

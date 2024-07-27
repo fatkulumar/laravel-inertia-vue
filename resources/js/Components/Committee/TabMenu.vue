@@ -28,41 +28,54 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
         Detail Jadwal
       </h2>
     </Link>
-    <Link :href="`/committee/participant/list-participant`">
+
+    <Link :href="`/committee/schedule/speaker-list/${id}`">
+        <h2
+          class="font-semibold leading-tight border-1 border-black px-5 py-1 rounded-md"
+          :class="{
+            'bg-blue-700 text-white': route().current(
+              'committee.schedule.speaker*'
+            ),
+          }"
+        >
+          Narasumber
+        </h2>
+    </Link>
+
+    <Link :href="`/committee/schedule/letter/${id}`">
+        <h2
+          class="font-semibold leading-tight border-1 border-black px-5 py-1 rounded-md"
+          :class="{
+            'bg-blue-700 text-white': route().current(
+              'committee.schedule.letter*'
+            ),
+          }"
+        >
+          Surat Tugas
+        </h2>
+    </Link>
+
+    <Link :href="`/committee/schedule/list-participant/${id}`">
       <h2
         class="font-semibold leading-tight border-1 border-black px-5 py-1 rounded-md"
         :class="{
-          'bg-blue-700 text-white': route().current('committee.participant*'),
+          'bg-blue-700 text-white': route().current('committee.schedule.participant*'),
         }"
       >
         Data Peserta
       </h2>
     </Link>
 
-    <Link :href="`/committee/schedule/speaker-list/${id}`">
-      <h2
-        class="font-semibold leading-tight border-1 border-black px-5 py-1 rounded-md"
-        :class="{
-          'bg-blue-700 text-white': route().current(
-            'committee.schedule.speaker*'
-          ),
-        }"
-      >
-        Narasumber
-      </h2>
+    <Link :href="`/committee/schedule/documentation/${id}`">
+        <h2
+          class="font-semibold leading-tight border-1 border-black px-5 py-1 rounded-md"
+          :class="{
+            'bg-blue-700 text-white': route().current('committee.schedule.documentation*'),
+          }"
+        >
+          Dokumentasi
+        </h2>
     </Link>
 
-    <Link :href="`/committee/schedule/letter/${id}`">
-      <h2
-        class="font-semibold leading-tight border-1 border-black px-5 py-1 rounded-md"
-        :class="{
-          'bg-blue-700 text-white': route().current(
-            'committee.schedule.letter*'
-          ),
-        }"
-      >
-        Surat Tugas
-      </h2>
-    </Link>
   </div>
 </template>

@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('letters', function (Blueprint $table) {
+        Schema::create('documentations', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('schedule_id')->references('id')->on('schedules');
-            $table->text('file')->nullable();
-            $table->text('name')->nullable();
+            $table->string('title');
+            $table->string('description');
+            $table->text('image');
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('letters');
+        Schema::dropIfExists('documentations');
     }
 };

@@ -7,5 +7,5 @@
         Route::post('/update', [Committee\ParticipantController::class, 'update'])->name('update');
         Route::get('/detail/{id}', [Committee\ParticipantController::class, 'show'])->name('detail');
         Route::get('/list-participant-class-room', [Committee\ParticipantController::class, 'participantClassRoom'])->name('participantClassRoom');
-        Route::get('/list-participant', [Committee\ParticipantController::class, 'participant'])->name('participant');
+        // Route::get('/list-participant/{scheduleId}', [Committee\ParticipantController::class, 'participant'])->name('participant');
     });

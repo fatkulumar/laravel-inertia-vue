@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Committee;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\ClassRoom;
+use App\Models\Documentation;
 use App\Models\Letter;
 use App\Models\Profile;
 use App\Models\Schedule;
 use App\Models\Speaker;
+use App\Models\Submission;
 use App\Models\TypeActivity;
 use App\Models\User;
 use App\Traits\EntityValidator;
@@ -42,7 +44,7 @@ class ScheduleController extends Controller
             $users = Auth::user();
             $profile = Profile::where('profileable_id', $users->id)->first();
             $schedules = Schedule::orderBy('created_at', 'desc')
-                ->when($request['search'], function($query, $request) {
+                ->when($request['search'], function ($query, $request) {
                     $query->whereHas('participant', function ($query) use ($request) {
                         $query->where('name', 'like', '%' . $request . '%');
                     });
@@ -79,14 +81,6 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -103,18 +97,18 @@ class ScheduleController extends Controller
                 $schedule = Schedule::where('id', $id)->first();
 
                 $poster = $request->file('poster');
-                if($poster) {
+                if ($poster) {
                     $this->fileSettings();
                     $uploadPoster = $this->uploadFile($poster);
-                }else{
+                } else {
                     $uploadPoster = $schedule->poster;
                 }
 
                 $proposal = $request->file('proposal');
-                if($proposal) {
+                if ($proposal) {
                     $this->fileSettings();
                     $uploadProposal = $this->uploadFile($proposal);
-                }else{
+                } else {
                     $uploadProposal = $schedule->proposal;
                 }
 
@@ -158,18 +152,18 @@ class ScheduleController extends Controller
                 if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
 
                 $poster = $request->file('poster');
-                if($poster) {
+                if ($poster) {
                     $this->fileSettings();
                     $uploadPoster = $this->uploadFile($poster);
-                }else{
+                } else {
                     $uploadPoster = "Poster Tidak Ada";
                 }
 
                 $proposal = $request->file('proposal');
-                if($proposal) {
+                if ($proposal) {
                     $this->fileSettings();
                     $uploadProposal = $this->uploadFile($proposal);
-                }else{
+                } else {
                     $uploadProposal = "Proposal Tidak Ada";
                 }
 
@@ -203,7 +197,7 @@ class ScheduleController extends Controller
                 $result = Schedule::create($saveData);
 
                 Letter::create([
-                   'schedule_id' => $result->id
+                    'schedule_id' => $result->id
                 ]);
 
                 if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
@@ -356,9 +350,9 @@ class ScheduleController extends Controller
      */
     public function show(string $id)
     {
-        $schedule = Schedule::with('participant', 'committee', 'committee.profile.regional', 'chief.profile', 'speaker')
-                                ->where('id',$id)
-                                ->get();
+        $schedule = Schedule::with('committee', 'committee.profile.regional', 'chief.profile', 'speaker', 'letter')
+            ->where('id', $id)
+            ->get();
 
         $schedule->map(function ($schedule) {
             $this->fileSettings();
@@ -460,13 +454,13 @@ class ScheduleController extends Controller
             $speakers = Speaker::whereHas('schedule', function ($query) use ($scheduleId) {
                 $query->where('id', $scheduleId);
             })
-            ->when($request['search'], function($query, $request) {
-                $query->whereHas('participant', function ($query) use ($request) {
-                    $query->where('name', 'like', '%' . $request . '%');
-                });
-            })
-            ->with('schedule.speaker', 'province', 'city', 'classRoom', 'city', 'category')
-            ->paginate(10);
+                ->when($request['search'], function ($query, $request) {
+                    $query->whereHas('participant', function ($query) use ($request) {
+                        $query->where('name', 'like', '%' . $request . '%');
+                    });
+                })
+                ->with('schedule.speaker', 'province', 'city', 'classRoom', 'city', 'category')
+                ->paginate(10);
 
             // return $speakers;
             return Inertia::render('Committee/Schedule/listSpeaker', [
@@ -484,7 +478,7 @@ class ScheduleController extends Controller
     public function letter(Request $request, $scheduleId)
     {
         try {
-            $letters = Letter::whereHas('schedule', function($query) use ($scheduleId) {
+            $letters = Letter::whereHas('schedule', function ($query) use ($scheduleId) {
                 $query->where('id', $scheduleId);
             })->with('schedule')->paginate(10);
 
@@ -513,14 +507,14 @@ class ScheduleController extends Controller
     public function uploadLetter(Request $request, $scheduleId)
     {
         try {
-            if($request->id) {
-                $validasiData = $this->updateLetterValidator($request);
+            if (Letter::where('schedule_id', $scheduleId)->exists()) {
+                $validasiData = $this->updateLetterValidator($request, $scheduleId);
                 $letter =  Letter::where('schedule_id', $scheduleId)->first();
                 $file = $request->file('file');
-                if($file) {
+                if ($file) {
                     $this->fileSettings();
                     $uploadFile = $this->uploadFile($file);
-                }else{
+                } else {
                     $uploadFile = $letter->file;
                 }
 
@@ -529,19 +523,19 @@ class ScheduleController extends Controller
                     'name' => $request->post('name'),
                 ]);
                 if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
-            }else{
-                $validasiData = $this->storeLetterValidator($request);
+            } else {
+                $validasiData = $this->storeLetterValidator($request, $scheduleId);
                 if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
                 $file = $request->file('file');
-                if($file) {
+                if ($file) {
                     $this->fileSettings();
                     $uploadFile = $this->uploadFile($file);
-                }else{
+                } else {
                     $uploadFile = '-';
                 }
 
                 $saveData = [
-                    'schedule_id' => $request->post('schedule_id'),
+                    'schedule_id' => $scheduleId,
                     'file' => $uploadFile,
                     'name' => $request->post('name'),
                 ];
@@ -549,7 +543,6 @@ class ScheduleController extends Controller
                 $result = Letter::create($saveData);
                 if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
             }
-
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
@@ -559,7 +552,7 @@ class ScheduleController extends Controller
         }
     }
 
-    private function updateLetterValidator(Request $request)
+    private function updateLetterValidator(Request $request, $scehduleId)
     {
         try {
             $rules = [
@@ -569,7 +562,7 @@ class ScheduleController extends Controller
 
             ];
             $Validatedata = [
-                'schedule_id' => $request->post('regional_id'),
+                'schedule_id' => $scehduleId,
                 'name' => $request->post('name'),
                 'file' => $request->file('file'),
             ];
@@ -584,7 +577,7 @@ class ScheduleController extends Controller
         }
     }
 
-    private function storeLetterValidator(Request $request)
+    private function storeLetterValidator(Request $request, $scheduleId)
     {
         try {
             $rules = [
@@ -594,7 +587,7 @@ class ScheduleController extends Controller
 
             ];
             $Validatedata = [
-                'schedule_id' => $request->post('regional_id'),
+                'schedule_id' => $scheduleId,
                 'name' => $request->post('name'),
                 'file' => $request->file('file'),
             ];
@@ -623,78 +616,216 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function uploadLetter in SchedlueController', $errors);
+            Log::channel('daily')->info('function deleteLetter in SchedlueController', $errors);
         }
     }
 
-    // public function rejectSubmission(Request $request)
-    // {
-    //     try {
-    //         $id = $request->post('id');
-    //         Schedule::where('id', $id)->update([
-    //             'status' => 'Ditolak',
-    //             'approval_date' => Carbon::now(),
-    //         ]);
-    //     } catch (\Exception $exception) {
-    //         $errors['message'] = $exception->getMessage();
-    //         $errors['file'] = $exception->getFile();
-    //         $errors['line'] = $exception->getLine();
-    //         $errors['trace'] = $exception->getTrace();
-    //         Log::channel('daily')->info('function rejectSubmission in ScheduleController', $errors);
-    //     }
-    // }
+    public function participant(Request $request, $scheduleId)
+    {
+        try {
+            $submissions = Submission::orderBy('created_at', 'desc')
+                ->when($request['search'], function ($query, $request) {
+                    $query->whereHas('participant', function ($query) use ($request) {
+                        $query->where('name', 'like', '%' . $request . '%');
+                    });
+                })
+                ->where('schedule_id', $scheduleId)
+                ->with('schedule.classRoom', 'schedule.category', 'participant.roles', 'participant.profile.regional')
+                ->paginate(5)
+                ->withQueryString()
+                ->appends(['search' => $request['search']]);
 
-    // public function approvalSubmission(Request $request)
-    // {
-    //     try {
-    //         $id = $request->post('id');
-    //         Schedule::where('id', $id)->update([
-    //             'status' => 'Diterima',
-    //             'approval_date' => Carbon::now(),
-    //         ]);
-    //     } catch (\Exception $exception) {
-    //         $errors['message'] = $exception->getMessage();
-    //         $errors['file'] = $exception->getFile();
-    //         $errors['line'] = $exception->getLine();
-    //         $errors['trace'] = $exception->getTrace();
-    //         Log::channel('daily')->info('function rejectSubmission in ScheduleController', $errors);
-    //     }
-    // }
+            $submissions->map(function ($submission) {
+                $this->fileSettings();
+                if (isset($submission->participant->image)) {
+                    $submission->participant->image = $this->getFileAttribute($submission->participant->image);
+                } else {
+                    $submission->participant->image = null;
+                }
 
-    // public function graduationSubmission(Request $request)
-    // {
-    //     try {
-    //         $id = $request->post('id');
-    //         Schedule::where('id', $id)->update([
-    //             'status' => 'Lulus',
-    //             'graduation_date' => Carbon::now(),
-    //         ]);
-    //     } catch (\Exception $exception) {
-    //         $errors['message'] = $exception->getMessage();
-    //         $errors['file'] = $exception->getFile();
-    //         $errors['line'] = $exception->getLine();
-    //         $errors['trace'] = $exception->getTrace();
-    //         Log::channel('daily')->info('function rejectSubmission in ScheduleController', $errors);
-    //     }
-    // }
+                if (isset($submission->schedule->poster)) {
+                    $submission->schedule->poster = $this->getFileAttribute($submission->schedule->poster);
+                } else {
+                    $submission->schedule->poster = null;
+                }
+                return $submission;
+            });
+            // return $submissions;
+            return Inertia::render('Committee/Schedule/Participant', [
+                'submissions' => $submissions,
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function participantClassRoom in SubmissionController', $errors);
+        }
+    }
 
-    // public function optionSubmission(Request $request)
-    // {
-    //     try {
-    //         $ids = $request->post('id');
-    //         $status = $request->post('status');
-    //         foreach($ids as $id) {
-    //             Schedule::where('id', $id)->update([
-    //                 'status' => $status,
-    //                 'graduation_date' => Carbon::now(),
-    //             ]);
-    //         }
-    //     } catch (\Exception $exception) {
-    //         $errors['message'] = $exception->getMessage();
-    //         $errors['file'] = $exception->getFile();
-    //         $errors['line'] = $exception->getLine();
-    //         $errors['trace'] = $exception->getTrace();
-    //         Log::channel('daily')->info('function rejectSubmission in ScheduleController', $errors);
-    //     }
-    // }
+    public function documentation(Request $request, $scheduleId)
+    {
+        try {
+            $documentations = Documentation::where('schedule_id', $scheduleId)
+                ->with('schedule')
+                ->get();
+
+            $documentations->map(function ($documentation) {
+                $this->fileSettings();
+                if (isset($documentation['image'])) {
+                    $documentation['image'] = $this->getFileAttribute($documentation['image']);
+                } else {
+                    $documentation['link_image'] = null;
+                }
+                return $documentation;
+            });
+            // return $documentations;
+
+            return Inertia::render('Committee/Schedule/Documentation', [
+                'documentations' => $documentations,
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function documentation in SchedlueController', $errors);
+        }
+    }
+
+    public function documentationStore(Request $request)
+    {
+        try {
+
+            $id = $request->post('id');
+            if ($id) {
+                $validasiData = $this->updateDocumetationValidator($request);
+                if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+                // return $validasiData;
+                $documentation = Documentation::where('id', $id)->first();
+
+                $image = $request->file('image');
+                if ($image) {
+                    $this->fileSettings();
+                    $uploadImage = $this->uploadFile($image);
+                } else {
+                    $uploadImage = $documentation->image;
+                }
+
+                $saveData = [
+                    'schedule_id' => $request->post('schedule_id'),
+                    'title' => $request->post('title'),
+                    'description' => $request->post('description'),
+                    'image' => $uploadImage,
+                ];
+
+                $result = $documentation->update($saveData);
+
+                // return $schedule;
+                if (!$result) return redirect()->back()->withErrors($result)->withInput();
+            } else {
+                // return $request->all();
+                $validasiData = $this->storeDocumentationValidator($request);
+                if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+
+                $image = $request->file('image');
+                if ($image) {
+                    $this->fileSettings();
+                    $uploadImage = $this->uploadFile($image);
+                } else {
+                    $uploadImage = "Image Tidak Ada";
+                }
+
+                $saveData = [
+                    'schedule_id' => $request->post('schedule_id'),
+                    'title' => $request->post('title'),
+                    'description' => $request->post('description'),
+                    'image' => $uploadImage,
+                ];
+
+                $result = Documentation::create($saveData);
+
+                if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
+            }
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function documentationStore in Committee/ScheduleController', $errors);
+        }
+    }
+
+    private function updateDocumetationValidator(Request $request)
+    {
+        try {
+            $rules = [
+                'schedule_id' => 'required|string|max:36',
+                'title' => 'required|string|max:36',
+                'description' => 'required|string|max:5000',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
+            ];
+            $Validatedata = [
+                'schedule_id' => $request->post('schedule_id'),
+                'title' => $request->post('title'),
+                'description' => $request->post('description'),
+                'image' => $request->file('image'),
+            ];
+            $validator = EntityValidator::validate($Validatedata, $rules);
+            if ($validator->fails()) return $validator->errors();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function updateDocumetationValidator in Committee/ScheduleController', $errors);
+        }
+    }
+
+    private function storeDocumentationValidator(Request $request)
+    {
+        try {
+            $rules = [
+                'schedule_id' => 'required|string|max:36',
+                'title' => 'required|string|max:36',
+                'description' => 'required|string|max:5000',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
+            ];
+            $Validatedata = [
+                'schedule_id' => $request->post('schedule_id'),
+                'title' => $request->post('title'),
+                'description' => $request->post('description'),
+                'image' => $request->file('image'),
+            ];
+            $validator = EntityValidator::validate($Validatedata, $rules);
+            if ($validator->fails()) return $validator->errors();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function storeDocumetationValidator in Committee/ScheduleController', $errors);
+        }
+    }
+
+    public function documentationDelete(Request $request)
+    {
+        try {
+            $id = $request->post('id');
+            $documentation = Documentation::findOrFail($id);
+            $this->fileSettings();
+            if (isset($documentation['image'])) {
+                $this->deleteFile($documentation['image']);
+            }
+            $documentation->delete();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function deleteDocumetation in Committee/ScheduleController', $errors);
+        }
+    }
 }

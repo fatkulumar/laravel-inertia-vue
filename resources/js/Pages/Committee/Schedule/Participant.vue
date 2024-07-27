@@ -35,6 +35,10 @@ const props = defineProps({
   },
 });
 
+const urlPath = window.location.pathname;
+const segments = urlPath.split("/");
+const idSubmissionLastSegment = segments.pop() || segments.pop();
+
 let search = ref(props.filters.search);
 
 watch(search, (value) => {
@@ -314,7 +318,7 @@ function uploadImage(e) {
   <div>
     <AuthenticatedLayoutCommittee>
       <template #header>
-        <TabMenu :id="props.submissions.data[0]?.schedule?.id"/>
+        <TabMenu :id="idSubmissionLastSegment"/>
       </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
