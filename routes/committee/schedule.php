@@ -23,4 +23,9 @@
         Route::get('/documentation/{scheduleId}', [Committee\ScheduleController::class, 'documentation'])->name('documentation');
         Route::post('/documentation/store', [Committee\ScheduleController::class, 'documentationStore'])->name('documentation.store');
         Route::delete('/documentation/delete', [Committee\ScheduleController::class, 'documentationDelete'])->name('documentation.delete');
+        // report
+        Route::get('/report/{scheduleId}', [Committee\ScheduleController::class, 'report'])->name('report');
+        // upload berita acara
+        Route::post('/upload-appointment-file', [Committee\ScheduleController::class, 'uploadAppointmentFile'])->name('upload.appintment.file');
+        Route::post('/appointment-file', [Committee\ScheduleController::class, 'appointmentFile'])->name('appintment.file');
     });

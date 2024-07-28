@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Committee;
 
 use App\Http\Controllers\Controller;
+use App\Models\AppointmentFile;
 use App\Models\Category;
 use App\Models\ClassRoom;
 use App\Models\Documentation;
@@ -826,6 +827,207 @@ class ScheduleController extends Controller
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function deleteDocumetation in Committee/ScheduleController', $errors);
+        }
+    }
+
+    public function report(Request $reques, $scheduleId)
+    {
+        try {
+
+            // Mengambil pengguna dengan role 'peserta'
+            $participants = User::with(['profile', 'submissions'])
+                ->whereHas('roles', function ($query) {
+                    $query->where('name', 'peserta');
+                })
+                ->whereHas('submissions', function ($query) use ($scheduleId) {
+                    $query->where('schedule_id', $scheduleId);
+                })
+                ->get();
+
+            $totalParticipants = $participants->count();
+
+            $totalMaleParticipants = $participants->filter(function ($user) {
+                return $user->profile && $user->profile->gender == 'laki-laki';
+            })->count();
+
+            $totalFemaleParticipants = $participants->filter(function ($user) {
+                return $user->profile && $user->profile->gender == 'perempuan';
+            })->count();
+
+            $totalGraduatedParticipants = $participants->filter(function ($user) {
+                return $user->submissions->contains('status', 'graduated');
+            })->count();
+
+            $totalNotGraduatedParticipants = $participants->filter(function ($user) {
+                return !$user->submissions->contains('status', 'graduated');
+            })->count();
+
+            $totalGraduatedMaleParticipants = $participants->filter(function ($user) {
+                return $user->submissions->contains('status', 'graduated') && $user->profile && $user->profile->gender == 'laki-laki';
+            })->count();
+
+            $totalGraduatedFemaleParticipants = $participants->filter(function ($user) {
+                return $user->submissions->contains('status', 'graduated') && $user->profile && $user->profile->gender == 'perempuan';
+            })->count();
+
+            $totalNotGraduatedMaleParticipants = $participants->filter(function ($user) {
+                return !$user->submissions->contains('status', 'graduated') && $user->profile && $user->profile->gender == 'laki-laki';
+            })->count();
+
+            $totalNotGraduatedFemaleParticipants = $participants->filter(function ($user) {
+                return !$user->submissions->contains('status', 'graduated') && $user->profile && $user->profile->gender == 'perempuan';
+            })->count();
+
+            $reports = [
+                'participants' => [
+                    'total' => $totalParticipants,
+                    'male' => $totalMaleParticipants,
+                    'female' => $totalFemaleParticipants,
+                ],
+                'participant_graduated' => [
+                    'total' => $totalGraduatedParticipants,
+                    'male' => $totalGraduatedMaleParticipants,
+                    'female' => $totalGraduatedFemaleParticipants,
+                ],
+                'participant_not_graduated' => [
+                    'total' => $totalNotGraduatedParticipants,
+                    'male' => $totalNotGraduatedMaleParticipants,
+                    'female' => $totalNotGraduatedFemaleParticipants,
+                ],
+            ];
+
+            $appointmentFiles = AppointmentFile::where('schedule_id', $scheduleId)->get();
+
+            $appointmentFiles->map(function ($appointmentFile) {
+                $this->fileSettings();
+                if (isset($appointmentFile['file'])) {
+                    $appointmentFile['file'] = $this->getFileAttribute($appointmentFile['file']);
+                }
+                return $appointmentFile;
+            });
+            // return $appointmentFiles;
+
+            return Inertia::render('Committee/Schedule/Report', [
+                'reports' => $reports,
+                'appointmentFiles' => $appointmentFiles,
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function report in Committee/ScheduleController', $errors);
+        }
+    }
+
+    public function uploadAppointmentFile(Request $request)
+    {
+        try {
+            $id = $request->post('id');
+            if ($id) {
+                $validasiData = $this->updateAppointmentFileValidator($request);
+                if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+                // return $validasiData;
+
+                // return $validasiData;
+                $appointmentFile = AppointmentFile::where('id', $id)->first();
+
+                $file = $request->file('file');
+                if ($file) {
+                    $this->fileSettings();
+                    $uploadFile = $this->uploadFile($file);
+                } else {
+                    $uploadFile = $appointmentFile->file;
+                }
+
+
+                $saveData = [
+                    'schedule_id' => $request->post('schedule_id'),
+                    'name' => $request->post('name'),
+                    'file' => $uploadFile,
+                ];
+
+                $result = $appointmentFile->update($saveData);
+
+                // return $schedule;
+                if (!$result) return redirect()->back()->withErrors($result)->withInput();
+            } else {
+                // return $request->all();
+                $validasiData = $this->storeAppointmentFileValidator($request);
+                if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+                $file = $request->file('file');
+                if ($file) {
+                    $this->fileSettings();
+                    $uploadFile = $this->uploadFile($file);
+                } else {
+                    $uploadFile = "File Tidak Ada";
+                }
+
+                $saveData = [
+                    'schedule_id' => $request->post('schedule_id'),
+                    'name' => $request->post('name'),
+                    'file' => $uploadFile,
+                ];
+                $result = AppointmentFile::create($saveData);
+
+                if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
+            }
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function uploadAppointmentFile in Committee/ScheduleController', $errors);
+        }
+    }
+
+    private function updateAppointmentFileValidator(Request $request)
+    {
+        try {
+            $rules = [
+                'schedule_id' => 'required|string|max:36',
+                'name' => 'required|string|max:5000',
+                'file' => 'nullable|mimes:pdf|max:2048',
+
+            ];
+            $Validatedata = [
+                'schedule_id' => $request->post('schedule_id'),
+                'name' => $request->post('name'),
+                'file' => $request->file('file'),
+            ];
+            $validator = EntityValidator::validate($Validatedata, $rules);
+            if ($validator->fails()) return $validator->errors();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function updateAppointmentFileValidator in Committee/ScheduleController', $errors);
+        }
+    }
+
+    private function storeAppointmentFileValidator(Request $request)
+    {
+        try {
+            $rules = [
+                'schedule_id' => 'required|string|max:36',
+                'name' => 'required|string|max:5000',
+                'file' => 'required|mimes:pdf|max:2048',
+
+            ];
+            $Validatedata = [
+                'schedule_id' => $request->post('schedule_id'),
+                'name' => $request->post('name'),
+                'file' => $request->file('file'),
+            ];
+            $validator = EntityValidator::validate($Validatedata, $rules);
+            if ($validator->fails()) return $validator->errors();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function storeAppointmentFileValidator in Committee/ScheduleController', $errors);
         }
     }
 }

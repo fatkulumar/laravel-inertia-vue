@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\AppointmentFile;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\ClassRoom;
@@ -55,7 +56,6 @@ class DatabaseSeeder extends Seeder
                     'email_verified_at' => now(),
                     'password' => Hash::make('fatkulumar'),
                     'image' => 'image',
-                    'regional_id' => $id_regional1,
                 ]);
 
                 Role::create(['name' => 'admin']);
@@ -93,7 +93,6 @@ class DatabaseSeeder extends Seeder
                     'email_verified_at' => now(),
                     'password' => Hash::make('fatkulumar'),
                     'image' => 'image',
-                    'regional_id' => $id_regional2,
                 ]);
 
                 Role::create(['name' => 'peserta']);
@@ -105,6 +104,31 @@ class DatabaseSeeder extends Seeder
                     'profileable_id' => $userId2,
                     'profileable_type' => 'App\Models\User',
                     'hp' => '6281234567890',
+                    'gender' => 'Laki-laki',
+                ]);
+
+                //
+
+                $userIdPeserta2 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                $userPeserta2 = User::create([
+                    'id' => $userIdPeserta2,
+                    'name' => 'Peserta dua',
+                    'email' => 'peserta2@gmail.com',
+                    'email_verified_at' => now(),
+                    'password' => Hash::make('fatkulumar'),
+                    'image' => 'image',
+                ]);
+
+                Role::updateOrCreate(['name' => 'peserta']);
+                $userPeserta2->assignRole('peserta');
+
+                Profile::create([
+                    'address' => 'Jl. Cempaka No. 2',
+                    'regional_id' => $id_regional2,
+                    'profileable_id' => $userIdPeserta2,
+                    'profileable_type' => 'App\Models\User',
+                    'hp' => '6281234567890',
+                    'gender' => 'perempuan',
                 ]);
             }
 
@@ -130,7 +154,6 @@ class DatabaseSeeder extends Seeder
                     'email_verified_at' => now(),
                     'password' => Hash::make('fatkulumar'),
                     'image' => 'image',
-                    'regional_id' => $id_regional3,
                 ]);
 
                 Role::create(['name' => 'panitia']);
@@ -201,6 +224,14 @@ class DatabaseSeeder extends Seeder
                     'status' => 'approved',
                 ]);
 
+                Submission::create([
+                    'id' => substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36),
+                    'schedule_id' => $scheduleId,
+                    'participant_id' => $userIdPeserta2,
+                    'proof' => 'Link Proof',
+                    'status' => 'graduated',
+                ]);
+
                 $letter_id = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 Letter::create([
                     'id' => $letter_id,
@@ -216,6 +247,14 @@ class DatabaseSeeder extends Seeder
                     'title' => 'documentation 1',
                     'description' => 'ini adalah deslripsi 1',
                     'image' => 'image.jpg',
+                ]);
+
+                $appointmentFile_id = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                AppointmentFile::create([
+                    'id' => $appointmentFile_id,
+                    'schedule_id' => $scheduleId,
+                    'name' => 'name',
+                    'file' => 'file',
                 ]);
             }
         }

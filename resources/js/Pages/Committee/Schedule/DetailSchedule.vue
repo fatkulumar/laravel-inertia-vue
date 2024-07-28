@@ -3,9 +3,7 @@ import AuthenticatedLayoutCommittee from "@/Layouts/AuthenticatedLayoutCommittee
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
 import { computed, onMounted, ref, watch } from "vue";
-// import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
-// import { Modal } from "flowbite";
 import TabMenu from "@/Components/Committee/TabMenu.vue";
 
 onMounted(() => {
@@ -98,46 +96,6 @@ const form = useForm({
   approval: props.schedule[0].formatted_approval,
 });
 
-// function resetForm() {
-//     form.id = ""
-//     form.regional_id = ""
-//     form.committee_id = ""
-//     form.category_id = ""
-//     form.class_room_id = ""
-//     form.hp = ""
-//     form.start_date_class = ""
-//     form.end_date_class = ""
-//     form.location = ""
-//     form.google_maps = ""
-//     form.address = ""
-//     form.file = ""
-// }
-
-// function modalRoom(opt) {
-//   const $targetEl = document.getElementById("crud-modal");
-//   // options with default values
-//   const options = {
-//     placement: "bottom-right",
-//     backdrop: "dynamic",
-//     backdropClasses: "bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40",
-//     closable: false,
-//   };
-
-//   // instance options object
-//   const instanceOptions = {
-//     id: "crud-modal",
-//     override: true,
-//   };
-
-//   const modal = new Modal($targetEl, options, instanceOptions);
-//   if (opt == "hide") {
-//     modal.hide();
-//   }
-//   if (opt == "show") {
-//     modal.show();
-//   }
-// }
-
 function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
   const Toast = Swal.mixin({
     toast: true,
@@ -155,21 +113,6 @@ function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
     title: text,
   });
 }
-
-// const closeModal = (targetModal = "crud-modal") => {
-// //   resetForm();
-//   formCheckbox.id = [];
-//   formCheckbox.status = "";
-//   const $targetEl = document.getElementById(targetModal);
-//   const modal = new Modal($targetEl);
-//   modal.hide();
-// };
-
-// const showModal = (targetModal = "crud-modal") => {
-//   const $targetEl = document.getElementById(targetModal);
-//   const modal = new Modal($targetEl);
-//   modal.show();
-// };
 
 const formCheckbox = useForm({
   id: [],
@@ -249,25 +192,6 @@ function checkedAll() {
   }
 }
 
-// function handleOptionSubmission() {
-//   formCheckbox.post("/dashboard/submission/option-submission", {
-//     preserveScroll: true,
-//     onSuccess: () => {
-//       choice.value = false;
-//       formCheckbox.id = [];
-//       formCheckbox.status = "";
-//       toast("success", "Berhasil");
-//       closeModal();
-//       let checkedCheckboxes = document.querySelectorAll(
-//         'input[type="checkbox"]:checked'
-//       );
-//       checkedCheckboxes.forEach((element) => {
-//         element.checked = false;
-//       });
-//     },
-//   });
-// }
-
 const previewPoster = ref(props.schedule[0].poster);
 function uploadPoster(e) {
   const image = e.target.files[0];
@@ -289,27 +213,6 @@ function uploadPoster(e) {
   }
 }
 
-// const previewProposal = ref(props.schedule[0].proposal);
-// function uploadProposal(e) {
-//   const image = e.target.files[0];
-//   if (
-//     (image.type == "image/png") |
-//     (image.type == "image/jpg") |
-//     (image.type == "image/jpeg")
-//   ) {
-//     const reader = new FileReader();
-//     reader.readAsDataURL(image);
-//     reader.onload = (e) => {
-//       previewProposal.value = e.target.result;
-//       form.proposal = image;
-//     };
-//   } else {
-//     form.image = null;
-//     closeModal("crud-modal");
-//     toast("warning", "Harus Format Gambar");
-//   }
-// }
-
 function updateSchedule() {
   form.post("/committee/schedule/store", {
     preserveScroll: true,
@@ -326,6 +229,9 @@ function updateSchedule() {
     <AuthenticatedLayoutCommittee>
       <template #header>
         <TabMenu :id="idSubmissionLastSegment" />
+      </template>
+      <template #headerTitle>
+        Detail Jadwal
       </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">

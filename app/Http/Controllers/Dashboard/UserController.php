@@ -46,20 +46,11 @@ class UserController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
         try {
-
             $id = $request->post('id');
             if ($id) {
                 $validasiData = $this->updateValidator($request);
@@ -79,6 +70,7 @@ class UserController extends Controller
 
                 Profile::where('profileable_id', $id)->update([
                     'regional_id' => $request->post('regional_id'),
+                    'gender' => $request->post('gender'),
                 ]);
 
                 if (!$result) return redirect()->back()->withErrors($result)->withInput();
@@ -103,9 +95,10 @@ class UserController extends Controller
                     'profileable_id' => $result->id,
                     'profileable_type' => 'App\Models\User',
                     'regional_id' => $request->post('regional_id'),
+                    'gender' => $request->post('gender'),
                 ];
 
-                $result->profile()->create($saveProfile);
+                Profile::create($saveProfile);
 
                 $result->assignRole($request->post('role'));
                 if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
@@ -128,6 +121,7 @@ class UserController extends Controller
                 'password' => 'required|string',
                 'role' => 'required|string|max:36',
                 'regional_id' => 'required|string|max:36',
+                'gender' => 'required|string|max:10',
             ];
             $Validatedata = [
                 'name' => $request->post('name'),
@@ -135,6 +129,7 @@ class UserController extends Controller
                 'password' => $request->post('password'),
                 'role' => $request->post('role'),
                 'regional_id' => $request->post('regional_id'),
+                'gender' => $request->post('gender'),
             ];
             $validator = EntityValidator::validate($Validatedata, $rules);
             if ($validator->fails()) return $validator->errors();
@@ -156,6 +151,7 @@ class UserController extends Controller
                 'password' => 'required|string',
                 'role' => 'required|string|max:36',
                 'regional_id' => 'required|string|max:36',
+                'gender' => 'required|string|max:10',
             ];
             $Validatedata = [
                 'name' => $request->post('name'),
@@ -163,6 +159,7 @@ class UserController extends Controller
                 'password' => $request->post('password'),
                 'role' => $request->post('role'),
                 'regional_id' => $request->post('regional_id'),
+                'gender' => $request->post('gender'),
             ];
             $validator = EntityValidator::validate($Validatedata, $rules);
             if ($validator->fails()) return $validator->errors();

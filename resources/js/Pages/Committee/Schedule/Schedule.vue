@@ -67,7 +67,7 @@ const regionalName = computed(() => props.committee.profile?.regional?.name);
 const form = useForm({
   id: "",
   regional_id: props.committee.profile?.regional?.id,
-//   participant_id: "",
+  //   participant_id: "",
   committee_id: props.committee.id,
   hp: props.committee.profile?.hp,
   category_id: "",
@@ -98,32 +98,31 @@ const form = useForm({
 });
 
 function resetForm() {
-  form.id = "",
-  form.category_id = "",
-  form.class_room_id = "",
-  form.chief_id = "", //ketua pelaksana
-  form.type_activity_id = "", //jenis kegiatan
-  form.periode = "",
-  form.poster = "", //konsep kegiatan
-  form.concept = "", //konsep kegiatan
-  form.committee_layout = "", //susunan panitia
-  form.target_participant = "", //target peserta
-  form.speaker = "", //pemateri
-  form.total_activity = "", // total kegiatan yang sudah dikerjakan
-  form.price = "", // harga
-  form.facility = "", // fasiliitas
-  form.total_rooms_stay = "", // jumlah ruang menginap
-  form.benefit = "", // jumlah ruang menginap
-  form.location = "",
-  form.google_maps = "",
-  form.address = "",
-  form.start_date_class = "",
-  form.end_date_class = "",
-  form.approval_date = "",
-  form.graduation_date = "",
-  form.proposal = "",
-  previewPoster.value = "";
-  previewProposal.value = "";
+  (form.id = ""),
+    (form.category_id = ""),
+    (form.class_room_id = ""),
+    (form.chief_id = ""), //ketua pelaksana
+    (form.type_activity_id = ""), //jenis kegiatan
+    (form.periode = ""),
+    (form.poster = ""), //konsep kegiatan
+    (form.concept = ""), //konsep kegiatan
+    (form.committee_layout = ""), //susunan panitia
+    (form.target_participant = ""), //target peserta
+    (form.speaker = ""), //pemateri
+    (form.total_activity = ""), // total kegiatan yang sudah dikerjakan
+    (form.price = ""), // harga
+    (form.facility = ""), // fasiliitas
+    (form.total_rooms_stay = ""), // jumlah ruang menginap
+    (form.benefit = ""), // jumlah ruang menginap
+    (form.location = ""),
+    (form.google_maps = ""),
+    (form.address = ""),
+    (form.start_date_class = ""),
+    (form.end_date_class = ""),
+    (form.approval_date = ""),
+    (form.graduation_date = ""),
+    (form.proposal = ""),
+    (previewPoster.value = "");
 }
 
 function modalAddSchedule(opt) {
@@ -161,59 +160,6 @@ function addSchedule() {
     },
   });
 }
-
-// function editClassRoom(data) {
-//     form.id = data.id;
-//     form.participant_id = data.participant_id;
-//     form.committee_id = data.committee_id;
-//     form.status = data.status;
-//     form.approval_date = data.approval_date;
-//     form.graduation_date = data.graduation_date;
-//     form.file = data.file;
-//     modalAddSchedule("show");
-// }
-
-// function rejectSubmission(id, namePeserta) {
-//     form.id = id;
-//     const konfirm = confirm(`Apakah anda yakin ingin menolak ${namePeserta}?`);
-//     if (!konfirm) return;
-//     form.post(`/dashboard/submission/reject-submission`, {
-//         preserveScroll: true,
-//         onSuccess: (e) => {
-//             toast("success", "Berhasil");
-//             resetForm();
-//             modalUser("hide");
-//         },
-//     });
-// }
-
-// function approvalSubmission(id, namePeserta) {
-//     form.id = id;
-//     const konfirm = confirm(`Apakah anda yakin ingin menerima ${namePeserta}?`);
-//     if (!konfirm) return;
-//     form.post(`/dashboard/submission/approval-submission`, {
-//         preserveScroll: true,
-//         onSuccess: (e) => {
-//             toast("success", "Berhasil");
-//             resetForm();
-//             modalUser("hide");
-//         },
-//     });
-// }
-
-// function graduationSubmission(id, namePeserta) {
-//     form.id = id;
-//     const konfirm = confirm(`Apakah anda yakin ingin meluluskan ${namePeserta}?`);
-//     if (!konfirm) return;
-//     form.post(`/dashboard/submission/graduation-submission`, {
-//         preserveScroll: true,
-//         onSuccess: (e) => {
-//             toast("success", "Berhasil");
-//             resetForm();
-//             modalUser("hide");
-//         },
-//     });
-// }
 
 function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
   const Toast = Swal.mixin({
@@ -388,9 +334,7 @@ function uploadPoster(e) {
 
 function uploadProposal(e) {
   const proposal = e.target.files[0];
-  if (
-    (proposal.type == "application/pdf")
-  ) {
+  if (proposal.type == "application/pdf") {
     const reader = new FileReader();
     reader.readAsDataURL(proposal);
     reader.onload = (e) => {
@@ -417,90 +361,90 @@ function deleteSchedule(id) {
 
 const speakers = ref([]);
 const setSpeaker = async (classRoomId) => {
-    await axios
+  await axios
     .get(`/committee/schedule/speaker/${classRoomId}`)
     .then((response) => {
-        speakers.value = response.data;
+      speakers.value = response.data;
     })
     .catch((error) => console.error(error));
-}
+};
 </script>
 
 <template>
-  <Head title="Article" />
+  <Head title="Schedule" />
   <div>
     <AuthenticatedLayoutCommittee>
       <template #header> Jadwal </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <div
+            class="p-6 flex flex-col items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
+          >
+            <div>
+              <!-- icon plus -->
+              <div
+                @click="showModal()"
+                title="Tambah Jadwal"
+                class="cursor-pointer"
+              >
+                <svg
+                  class="h-8 w-8 bg-green-400 p-1 rounded-lg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g
+                    id="SVGRepo_tracerCarrier"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <path
+                      d="M4 12H20M12 4V20"
+                      stroke="#000000"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                  </g>
+                </svg>
+              </div>
+            </div>
+
+            <label for="table-search" class="sr-only">Search</label>
+            <div class="relative">
+              <div
+                class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none"
+              >
+                <svg
+                  class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                  />
+                </svg>
+              </div>
+              <input
+                v-model="search"
+                type="text"
+                id="table-search-users"
+                class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Regional"
+              />
+            </div>
+          </div>
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
-              <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <div
-                  class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
-                >
-                  <div>
-                    <!-- icon plus -->
-                    <div
-                      @click="showModal()"
-                      title="Tambah Jadwal"
-                      class="cursor-pointer"
-                    >
-                      <svg
-                        class="h-8 w-8 bg-green-400 p-1 rounded-lg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g
-                          id="SVGRepo_tracerCarrier"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        ></g>
-                        <g id="SVGRepo_iconCarrier">
-                          <path
-                            d="M4 12H20M12 4V20"
-                            stroke="#000000"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          ></path>
-                        </g>
-                      </svg>
-                    </div>
-                  </div>
-
-                  <label for="table-search" class="sr-only">Search</label>
-                  <div class="relative">
-                    <div
-                      class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none"
-                    >
-                      <svg
-                        class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                        />
-                      </svg>
-                    </div>
-                    <input
-                      v-model="search"
-                      type="text"
-                      id="table-search-users"
-                      class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="Regional"
-                    />
-                  </div>
-                </div>
+              <div class="overflow-x-auto shadow-md sm:rounded-lg">
                 <table
                   class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
                 >
@@ -644,7 +588,9 @@ const setSpeaker = async (classRoomId) => {
                                 class="p-2 pl-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                               >
                                 <Link
-                                 :href="route('committee.schedule.detail', item.id)"
+                                  :href="
+                                    route('committee.schedule.detail', item.id)
+                                  "
                                   title="Detail Jadwal"
                                   class="cursor-pointer"
                                   >Detail</Link
@@ -652,8 +598,8 @@ const setSpeaker = async (classRoomId) => {
                               </li>
                               <li>
                                 <button
-                                title="Hapus Jadwal"
-                                 @click="deleteSchedule(item.id)"
+                                  title="Hapus Jadwal"
+                                  @click="deleteSchedule(item.id)"
                                   type="button"
                                   class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                                 >
@@ -675,12 +621,11 @@ const setSpeaker = async (classRoomId) => {
                     </tr>
                   </tbody>
                 </table>
-
-                <Pagination
-                  class="my-6 flex justify-center md:justify-end"
-                  :links="props.schedules.links"
-                />
               </div>
+              <Pagination
+                class="my-6 flex justify-center md:justify-end"
+                :links="props.schedules.links"
+              />
             </div>
           </div>
         </div>
@@ -713,7 +658,7 @@ const setSpeaker = async (classRoomId) => {
               <button
                 type="button"
                 class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                @click="closeModal()"
+                @click="closeModal('crud-modal')"
               >
                 <svg
                   class="w-3 h-3"
@@ -757,35 +702,35 @@ const setSpeaker = async (classRoomId) => {
                   />
                 </div>
                 <div class="col-span-2 sm:col-span-1">
-                    <label
-                      for="start_date_class"
-                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >Mulai</label
-                    >
-                    <input
-                      v-model="form.start_date_class"
-                      type="date"
-                      name="start_date_class"
-                      id="start_date_class"
-                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Tanggal Muali"
-                    />
-                  </div>
-                  <div class="col-span-2 sm:col-span-1">
-                    <label
-                      for="end_date_class"
-                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >Selesai</label
-                    >
-                    <input
-                      v-model="form.end_date_class"
-                      type="date"
-                      name="end_date_class"
-                      id="end_date_class"
-                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Tanggal Selesai"
-                    />
-                  </div>
+                  <label
+                    for="start_date_class"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Mulai</label
+                  >
+                  <input
+                    v-model="form.start_date_class"
+                    type="date"
+                    name="start_date_class"
+                    id="start_date_class"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Tanggal Muali"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="end_date_class"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Selesai</label
+                  >
+                  <input
+                    v-model="form.end_date_class"
+                    type="date"
+                    name="end_date_class"
+                    id="end_date_class"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Tanggal Selesai"
+                  />
+                </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label
                     for="chief_id"
@@ -798,8 +743,12 @@ const setSpeaker = async (classRoomId) => {
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   >
                     <option value="" selected>Pilih Ketua Pelaksana</option>
-                    <option v-for="item, index in committees" :key="index" :value="item.id">
-                        {{item.name}}
+                    <option
+                      v-for="(item, index) in committees"
+                      :key="index"
+                      :value="item.id"
+                    >
+                      {{ item.name }}
                     </option>
                   </select>
                 </div>
@@ -841,51 +790,51 @@ const setSpeaker = async (classRoomId) => {
                   </select>
                 </div>
                 <div class="col-span-2 sm:col-span-1">
-                    <label
-                      for="speaker"
-                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >Pemateri</label
+                  <label
+                    for="speaker"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Pemateri</label
+                  >
+                  <select
+                    v-model="form.speaker"
+                    @change="chainedProvince(form.speaker)"
+                    id="speaker"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" :selected="form.speaker == null">
+                      Pilih Narasumber
+                    </option>
+                    <option
+                      v-for="(item, index) in speakers"
+                      :key="index"
+                      :value="item.id"
+                      :selected="form.speaker == item.id"
                     >
-                    <select
-                      v-model="form.speaker"
-                      @change="chainedProvince(form.speaker)"
-                      id="speaker"
-                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      {{ item.name }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="category_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Tingkatan Kelas</label
+                  >
+                  <select
+                    v-model="form.category_id"
+                    id="category_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" selected>Pilih Tingkatan</option>
+                    <option
+                      v-for="(item, index) in props.categories"
+                      :key="index"
+                      :value="item.id"
                     >
-                      <option value="" :selected="form.speaker == null">
-                        Pilih Narasumber
-                      </option>
-                      <option
-                        v-for="(item, index) in speakers"
-                        :key="index"
-                        :value="item.id"
-                        :selected="form.speaker == item.id"
-                      >
-                        {{ item.name }}
-                      </option>
-                    </select>
-                  </div>
-                  <div class="col-span-2 sm:col-span-1">
-                    <label
-                      for="category_id"
-                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >Tingkatan Kelas</label
-                    >
-                    <select
-                      v-model="form.category_id"
-                      id="category_id"
-                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    >
-                      <option value="" selected>Pilih Tingkatan</option>
-                      <option
-                        v-for="(item, index) in props.categories"
-                        :key="index"
-                        :value="item.id"
-                      >
-                        {{ item.name }}
-                      </option>
-                    </select>
-                  </div>
+                      {{ item.name }}
+                    </option>
+                  </select>
+                </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label
                     for="class_room_id"
@@ -1030,19 +979,19 @@ const setSpeaker = async (classRoomId) => {
                   ></textarea>
                 </div>
                 <div class="col-span-2 sm:col-span-1">
-                <label
+                  <label
                     for="benefit"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >Benefit Peserta</label
-                >
-                <textarea
+                  >
+                  <textarea
                     v-model="form.benefit"
                     type="number"
                     name="benefit"
                     id="benefit"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder="Benefit Peserta"
-                ></textarea>
+                  ></textarea>
                 </div>
 
                 <div class="col-span-2 sm:col-span-1">

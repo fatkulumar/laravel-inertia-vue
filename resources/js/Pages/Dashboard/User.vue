@@ -44,6 +44,7 @@ const form = useForm({
   name: "",
   email: "",
   role: "",
+  gender: "",
   password: "mmpj12345",
   regional_id: "",
 });
@@ -55,6 +56,7 @@ function resetForm() {
   form.role = "";
   form.password = "mmpj12345";
   form.regional_id = null;
+  form.gender = null;
 }
 
 function modalUser(opt) {
@@ -99,6 +101,7 @@ function editUser(data, role, regional) {
   form.email = data.email;
   form.role = role[0].name;
   form.regional_id = regional.regional_id;
+  form.gender = regional.gender;
   modalUser("show");
 }
 
@@ -355,6 +358,9 @@ function uploadImage(e) {
                         <p>Role</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
+                        <p>Jenis Kelamin</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
                         <div class="flex gap-1">
                           <p class="text-center mt-1">Action</p>
                           <input
@@ -410,6 +416,9 @@ function uploadImage(e) {
                         <div v-for="(itemRole, indexRole) in item.roles" :key="indexRole">
                             {{ itemRole.name }}
                         </div>
+                      </td>
+                      <td class="px-6 py-4">
+                        {{ item.profile?.gender }}
                       </td>
                       <td class="px-6 py-4">
                         <div class="flex gap-2">
@@ -628,6 +637,18 @@ function uploadImage(e) {
                         <option v-for="item, index in regionals" :key="index" :value="item.id" :selected="form.regionId === item.id">
                             {{ item.name }}
                         </option>
+                    </select>
+                </div>
+                <div class="col-span-2">
+                    <label
+                      for="role"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >Gender</label
+                    >
+                    <select v-model="form.gender" name="role" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                        <option :selected="form.gender == null" value="">Pilih Jenis Kelamin</option>
+                        <option value="laki-laki">Laki Laki</option>
+                        <option value="perempuan">Perempuan</option>
                     </select>
                 </div>
               </div>

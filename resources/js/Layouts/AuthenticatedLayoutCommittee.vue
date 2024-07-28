@@ -10,6 +10,10 @@ import { initFlowbite } from 'flowbite';
 import SidebarAdmin from '@/Components/SIdebar/SidebarAdmin.vue';
 import SidebarCommittee from '@/Components/SIdebar/SidebarCommittee.vue';
 
+onMounted(() => {
+    initFlowbite();
+})
+
 const showingNavigationDropdown = ref(false);
 
 onMounted(() => {
@@ -94,7 +98,7 @@ onUnmounted(() => document.removeEventListener('mouseup', closeOnEscape));
                                         <span class="inline-flex rounded-md">
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
+                                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white hover:underline focus:outline-none transition ease-in-out duration-150"
                                             >
                                                 {{ $page.props.auth.user.name }}
 
@@ -200,6 +204,12 @@ onUnmounted(() => document.removeEventListener('mouseup', closeOnEscape));
             <header class="bg-white shadow" v-if="$slots.header">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     <slot name="header" />
+                </div>
+            </header>
+
+            <header class="bg-white shadow" v-if="$slots.headerTitle">
+                <div class="mx-auto py-6 px-4 sm:px-6 md:px-0 flex justify-center font-bold">
+                    <slot name="headerTitle" />
                 </div>
             </header>
 

@@ -291,11 +291,9 @@ function uploadImage(e) {
       </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 text-gray-900">
-              <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <div
-                  class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
+
+            <div
+                  class="p-6 flex flex-col items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
                 >
                   <div>
                     <!-- icon plus -->
@@ -359,6 +357,11 @@ function uploadImage(e) {
                     />
                   </div>
                 </div>
+
+          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6 text-gray-900">
+              <div class="overflow-x-auto shadow-md sm:rounded-lg">
+
                 <table
                   class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
                 >
@@ -377,6 +380,9 @@ function uploadImage(e) {
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <p>Role</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
+                        <p>Jenis Kelamin</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <div class="flex gap-1">
@@ -472,6 +478,9 @@ function uploadImage(e) {
                         {{ item.participant?.profile?.regional?.name }}
                       </td>
                       <td class="px-6 py-4">
+                        {{ item.participant?.profile?.gender }}
+                      </td>
+                      <td class="px-6 py-4">
                         <div
                           v-for="(itemRole, indexRole) in item.participant
                             ?.roles"
@@ -553,12 +562,11 @@ function uploadImage(e) {
                     </tr>
                   </tbody>
                 </table>
-
-                <Pagination
-                  class="my-6 flex justify-center md:justify-end"
-                  :links="props.submissions.links"
-                />
-              </div>
+            </div>
+            <Pagination
+              class="my-6 flex justify-center md:justify-end"
+              :links="props.submissions.links"
+            />
             </div>
           </div>
         </div>
@@ -683,7 +691,7 @@ function uploadImage(e) {
                   <label
                     for="role"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Level</label
+                    >Role</label
                   >
                   <input
                     v-model="form.role"
