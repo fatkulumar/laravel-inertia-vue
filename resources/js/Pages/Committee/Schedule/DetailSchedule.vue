@@ -234,11 +234,11 @@ function updateSchedule() {
         Detail Jadwal
       </template>
       <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-0">
           <div
             class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex flex-col md:flex-row"
           >
-            <div class="p-6 text-gray-900">
+            <div class="text-gray-900">
               <div
                 class="text-red-600 text-sm ml-2"
                 v-for="(error, index) in props.errors"
@@ -253,7 +253,23 @@ function updateSchedule() {
                   enctype="multipart/form-data"
                   class="p-4 md:p-5"
                 >
-                  <div class="md:grid gap-4 mb-4 md:grid-cols-3">
+                  <div class="md:grid gap-1 mb-4 md:grid-cols-2">
+                    <div class="col-span-2">
+                        <label
+                          for="poster"
+                          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          >Poster</label
+                        >
+                        <img :src="previewPoster" class="md:w-6/12 py-2" />
+                        <input
+                          @change="uploadPoster"
+                          type="file"
+                          name="poster"
+                          id="poster"
+                          accept="poster/*"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        />
+                      </div>
                     <div class="col-span-2 sm:col-span-1">
                       <label
                         for="committee_id"
@@ -324,22 +340,6 @@ function updateSchedule() {
                       </select>
                     </div>
 
-                    <div class="col-span-2">
-                      <label
-                        for="poster"
-                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                        >Poster</label
-                      >
-                      <img :src="previewPoster" class="md:w-5/12 py-2" />
-                      <input
-                        @change="uploadPoster"
-                        type="file"
-                        name="poster"
-                        id="poster"
-                        accept="poster/*"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      />
-                    </div>
                     <div class="col-span-2 sm:col-span-1">
                       <label
                         for="chief_id"
@@ -683,7 +683,7 @@ function updateSchedule() {
                 </form>
               </div>
             </div>
-            <div class="px-10 md:px-0">
+            <div class="px-2">
               <div class="flex border-b-2 pb-4">
                 <p class="mt-6">Status</p>
                 <small class="text-xs text-green-500 mt-5"

@@ -7,8 +7,10 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Models\ClassRoom;
 use App\Models\Documentation;
+use App\Models\GuideCadre;
 use App\Models\Letter;
 use App\Models\Profile;
+use App\Models\RegencyRegional;
 use App\Models\Regional;
 use App\Models\Schedule;
 use App\Models\Speaker;
@@ -255,6 +257,22 @@ class DatabaseSeeder extends Seeder
                     'schedule_id' => $scheduleId,
                     'name' => 'name',
                     'file' => 'file',
+                ]);
+
+                $guide_cadre_id = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                GuideCadre::create([
+                    'id' => $guide_cadre_id,
+                    'type_activity_id' => $type_activity_id,
+                    'name' => 'name',
+                    'link' => 'link',
+                    'information' => 'Persiapan Pelaksanaan Kegiatan',
+                ]);
+
+                $regency_regional_id = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                RegencyRegional::create([
+                    'id' => $regency_regional_id,
+                    'regional_id' => $id_regional3,
+                    'regency' => 'Sukun',
                 ]);
             }
         }

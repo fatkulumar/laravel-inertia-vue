@@ -57,6 +57,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->name('dashboard.speaker.')
                 ->group(base_path('routes/dashboard/speaker.php'));
 
+            Route::middleware('web')
+                ->prefix('dashboard/guide-cadre')
+                ->name('dashboard.guideCadre.')
+                ->group(base_path('routes/dashboard/guide_cadre.php'));
+
             //committee
             Route::middleware('web')
                 ->prefix('committee/schedule')
@@ -67,6 +72,17 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->prefix('committee/participant')
                 ->name('committee.participant.')
                 ->group(base_path('routes/committee/participant.php'));
+
+            Route::middleware('web')
+                ->prefix('committee/guide-cadre')
+                ->name('committee.guideCadre.')
+                ->group(base_path('routes/committee/guide_cadre.php'));
+
+            Route::middleware('web')
+                ->prefix('committee/regency-regional')
+                ->name('committee.regencyRegional.')
+                ->group(base_path('routes/committee/regency_regional.php'));
+
 
             //participant
             Route::middleware('web')
