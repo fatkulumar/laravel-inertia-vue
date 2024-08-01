@@ -689,7 +689,7 @@ function uploadImage(e) {
                             >
                               <li>
                                 <button
-                                  title="Hapus Jadwal"
+                                  title="Overview"
                                   @click="overviewSchedule(item.id, item.participant?.name)"
                                   type="button"
                                   class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -699,7 +699,7 @@ function uploadImage(e) {
                               </li>
                               <li>
                                 <button
-                                  title="Hapus Jadwal"
+                                  title="Received"
                                   @click="receivedSchedule(item.id, item.participant?.name)"
                                   type="button"
                                   class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -709,7 +709,7 @@ function uploadImage(e) {
                               </li>
                               <li>
                                 <button
-                                  title="Hapus Jadwal"
+                                  title="Reject"
                                   @click="rejectSchedule(item.id, item.participant?.name)"
                                   type="button"
                                   class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -719,7 +719,7 @@ function uploadImage(e) {
                               </li>
                               <li>
                                 <button
-                                  title="Hapus Jadwal"
+                                  title="Approval"
                                   @click="approvalSchedule(item)"
                                   type="button"
                                   class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -729,7 +729,7 @@ function uploadImage(e) {
                               </li>
                               <li>
                                 <button
-                                  title="Hapus Jadwal"
+                                  title="Hapus"
                                   @click="
                                     deleteSchedule(
                                       item.id,

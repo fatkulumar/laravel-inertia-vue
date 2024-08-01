@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('guide_cadres', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('type_activity_id')->references('id')->on('type_activities');
+            $table->foreignUuid('type_activity_id');
             $table->string('name');
             $table->text('link');
             $table->string('information');

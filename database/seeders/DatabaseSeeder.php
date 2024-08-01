@@ -186,6 +186,13 @@ class DatabaseSeeder extends Seeder
                     'category_id' => $Category1->id,
                 ]);
 
+                $regency_regional_id = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                RegencyRegional::create([
+                    'id' => $regency_regional_id,
+                    'regional_id' => $id_regional3,
+                    'regency' => 'Sukun',
+                ]);
+
                 $scheduleId = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 Schedule::create([
                     'id' => $scheduleId,
@@ -195,6 +202,7 @@ class DatabaseSeeder extends Seeder
                     'class_room_id' => $classRoom3->id,
                     'chief_id' => $userId3, //ketua pelaksana
                     'type_activity_id' => $type_activity_id,
+                    'regency_regional_id' => $regency_regional_id,
                     'periode' => 14,
                     'poster' => 'Link Poster', //konsep kegiatan
                     'concept' => 'konsep', //konsep kegiatan
@@ -266,13 +274,6 @@ class DatabaseSeeder extends Seeder
                     'name' => 'name',
                     'link' => 'link',
                     'information' => 'Persiapan Pelaksanaan Kegiatan',
-                ]);
-
-                $regency_regional_id = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
-                RegencyRegional::create([
-                    'id' => $regency_regional_id,
-                    'regional_id' => $id_regional3,
-                    'regency' => 'Sukun',
                 ]);
             }
         }

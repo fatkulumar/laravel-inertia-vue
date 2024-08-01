@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('regency_regionals', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('regional_id')->references('id')->on('regionals');
+            $table->foreignUuid('regional_id');
             $table->text('regency');
             $table->timestamps();
         });

@@ -9,6 +9,7 @@ use App\Models\ClassRoom;
 use App\Models\Documentation;
 use App\Models\Letter;
 use App\Models\Profile;
+use App\Models\RegencyRegional;
 use App\Models\Schedule;
 use App\Models\Speaker;
 use App\Models\Submission;
@@ -62,7 +63,11 @@ class ScheduleController extends Controller
             $committee = User::with('profile.regional')->where('id', Auth()->user()->id)->first();
             $committees = User::with('profile.regional', 'chief')->role('panitia')->get();
             $typeActivities = TypeActivity::all(['id', 'name']);
-            // return $schedules;
+            $regional_id = Auth::user()->profile->regional->id;
+            $regencyRegionals = RegencyRegional::with('regional')
+                                ->where('regional_id', $regional_id)
+                                ->get();
+            // return $regencyRegional;
 
             return Inertia::render('Committee/Schedule/Schedule', [
                 'schedules' => $schedules,
@@ -71,6 +76,7 @@ class ScheduleController extends Controller
                 'classRooms' => $classRooms,
                 'categories' => $categories,
                 'typeActivities' => $typeActivities,
+                'regencyRegionals' => $regencyRegionals,
             ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
@@ -87,7 +93,6 @@ class ScheduleController extends Controller
     public function store(Request $request)
     {
         try {
-
             $id = $request->post('id');
             if ($id) {
                 $validasiData = $this->updateValidator($request);
@@ -119,6 +124,7 @@ class ScheduleController extends Controller
                     'committee_id' => $request->post('committee_id'),
                     'class_room_id' => $request->post('class_room_id'),
                     'category_id' => $request->post('category_id'),
+                    'regency_regional_id' => $request->post('regency_regional_id'),
                     'status' => $request->post('status'),
                     'start_date_class' => $request->post('start_date_class'),
                     'end_date_class' => $request->post('end_date_class'),
@@ -144,10 +150,8 @@ class ScheduleController extends Controller
                 $result = $schedule->update($saveData);
 
                 // return $schedule;
-                // return $request->post('periode');
                 if (!$result) return redirect()->back()->withErrors($result)->withInput();
             } else {
-                // return "umar";
                 // return $request->all();
                 $validasiData = $this->storeValidator($request);
                 if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
@@ -173,6 +177,7 @@ class ScheduleController extends Controller
                     'committee_id' => $request->post('committee_id'),
                     'class_room_id' => $request->post('class_room_id'),
                     'category_id' => $request->post('category_id'),
+                    'regency_regional_id' => $request->post('regency_regional_id'),
                     'status' => $request->post('status'),
                     'start_date_class' => $request->post('start_date_class'),
                     'end_date_class' => $request->post('end_date_class'),
@@ -186,7 +191,7 @@ class ScheduleController extends Controller
                     'concept' => $request->post('concept'), //konsep kegiatan
                     'committee_layout' => $request->post('committee_layout'), //susunan panitia
                     'target_participant' => $request->post('target_participant'), //target peserta
-                    'speaker' => $request->post('speaker'), //pemateri
+                    'speaker_id' => $request->post('speaker_id'), //pemateri
                     'total_activity' => $request->post('total_activity'), // total kegiatan yang sudah dikerjakan
                     'price' => $request->post('price'), // harga
                     'facility' => $request->post('facility'), // fasiliitas
@@ -220,6 +225,7 @@ class ScheduleController extends Controller
                 'committee_id' => 'required|string|max:36',
                 'class_room_id' => 'required|string|max:36',
                 'category_id' => 'required|string|max:36',
+                'regency_regional_id' => 'required|string|max:36',
                 'start_date_class' => 'required|string|max:15',
                 'end_date_class' => 'required|string|max:15',
                 'location' => 'required|string|max:255',
@@ -233,13 +239,13 @@ class ScheduleController extends Controller
                 'concept' => 'required|string',
                 'committee_layout' => 'required|string',
                 'target_participant' => 'required|string',
-                'speaker' => 'required|string|max:36',
+                'speaker_id' => 'required|string|max:36',
                 'total_activity' => 'required|integer',
                 'price' => 'required|integer',
                 'facility' => 'required|string|max:20000',
                 'total_rooms_stay' => 'required|integer',
                 'benefit' => 'required|string|max:20000',
-                'proposal' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'proposal' => 'required|mimes:pdf|max:2048',
 
             ];
             $Validatedata = [
@@ -247,6 +253,7 @@ class ScheduleController extends Controller
                 'committee_id' => $request->post('committee_id'),
                 'class_room_id' => $request->post('class_room_id'),
                 'category_id' => $request->post('category_id'),
+                'regency_regional_id' => $request->post('regency_regional_id'),
                 'status' => $request->post('status'),
                 'start_date_class' => $request->post('start_date_class'),
                 'end_date_class' => $request->post('end_date_class'),
@@ -260,7 +267,7 @@ class ScheduleController extends Controller
                 'concept' => $request->post('concept'),
                 'committee_layout' => $request->post('committee_layout'),
                 'target_participant' => $request->post('target_participant'),
-                'speaker' => $request->post('speaker'),
+                'speaker_id' => $request->post('speaker_id'),
                 'total_activity' => $request->post('total_activity'),
                 'price' => $request->post('price'),
                 'facility' => $request->post('facility'),
@@ -287,6 +294,7 @@ class ScheduleController extends Controller
                 'committee_id' => 'required|string|max:36',
                 'class_room_id' => 'required|string|max:36',
                 'category_id' => 'required|string|max:36',
+                'regency_regional_id' => 'required|string|max:36',
                 'start_date_class' => 'required|string|max:15',
                 'end_date_class' => 'required|string|max:15',
                 'location' => 'required|string|max:255',
@@ -300,20 +308,20 @@ class ScheduleController extends Controller
                 'concept' => 'required|string',
                 'committee_layout' => 'required|string',
                 'target_participant' => 'required|string',
-                'speaker' => 'required|string|max:36',
+                'speaker_id' => 'required|string|max:36',
                 'total_activity' => 'required|integer',
                 'price' => 'required|integer',
                 'facility' => 'required|string|max:20000',
                 'total_rooms_stay' => 'required|integer',
                 'benefit' => 'required|string|max:20000',
-                'proposal' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-
+                'proposal' => 'nullable|mimes:pdf|max:2048',
             ];
             $Validatedata = [
                 'regional_id' => $request->post('regional_id'),
                 'committee_id' => $request->post('committee_id'),
                 'class_room_id' => $request->post('class_room_id'),
                 'category_id' => $request->post('category_id'),
+                'regency_regional_id' => $request->post('regency_regional_id'),
                 'status' => $request->post('status'),
                 'start_date_class' => $request->post('start_date_class'),
                 'end_date_class' => $request->post('end_date_class'),
@@ -327,7 +335,7 @@ class ScheduleController extends Controller
                 'concept' => $request->post('concept'),
                 'committee_layout' => $request->post('committee_layout'),
                 'target_participant' => $request->post('target_participant'),
-                'speaker' => $request->post('speaker'),
+                'speaker_id' => $request->post('speaker_id'),
                 'total_activity' => $request->post('total_activity'),
                 'price' => $request->post('price'),
                 'facility' => $request->post('facility'),
@@ -382,13 +390,17 @@ class ScheduleController extends Controller
         $categories = Category::all(['id', 'name']);
         $chiefs = User::with('profile.regional')->role('panitia')->get();
         $typeActivities = TypeActivity::all(['id', 'name']);
-        // return $chiefs;
+        $regional_id = Auth::user()->profile->regional->id;
+        $regencyRegionals = RegencyRegional::with('regional')
+                                ->where('regional_id', $regional_id)
+                                ->get();
         return Inertia::render('Committee/Schedule/DetailSchedule', [
             'schedule' => $schedule,
             'classRooms' => $classRooms,
             'categories' => $categories,
             'chiefs' => $chiefs,
             'typeActivities' => $typeActivities,
+            'regencyRegionals' => $regencyRegionals,
         ]);
     }
 

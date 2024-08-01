@@ -3,42 +3,44 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Models\GuideCadre;
+use App\Models\RegencyRegional;
+use App\Models\Regional;
 use App\Models\TypeActivity;
 use App\Traits\EntityValidator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
-class GuideCadreController extends Controller
+class RegencyRegionalController extends Controller
 {
     use EntityValidator;
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request, $regionalId)
     {
         try {
-            $guideCadres = GuideCadre::orderBy('created_at', 'desc')
+            $regencyRegionals = RegencyRegional::orderBy('created_at', 'desc')
                 ->when($request['search'], function ($query, $request) {
-                    $query->where('name', 'like', '%' . $request . '%');
+                    $query->where('regency', 'like', '%' . $request . '%');
                 })
-                ->with('typeActivity')
+                ->with('regional')
+                ->where('regional_id', $regionalId)
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);
-            // return $guideCadres;
-            $typeActivities = TypeActivity::all('id', 'name');
-            return Inertia::render('Dashboard/GuideCadre', [
-                'guideCadres' => $guideCadres,
-                'typeActivities' => $typeActivities,
+            // return $regencyRegionals;
+            return Inertia::render('Dashboard/RegencyRegional', [
+                'regencyRegionals' => $regencyRegionals,
+                'regional_id' => $regionalId,
             ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function index in Dashboard/GuideCadreController', $errors);
+            Log::channel('daily')->info('function index in Dashboard/RegencyRegionalController', $errors);
         }
     }
 
@@ -54,25 +56,21 @@ class GuideCadreController extends Controller
             $id = $request->post('id');
             if ($id) {
 
-                $categories = GuideCadre::where('id', $id)->first();
+                $categories = RegencyRegional::where('id', $id)->first();
                 $saveData = [
-                    'name' => $request->post('name'),
-                    'type_activity_id' => $request->post('type_activity_id'),
-                    'link' => $request->post('link'),
-                    'information' => $request->post('information'),
+                    'regency' => $request->post('regency'),
+                    'regional_id' => $request->post('regional_id'),
                 ];
                 $result = $categories->update($saveData);
                 if (!$result) return redirect()->back()->withErrors($result)->withInput();
             } else {
 
                 $saveData = [
-                    'name' => $request->post('name'),
-                    'type_activity_id' => $request->post('type_activity_id'),
-                    'link' => $request->post('link'),
-                    'information' => $request->post('information'),
+                    'regency' => $request->post('regency'),
+                    'regional_id' => $request->post('regional_id'),
                 ];
 
-                $result = GuideCadre::create($saveData);
+                $result = RegencyRegional::create($saveData);
                 if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
             }
         } catch (\Exception $exception) {
@@ -80,7 +78,7 @@ class GuideCadreController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function store in GuideCadreController', $errors);
+            Log::channel('daily')->info('function store in RegencyRegionalController', $errors);
         }
     }
 
@@ -88,16 +86,12 @@ class GuideCadreController extends Controller
     {
         try {
             $rules = [
-                'name' => 'required|string|max:100',
-                'type_activity_id' => 'required|string|max:36',
-                'link' => 'required|string|max:1000',
-                'information' => 'required|string|max:100',
+                'regency' => 'required|string|max:50',
+                'regional_id' => 'required|string|max:36',
             ];
             $Validatedata = [
-                'name' => $request->post('name'),
-                'type_activity_id' => $request->post('type_activity_id'),
-                'link' => $request->post('link'),
-                'information' => $request->post('information'),
+                'regency' => $request->post('regency'),
+                'regional_id' => $request->post('regional_id'),
             ];
             $validator = EntityValidator::validate($Validatedata, $rules);
             if ($validator->fails()) return $validator->errors();
@@ -106,7 +100,7 @@ class GuideCadreController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function storeValidator in GuideCadreController', $errors);
+            Log::channel('daily')->info('function storeValidator in RegencyRegionalController', $errors);
         }
     }
 
@@ -116,13 +110,13 @@ class GuideCadreController extends Controller
     public function delete(string $id)
     {
         try {
-            GuideCadre::findOrFail($id)->delete();
+            RegencyRegional::findOrFail($id)->delete();
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function delete in GuideCadreController', $errors);
+            Log::channel('daily')->info('function delete in RegencyRegionalController', $errors);
         }
     }
 
@@ -134,14 +128,14 @@ class GuideCadreController extends Controller
         try {
             $ids = $request->post('id');
             foreach ($ids as $id) {
-                GuideCadre::findOrFail($id)->delete();
+                RegencyRegional::findOrFail($id)->delete();
             }
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function delete in GuideCadreController', $errors);
+            Log::channel('daily')->info('function delete in RegencyRegionalController', $errors);
         }
     }
 }

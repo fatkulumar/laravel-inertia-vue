@@ -7,7 +7,7 @@ import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
 import { Modal } from "flowbite";
 import axios from "axios";
-import TabMenu from "@/Components/Committee/TabMenu.vue";
+import TabMenuDetailSchedule from "@/Components/Committee/TabMenuDetailSchedule.vue";
 
 onMounted(() => {
   initFlowbite();
@@ -307,7 +307,7 @@ const chainedProvince = async (provinceCode) => {
   <div>
     <AuthenticatedLayoutCommittee>
       <template #header>
-            <TabMenu :id="idSubmissionLastSegment" />
+            <TabMenuDetailSchedule :id="idSubmissionLastSegment" />
       </template>
       <template #headerTitle>
         Narasumber

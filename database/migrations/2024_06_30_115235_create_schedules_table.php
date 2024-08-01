@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->uuid('id')->primary()->unique();
-            $table->foreignUuid('regional_id');
-            $table->foreignUuid('committee_id');
-            $table->foreignUuid('category_id'); // kategori kelas
-            $table->foreignUuid('class_room_id');
-            $table->foreignUuid('chief_id'); //ketua pelaksana
-            $table->foreignUuid('type_activity_id'); //ketua pelaksana
+            $table->uuid('regional_id');
+            $table->uuid('committee_id');
+            $table->uuid('category_id'); // kategori kelas
+            $table->uuid('class_room_id');
+            $table->uuid('chief_id'); //ketua pelaksana
+            $table->uuid('type_activity_id');
+            $table->uuid('regency_regional_id');
             $table->bigInteger('periode');
             $table->text('poster'); //konsep kegiatan
             $table->text('concept'); //konsep kegiatan

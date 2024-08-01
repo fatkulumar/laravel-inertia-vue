@@ -25,6 +25,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  regencyRegionals: {
+    type: Object,
+    default: () => ({}),
+  },
   filters: {
     type: Object,
     default: () => ({}),
@@ -70,6 +74,7 @@ const form = useForm({
   //   participant_id: "",
   committee_id: props.committee.id,
   hp: props.committee.profile?.hp,
+  regency_regional_id: "",
   category_id: "",
   class_room_id: "",
   chief_id: "", //ketua pelaksana
@@ -80,7 +85,7 @@ const form = useForm({
   concept: "", //konsep kegiatan
   committee_layout: "", //susunan panitia
   target_participant: "", //target peserta
-  speaker: "", //pemateri
+  speaker_id: "", //pemateri
   total_activity: "", // total kegiatan yang sudah dikerjakan
   price: "", // harga
   facility: "", // fasiliitas
@@ -98,31 +103,31 @@ const form = useForm({
 });
 
 function resetForm() {
-  (form.id = ""),
-    (form.category_id = ""),
-    (form.class_room_id = ""),
-    (form.chief_id = ""), //ketua pelaksana
-    (form.type_activity_id = ""), //jenis kegiatan
-    (form.periode = ""),
-    (form.poster = ""), //konsep kegiatan
-    (form.concept = ""), //konsep kegiatan
-    (form.committee_layout = ""), //susunan panitia
-    (form.target_participant = ""), //target peserta
-    (form.speaker = ""), //pemateri
-    (form.total_activity = ""), // total kegiatan yang sudah dikerjakan
-    (form.price = ""), // harga
-    (form.facility = ""), // fasiliitas
-    (form.total_rooms_stay = ""), // jumlah ruang menginap
-    (form.benefit = ""), // jumlah ruang menginap
-    (form.location = ""),
-    (form.google_maps = ""),
-    (form.address = ""),
-    (form.start_date_class = ""),
-    (form.end_date_class = ""),
-    (form.approval_date = ""),
-    (form.graduation_date = ""),
-    (form.proposal = ""),
-    (previewPoster.value = "");
+    form.id = "",
+    form.category_id = "",
+    form.class_room_id = "",
+    form.chief_id = "", //ketua pelaksana
+    form.type_activity_id = "", //jenis kegiatan
+    form.periode = "",
+    form.poster = "", //konsep kegiatan
+    form.concept = "", //konsep kegiatan
+    form.committee_layout = "", //susunan panitia
+    form.target_participant = "", //target peserta
+    form.speaker_id = "", //pemateri
+    form.total_activity = "", // total kegiatan yang sudah dikerjakan
+    form.price = "", // harga
+    form.facility = "", // fasiliitas
+    form.total_rooms_stay = "", // jumlah ruang menginap
+    form.benefit = "", // jumlah ruang menginap
+    form.location = "",
+    form.google_maps = "",
+    form.address = "",
+    form.start_date_class = "",
+    form.end_date_class = "",
+    form.approval_date = "",
+    form.graduation_date = "",
+    form.proposal = "",
+    previewPoster.value = "";
 }
 
 function modalAddSchedule(opt) {
@@ -338,11 +343,10 @@ function uploadProposal(e) {
     const reader = new FileReader();
     reader.readAsDataURL(proposal);
     reader.onload = (e) => {
-      previewProposal.value = e.target.result;
       form.proposal = proposal;
     };
   } else {
-    form.image = null;
+    form.proposal = null;
     toast("warning", "Harus Format Gambar");
   }
 }
@@ -361,12 +365,16 @@ function deleteSchedule(id) {
 
 const speakers = ref([]);
 const setSpeaker = async (classRoomId) => {
-  await axios
+  try {
+    await axios
     .get(`/committee/schedule/speaker/${classRoomId}`)
     .then((response) => {
       speakers.value = response.data;
     })
-    .catch((error) => console.error(error));
+    .catch((error) => speakers.value = "");
+  } catch (error) {
+    console.log(error)
+  }
 };
 </script>
 
@@ -697,7 +705,7 @@ const setSpeaker = async (classRoomId) => {
                     type="file"
                     name="poster"
                     id="poster"
-                    accept="poster/*"
+                    accept="image/*"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                   />
                 </div>
@@ -791,14 +799,14 @@ const setSpeaker = async (classRoomId) => {
                 </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label
-                    for="speaker"
+                    for="speaker_id"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >Pemateri</label
                   >
                   <select
-                    v-model="form.speaker"
-                    @change="chainedProvince(form.speaker)"
-                    id="speaker"
+                    v-model="form.speaker_id"
+                    @change="chainedProvince(form.speaker_id)"
+                    id="speaker_id"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   >
                     <option value="" :selected="form.speaker == null">
@@ -808,7 +816,7 @@ const setSpeaker = async (classRoomId) => {
                       v-for="(item, index) in speakers"
                       :key="index"
                       :value="item.id"
-                      :selected="form.speaker == item.id"
+                      :selected="form.speaker_id == item.id"
                     >
                       {{ item.name }}
                     </option>
@@ -1011,6 +1019,35 @@ const setSpeaker = async (classRoomId) => {
                 </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label
+                    for="regency_regional_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Kecamatan</label
+                  >
+                  <select
+                    v-model="form.regency_regional_id"
+                    name="regency_regional_id"
+                    id="regency_regional_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Lokasi"
+                  >
+                    <option
+                      value=""
+                      :selected="form.regency_regional_id == null"
+                    >
+                      Pilih Kecamatan
+                    </option>
+                    <option
+                      v-for="(item, index) in props.regencyRegionals"
+                      :key="index"
+                      :selected="form.regency_regional_id == item.id"
+                      :value="item.id"
+                    >
+                      {{ item.regency }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
                     for="google_maps"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >Google Maps</label
@@ -1042,7 +1079,7 @@ const setSpeaker = async (classRoomId) => {
                 </div>
                 <div class="col-span-2">
                   <label
-                    for="image"
+                    for="proposal"
                     class="w-2block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >Surat Pengajuan</label
                   >
@@ -1051,8 +1088,8 @@ const setSpeaker = async (classRoomId) => {
                       <input
                         @change="uploadProposal"
                         type="file"
-                        name="image"
-                        id="image"
+                        name="proposal"
+                        id="proposal"
                         accept="application/pdf"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                       />

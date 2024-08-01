@@ -6,7 +6,7 @@ import { computed, onMounted, ref, watch } from "vue";
 // import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
 // import { Modal } from "flowbite";
-import TabMenu from "@/Components/Committee/TabMenu.vue";
+import TabMenuDetailSchedule from "@/Components/Committee/TabMenuDetailSchedule.vue";
 
 onMounted(() => {
   initFlowbite();
@@ -93,7 +93,7 @@ function addAppointmentFile() {
   <div>
     <AuthenticatedLayoutCommittee>
       <template #header>
-        <TabMenu :id="idSubmissionLastSegment" />
+        <TabMenuDetailSchedule :id="idSubmissionLastSegment" />
       </template>
       <template #headerTitle>
         Laporan

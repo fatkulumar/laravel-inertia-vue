@@ -1,11 +1,15 @@
 <script setup>
-import AuthenticatedLayoutCommittee from "@/Layouts/AuthenticatedLayoutCommittee.vue";
+import AuthenticatedLayoutAdmin from "@/Layouts/AuthenticatedLayoutAdmin.vue";
 import { Head, useForm } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
-import { Modal } from "flowbite";
+import { initFlowbite, Modal } from "flowbite";
+
+onMounted(() => {
+    initFlowbite();
+});
 
 const props = defineProps({
   guideCadres: {
@@ -39,222 +43,222 @@ watch(search, (value) => {
   );
 });
 
-// const form = useForm({
-//   id: "",
-//   name: "",
-//   type_activity_id: "",
-//   link: "",
-//   information: "",
-// });
+const form = useForm({
+  id: "",
+  name: "",
+  type_activity_id: "",
+  link: "",
+  information: "",
+});
 
-// function resetForm() {
-//   form.id = "";
-//   form.name = "";
-//   form.type_activity_id = "";
-//   form.link = "";
-//   form.information = "";
-//   let uncheckedCheckboxes = document.querySelectorAll(
-//     'input[type="checkbox"]:not(#checkboxAll)'
-//   );
-//   let checboxAll = document.getElementById("checkboxAll");
+function resetForm() {
+  form.id = "";
+  form.name = "";
+  form.type_activity_id = "";
+  form.link = "";
+  form.information = "";
+  let uncheckedCheckboxes = document.querySelectorAll(
+    'input[type="checkbox"]:not(#checkboxAll)'
+  );
+  let checboxAll = document.getElementById("checkboxAll");
 
-//   uncheckedCheckboxes.forEach((checkbox) => {
-//     checkbox.checked = false;
-//   });
-//   formCheckbox.id = [];
-// }
+  uncheckedCheckboxes.forEach((checkbox) => {
+    checkbox.checked = false;
+  });
+  formCheckbox.id = [];
+}
 
-// function modalGuideCadre(opt) {
-//   const $targetEl = document.getElementById("crud-modal");
-//   // options with default values
-//   const options = {
-//     placement: "bottom-right",
-//     backdrop: "dynamic",
-//     backdropClasses: "bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40",
-//     closable: false,
-//   };
+function modalGuideCadre(opt) {
+  const $targetEl = document.getElementById("crud-modal");
+  // options with default values
+  const options = {
+    placement: "bottom-right",
+    backdrop: "dynamic",
+    backdropClasses: "bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40",
+    closable: false,
+  };
 
-//   // instance options object
-//   const instanceOptions = {
-//     id: "crud-modal",
-//     override: true,
-//   };
+  // instance options object
+  const instanceOptions = {
+    id: "crud-modal",
+    override: true,
+  };
 
-//   const modal = new Modal($targetEl, options, instanceOptions);
-//   if (opt == "hide") {
-//     modal.hide();
-//   }
-//   if (opt == "show") {
-//     modal.show();
-//   }
-// }
+  const modal = new Modal($targetEl, options, instanceOptions);
+  if (opt == "hide") {
+    modal.hide();
+  }
+  if (opt == "show") {
+    modal.show();
+  }
+}
 
-// function addGuideCadre() {
-//   form.post("/dashboard/guide-cadre/store", {
-//     preserveScroll: true,
-//     onSuccess: () => {
-//       resetForm();
-//       modalGuideCadre("hide");
-//       toast("success", "Berhasil");
-//       closeModal();
-//     },
-//   });
-// }
+function addGuideCadre() {
+  form.post("/dashboard/guide-cadre/store", {
+    preserveScroll: true,
+    onSuccess: () => {
+      resetForm();
+      modalGuideCadre("hide");
+      toast("success", "Berhasil");
+      closeModal();
+    },
+  });
+}
 
-// function editGuideCadre(data) {
-//   form.id = data.id;
-//   form.name = data.name;
-//   form.type_activity_id = data.type_activity_id;
-//   form.link = data.link;
-//   form.information = data.information;
-//   modalGuideCadre("show");
-// }
+function editGuideCadre(data) {
+  form.id = data.id;
+  form.name = data.name;
+  form.type_activity_id = data.type_activity_id;
+  form.link = data.link;
+  form.information = data.information;
+  modalGuideCadre("show");
+}
 
-// function deleteGuideCadre(id, name) {
-//   const konfirm = confirm(`Apakah anda yakin ingin menghapus ${name}?`);
-//   if (!konfirm) return;
-//   form.delete(`/dashboard/guide-cadre/delete/${id}`, {
-//     preserveScroll: true,
-//     onSuccess: (e) => {
-//       toast("success", "Berhasil");
-//       resetForm();
-//       modalUser("hide");
-//     },
-//   });
-// }
+function deleteGuideCadre(id, name) {
+  const konfirm = confirm(`Apakah anda yakin ingin menghapus ${name}?`);
+  if (!konfirm) return;
+  form.delete(`/committee/guide-cadre/delete/${id}`, {
+    preserveScroll: true,
+    onSuccess: (e) => {
+      toast("success", "Berhasil");
+      resetForm();
+      modalUser("hide");
+    },
+  });
+}
 
-// function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
-//   const Toast = Swal.mixin({
-//     toast: true,
-//     position: "top-end",
-//     showConfirmButton: false,
-//     timer: 3000,
-//     timerProgressBar: true,
-//     didOpen: (toast) => {
-//       toast.onmouseenter = Swal.stopTimer;
-//       toast.onmouseleave = Swal.resumeTimer;
-//     },
-//   });
-//   Toast.fire({
-//     icon: icon,
-//     title: text,
-//   });
-// }
+function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    },
+  });
+  Toast.fire({
+    icon: icon,
+    title: text,
+  });
+}
 
-// const closeModal = (targetModal = "crud-modal") => {
-//   resetForm();
-//   formCheckbox.id = [];
-//   const $targetEl = document.getElementById(targetModal);
-//   const modal = new Modal($targetEl);
-//   modal.hide();
-// };
+const closeModal = (targetModal = "crud-modal") => {
+  resetForm();
+  formCheckbox.id = [];
+  const $targetEl = document.getElementById(targetModal);
+  const modal = new Modal($targetEl);
+  modal.hide();
+};
 
-// const showModal = (targetModal = "crud-modal") => {
-//   resetForm();
-//   const $targetEl = document.getElementById(targetModal);
-//   const modal = new Modal($targetEl);
-//   modal.show();
-// };
+const showModal = (targetModal = "crud-modal") => {
+  resetForm();
+  const $targetEl = document.getElementById(targetModal);
+  const modal = new Modal($targetEl);
+  modal.show();
+};
 
-// const formCheckbox = useForm({
-//   id: [],
-// });
+const formCheckbox = useForm({
+  id: [],
+});
 
-// const deleteChoice = ref(false);
-// function toggleCheckbox(id) {
-//   let checkbox = document.getElementById(`checkbox${id}`);
-//   let checkboxAll = document.getElementById(`checkboxAll`);
-//   if (checkboxAll.checked) {
-//     checkboxAll.checked = false;
-//   }
+const deleteChoice = ref(false);
+function toggleCheckbox(id) {
+  let checkbox = document.getElementById(`checkbox${id}`);
+  let checkboxAll = document.getElementById(`checkboxAll`);
+  if (checkboxAll.checked) {
+    checkboxAll.checked = false;
+  }
 
-//   if (checkbox.checked == true) {
-//     const articleId = formCheckbox.id.includes(id);
-//     if (!articleId) {
-//       formCheckbox.id.push(id);
-//     }
-//   } else {
-//     formCheckbox.id = formCheckbox.id.filter((checkId) => checkId !== id); // Memfilter id pengguna yang cocok
-//   }
+  if (checkbox.checked == true) {
+    const articleId = formCheckbox.id.includes(id);
+    if (!articleId) {
+      formCheckbox.id.push(id);
+    }
+  } else {
+    formCheckbox.id = formCheckbox.id.filter((checkId) => checkId !== id); // Memfilter id pengguna yang cocok
+  }
 
-//   const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
-//   // Inisialisasi jumlah total checkbox yang dicentang
-//   let totalChecked = 0;
+  // Inisialisasi jumlah total checkbox yang dicentang
+  let totalChecked = 0;
 
-//   // Iterasi melalui setiap elemen checkbox
-//   checkboxes.forEach((checkbox) => {
-//     // Periksa apakah checkbox dicentang
-//     if (checkbox.checked) {
-//       // Jika dicentang, tambahkan 1 ke jumlah total
-//       totalChecked++;
-//     }
-//   });
-//   if (props.guideCadres.to == totalChecked) {
-//     checkboxAll.checked = true;
-//   }
-//   if (formCheckbox.id.length > 0) {
-//     deleteChoice.value = true;
-//   } else {
-//     deleteChoice.value = false;
-//   }
-// }
+  // Iterasi melalui setiap elemen checkbox
+  checkboxes.forEach((checkbox) => {
+    // Periksa apakah checkbox dicentang
+    if (checkbox.checked) {
+      // Jika dicentang, tambahkan 1 ke jumlah total
+      totalChecked++;
+    }
+  });
+  if (props.guideCadres.to == totalChecked) {
+    checkboxAll.checked = true;
+  }
+  if (formCheckbox.id.length > 0) {
+    deleteChoice.value = true;
+  } else {
+    deleteChoice.value = false;
+  }
+}
 
-// const countCheckbox = ref(0);
-// function checkedAll() {
-//   countCheckbox.value = 0;
-//   let checkedCheckboxes = document.querySelectorAll(
-//     'input[type="checkbox"]:not(#checkboxAll):not(:checked)'
-//   );
-//   let uncheckedCheckboxes = document.querySelectorAll(
-//     'input[type="checkbox"]:not(#checkboxAll)'
-//   );
-//   let checboxAll = document.getElementById("checkboxAll");
-//   if (checboxAll.checked == true) {
-//     checkedCheckboxes.forEach((checkbox) => {
-//       checkbox.checked = true;
-//     });
-//     props.guideCadres.data.forEach((data) => {
-//       formCheckbox.id.push(data.id);
-//       countCheckbox.value++;
-//     });
-//   } else {
-//     uncheckedCheckboxes.forEach((checkbox) => {
-//       checkbox.checked = false;
-//     });
-//     formCheckbox.id = [];
-//   }
+const countCheckbox = ref(0);
+function checkedAll() {
+  countCheckbox.value = 0;
+  let checkedCheckboxes = document.querySelectorAll(
+    'input[type="checkbox"]:not(#checkboxAll):not(:checked)'
+  );
+  let uncheckedCheckboxes = document.querySelectorAll(
+    'input[type="checkbox"]:not(#checkboxAll)'
+  );
+  let checboxAll = document.getElementById("checkboxAll");
+  if (checboxAll.checked == true) {
+    checkedCheckboxes.forEach((checkbox) => {
+      checkbox.checked = true;
+    });
+    props.guideCadres.data.forEach((data) => {
+      formCheckbox.id.push(data.id);
+      countCheckbox.value++;
+    });
+  } else {
+    uncheckedCheckboxes.forEach((checkbox) => {
+      checkbox.checked = false;
+    });
+    formCheckbox.id = [];
+  }
 
-//   if (formCheckbox.id.length > 0) {
-//     deleteChoice.value = true;
-//   } else {
-//     deleteChoice.value = false;
-//   }
-// }
+  if (formCheckbox.id.length > 0) {
+    deleteChoice.value = true;
+  } else {
+    deleteChoice.value = false;
+  }
+}
 
-// function deleteGuideCadreDestroy() {
-//   const konfirm = confirm(`Apakah anda yakin ingin menghapus data ini?`);
-//   if (!konfirm) return;
-//   formCheckbox.post("/dashboard/guide-cadre/destroy", {
-//     preserveScroll: true,
-//     onSuccess: () => {
-//       formCheckbox.id = [];
-//       toast("success", "Data Berhasil Dihapus");
-//       let checkedCheckboxes = document.querySelectorAll(
-//         'input[type="checkbox"]:checked'
-//       );
-//       checkedCheckboxes.forEach((element) => {
-//         element.checked = false;
-//       });
-//     },
-//   });
-// }
+function deleteGuideCadreDestroy() {
+  const konfirm = confirm(`Apakah anda yakin ingin menghapus data ini?`);
+  if (!konfirm) return;
+  formCheckbox.post("/dashboard/guide-cadre/destroy", {
+    preserveScroll: true,
+    onSuccess: () => {
+      formCheckbox.id = [];
+      toast("success", "Data Berhasil Dihapus");
+      let checkedCheckboxes = document.querySelectorAll(
+        'input[type="checkbox"]:checked'
+      );
+      checkedCheckboxes.forEach((element) => {
+        element.checked = false;
+      });
+    },
+  });
+}
 </script>
 
 <template>
   <Head title="Panduan Kaderisasi" />
   <div>
-    <AuthenticatedLayoutCommittee>
+    <AuthenticatedLayoutAdmin>
       <template #header>
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
           Panduan Kaderisasi
@@ -262,10 +266,10 @@ watch(search, (value) => {
       </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          <!-- <div
+          <div
             class="p-6 flex flex-col items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
-          > -->
-            <!-- <div>
+          >
+            <div>
               <div @click="showModal()" title="Tambah" class="cursor-pointer">
                 <svg
                   class="h-8 w-8 bg-green-400 p-1 rounded-lg"
@@ -290,10 +294,10 @@ watch(search, (value) => {
                   </g>
                 </svg>
               </div>
-            </div> -->
+            </div>
 
-            <!-- <label for="table-search" class="sr-only">Search</label> -->
-            <!-- <div class="relative">
+            <label for="table-search" class="sr-only">Search</label>
+            <div class="relative">
               <div
                 class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none"
               >
@@ -320,8 +324,8 @@ watch(search, (value) => {
                 class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="Nama"
               />
-            </div> -->
-          <!-- </div> -->
+            </div>
+          </div>
 
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
@@ -420,15 +424,12 @@ watch(search, (value) => {
                         {{ item.type_activity?.name }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.link }}
+                        <a class="text-blue-500" :href="item.link" target="_blank" rel="noopener noreferrer">{{ item.link }}</a>
                       </td>
                       <td class="px-6 py-4">
                         {{ item.information }}
                       </td>
-                      <td>
-                        <a target="_blank" class="p-2 bg-blue-500 rounded-lg text-white flex justify-center text-md font-bold" :href="item.link">Unduh</a>
-                      </td>
-                      <!-- <td class="px-6 py-4">
+                      <td class="px-6 py-4">
                         <div class="flex gap-2">
                           <div
                             title="Actions"
@@ -466,7 +467,7 @@ watch(search, (value) => {
                               class="py-2 text-sm text-gray-700 dark:text-gray-200"
                               aria-labelledby="dropdown-button"
                             >
-                            <li>
+                              <li>
                                 <button
                                   title="Edit"
                                   @click="editGuideCadre(item)"
@@ -479,7 +480,12 @@ watch(search, (value) => {
                               <li>
                                 <button
                                   title="Hapus"
-                                  @click="deleteGuideCadre(item.id, item.title)"
+                                  @click="
+                                    deleteGuideCadre(
+                                      item.id,
+                                      item.name,
+                                    )
+                                  "
                                   type="button"
                                   class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                                 >
@@ -497,7 +503,7 @@ watch(search, (value) => {
                             />
                           </div>
                         </div>
-                      </td> -->
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -512,7 +518,7 @@ watch(search, (value) => {
       </div>
 
       <!-- Main modal -->
-      <!-- <div
+      <div
         id="crud-modal"
         tabindex="-1"
         aria-hidden="true"
@@ -639,7 +645,7 @@ watch(search, (value) => {
             </form>
           </div>
         </div>
-      </div> -->
-    </AuthenticatedLayoutCommittee>
+      </div>
+    </AuthenticatedLayoutAdmin>
   </div>
 </template>

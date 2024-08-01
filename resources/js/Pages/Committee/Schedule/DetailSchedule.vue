@@ -4,7 +4,7 @@ import { Head, Link, useForm } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
 import { computed, onMounted, ref, watch } from "vue";
 import Swal from "sweetalert2";
-import TabMenu from "@/Components/Committee/TabMenu.vue";
+import TabMenuDetailSchedule from "@/Components/Committee/TabMenuDetailSchedule.vue";
 
 onMounted(() => {
   initFlowbite();
@@ -28,6 +28,10 @@ const props = defineProps({
     default: () => ({}),
   },
   typeActivities: {
+    type: Object,
+    default: () => ({}),
+  },
+  regencyRegionals: {
     type: Object,
     default: () => ({}),
   },
@@ -67,6 +71,7 @@ const form = useForm({
   committee_id: props.schedule[0].committee?.id,
   category_id: props.schedule[0].category_id,
   class_room_id: props.schedule[0].class_room_id,
+  regency_regional_id: props.schedule[0].regency_regional_id,
   hp: props.schedule[0].committee?.profile?.hp,
   start_date_class: props.schedule[0].formatted_start_date_class,
   end_date_class: props.schedule[0].formatted_end_date_class,
@@ -84,7 +89,7 @@ const form = useForm({
   concept: props.schedule[0].concept,
   committee_layout: props.schedule[0].committee_layout,
   target_participant: props.schedule[0].target_participant,
-  speaker_id: props.schedule[0].speaker.name,
+  speaker_id: props.schedule[0].speaker.id,
   total_activity: props.schedule[0].total_activity,
   price: props.schedule[0].price,
   facility: props.schedule[0].facility,
@@ -224,11 +229,11 @@ function updateSchedule() {
 </script>
 
 <template>
-  <Head title="Article" />
+  <Head title="Detail Jadwal" />
   <div>
     <AuthenticatedLayoutCommittee>
       <template #header>
-        <TabMenu :id="idSubmissionLastSegment" />
+        <TabMenuDetailSchedule :id="idSubmissionLastSegment" />
       </template>
       <template #headerTitle>
         Detail Jadwal
@@ -605,6 +610,25 @@ function updateSchedule() {
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="Tanggal Selesai"
                       />
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                    <label
+                        for="regency_regional_id"
+                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >Kecamatan</label
+                    >
+                    <select
+                        v-model="form.regency_regional_id"
+                        name="regency_regional_id"
+                        id="regency_regional_id"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        placeholder="Lokasi"
+                    >
+                    <option value="" :selected="form.regency_regional_id == null">Pilih Kecamatan</option>
+                    <option v-for="item, index in props.regencyRegionals" :key="index" :selected="form.regency_regional_id == item.id" :value="item.id">
+                        {{ item.regency }}
+                    </option>
+                    </select>
                     </div>
                     <div class="col-span-2 sm:col-span-1">
                       <label

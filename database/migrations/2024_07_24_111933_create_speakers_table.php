@@ -17,8 +17,8 @@ return new class extends Migration
             $table->text('name');
             $table->unsignedInteger('province_code');
             $table->unsignedInteger('city_code')->unsigned();
-            $table->foreignUuid('class_room_id')->references('id')->on('class_rooms');
-            $table->foreignUuid('category_id')->references('id')->on('categories');
+            $table->foreignUuid('class_room_id');
+            $table->foreignUuid('category_id');
             $table->timestamps();
         });
     }

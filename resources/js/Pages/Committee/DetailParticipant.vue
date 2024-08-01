@@ -2,6 +2,7 @@
 import AuthenticatedLayoutCommittee from "@/Layouts/AuthenticatedLayoutCommittee.vue";
 import { Head, useForm } from "@inertiajs/vue3";
 import Swal from "sweetalert2";
+import TabMenuDetailParticipant from "@/Components/Committee/TabMenuDetailParticipant.vue";
 
 const props = defineProps({
   participant: {
@@ -18,6 +19,9 @@ const props = defineProps({
   },
 });
 
+const urlPath = window.location.pathname;
+const segments = urlPath.split("/");
+const idSubmissionLastSegment = segments.pop() || segments.pop();
 
 const form = useForm({
   participant_id: props.participant[0]?.id,
@@ -43,7 +47,6 @@ const form = useForm({
   class_room: "",
   category: "",
 });
-
 
 function updateParticipant() {
   form.post("/committee/participant/update", {
@@ -72,7 +75,6 @@ function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
   });
 }
 
-
 function uploadImage(e) {
   const image = e.target.files[0];
   if (
@@ -95,11 +97,13 @@ function uploadImage(e) {
 </script>
 
 <template>
-  <Head title="Article" />
+  <Head title="Detail Peserta" />
   <div>
     <AuthenticatedLayoutCommittee>
+      <template #headerTitle> Data Peserta </template>
       <template #header>
-        <h1 class="font-bold">Detail Warga</h1>
+        <!-- <h1 class="font-bold">Detail Peserta</h1> -->
+        <TabMenuDetailParticipant :id="idSubmissionLastSegment" />
       </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -187,7 +191,12 @@ function uploadImage(e) {
                         </select>
                       </div>
                       <div class="md:col-span-3 pb-2">
-                          <button type="submit" class="bg-blue-500 p-2 rounded-md text-white">Update</button>
+                        <button
+                          type="submit"
+                          class="bg-blue-500 p-2 rounded-md text-white"
+                        >
+                          Update
+                        </button>
                       </div>
                     </div>
                   </form>

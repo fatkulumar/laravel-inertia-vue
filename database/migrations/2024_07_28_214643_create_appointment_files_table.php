@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('appointment_files', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('schedule_id')->references('id')->on('schedules');
+            $table->foreignUuid('schedule_id');
             $table->text('file');
             $table->text('name');
             $table->timestamps();

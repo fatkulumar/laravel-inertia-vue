@@ -16,6 +16,7 @@ class Schedule extends Model
         'committee_id',
         'category_id',
         'class_room_id',
+        'regency_regional_id',
         'chief_id', //ketua pelaksana
         'type_activity_id', //jenis kegiatan
         'periode',
@@ -23,7 +24,7 @@ class Schedule extends Model
         'concept', //konsep kegiatan
         'committee_layout', //susunan panitia
         'target_participant', //target peserta
-        'speaker', //pemateri
+        'speaker_id', //pemateri
         'total_activity', // total kegiatan yang sudah dikerjakan
         'price', // harga
         'facility', // fasiliitas

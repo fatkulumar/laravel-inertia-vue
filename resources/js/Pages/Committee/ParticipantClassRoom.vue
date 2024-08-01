@@ -64,7 +64,9 @@ const form = useForm({
 });
 
 function resetForm() {
-  (form.participant_id = ""), (form.committee_id = ""), (form.id = "");
+  form.participant_id = "",
+  form.committee_id = "",
+  form.id = "";
   form.name = "";
   form.email = "";
   form.hp = "";

@@ -255,7 +255,7 @@ class ParticipantController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function waitingApproval in Participant/ParticipantController', $errors);
+            Log::channel('daily')->info('function historyClass in Participant/ParticipantController', $errors);
         }
     }
 }

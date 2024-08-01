@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Committee;
 use App\Http\Controllers\Controller;
 use App\Models\Profile;
 use App\Models\Regional;
+use App\Models\Schedule;
 use App\Models\Submission;
 use App\Models\User;
 use App\Traits\EntityValidator;
@@ -12,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use App\Traits\FileUpload;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ParticipantController extends Controller
@@ -62,7 +65,7 @@ class ParticipantController extends Controller
     public function show(string $id)
     {
         $participant = User::with('profile.regional', 'submissions.schedule', 'submissions.schedule.classRoom', 'submissions.schedule.category')
-        ->where('id', $id)->get();
+            ->where('id', $id)->get();
         $participant->each(function ($user) {
             $this->fileSettings();
 
@@ -175,46 +178,48 @@ class ParticipantController extends Controller
         }
     }
 
-    // public function participant(Request $request, $schedule_id)
-    // {
-    //     try {
-    //         $submissions = Submission::orderBy('created_at', 'desc')
-    //             ->when($request['search'], function ($query, $request) {
-    //                 $query->whereHas('participant', function ($query) use ($request) {
-    //                     $query->where('name', 'like', '%' . $request . '%');
-    //                 });
-    //             })
-    //             ->where('schedule_id', $schedule_id)
-    //             ->with('schedule.classRoom', 'schedule.category', 'participant.roles', 'participant.profile.regional')
-    //             ->paginate(5)
-    //             ->withQueryString()
-    //             ->appends(['search' => $request['search']]);
+    public function historyClass(Request $request, $id)
+    {
+        try {
+            $users = Auth::user();
+            $profile = Profile::where('profileable_id', $users->id)->first();
+            $schedules = Schedule::with('classRoom', 'category', 'submissions.participant')
+                ->where('regional_id', $profile->regional_id)
+                ->whereHas('submissions', function ($query) use ($id) {
+                    $query->where('status', 'approved') // Sesuaikan dengan kondisi yang Anda inginkan
+                        ->whereHas('participant', function ($query) use ($id) {
+                            $query->where('id', $id);
+                        });
+                })
+                ->whereDate('end_date_class', '>=', Carbon::now())
+                ->get();
 
-    //         $submissions->map(function ($submission) {
-    //             $this->fileSettings();
-    //             if (isset($submission->participant->image)) {
-    //                 $submission->participant->image = $this->getFileAttribute($submission->participant->image);
-    //             } else {
-    //                 $submission->participant->image = null;
-    //             }
-
-    //             if (isset($submission->schedule->poster)) {
-    //                 $submission->schedule->poster = $this->getFileAttribute($submission->schedule->poster);
-    //             } else {
-    //                 $submission->schedule->poster = null;
-    //             }
-    //             return $submission;
-    //         });
-    //         // return $submissions;
-    //         return Inertia::render('Committee/Schedule/Participant', [
-    //             'submissions' => $submissions,
-    //         ]);
-    //     } catch (\Exception $exception) {
-    //         $errors['message'] = $exception->getMessage();
-    //         $errors['file'] = $exception->getFile();
-    //         $errors['line'] = $exception->getLine();
-    //         $errors['trace'] = $exception->getTrace();
-    //         Log::channel('daily')->info('function participantClassRoom in SubmissionController', $errors);
-    //     }
-    // }
+            $schedules->map(function ($schedule) {
+                $this->fileSettings();
+                if (isset($schedule['poster'])) {
+                    $schedule['poster'] = $this->getFileAttribute($schedule['poster']);
+                } else {
+                    $schedule['link_poster'] = null;
+                }
+                if (isset($schedule['proposal'])) {
+                    $schedule['proposal'] = $this->getFileAttribute($schedule['proposal']);
+                } else {
+                    $schedule['link_proposal'] = null;
+                }
+                $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('Y-m-d');
+                $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('Y-m-d');
+                return $schedule;
+            });
+            // return $schedules;
+            return Inertia::render('Committee/Participant/HistoryClass', [
+                'schedule' => $schedules,
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function historyClass in Participant/ParticipantController', $errors);
+        }
+    }
 }
