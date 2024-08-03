@@ -178,33 +178,37 @@ class ParticipantController extends Controller
         }
     }
 
-    public function historyClass(Request $request, $id)
+    public function historyClass(Request $request, $userId)
     {
+        // return $userId;
+
         try {
             $users = Auth::user();
             $profile = Profile::where('profileable_id', $users->id)->first();
-            $schedules = Schedule::with('classRoom', 'category', 'submissions.participant')
-                ->where('regional_id', $profile->regional_id)
-                ->whereHas('submissions', function ($query) use ($id) {
-                    $query->where('status', 'approved') // Sesuaikan dengan kondisi yang Anda inginkan
-                        ->whereHas('participant', function ($query) use ($id) {
-                            $query->where('id', $id);
-                        });
-                })
-                ->whereDate('end_date_class', '>=', Carbon::now())
-                ->get();
+            $schedules = Schedule::with(['classRoom', 'category', 'submissions' => function ($query) use ($userId) {
+                $query->whereHas('participant', function ($query) use ($userId) {
+                    $query->where('id', $userId);
+                });
+            }])
+            ->where('regional_id', $profile->regional_id)
+            ->whereHas('submissions', function ($query) use ($userId) {
+                $query->whereHas('participant', function ($query) use ($userId) {
+                    $query->where('id', $userId);
+                });
+            })
+            ->get();
 
             $schedules->map(function ($schedule) {
                 $this->fileSettings();
                 if (isset($schedule['poster'])) {
                     $schedule['poster'] = $this->getFileAttribute($schedule['poster']);
                 } else {
-                    $schedule['link_poster'] = null;
+                    $schedule['poster'] = null;
                 }
                 if (isset($schedule['proposal'])) {
                     $schedule['proposal'] = $this->getFileAttribute($schedule['proposal']);
                 } else {
-                    $schedule['link_proposal'] = null;
+                    $schedule['poster'] = null;
                 }
                 $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('Y-m-d');
                 $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('Y-m-d');
@@ -212,7 +216,7 @@ class ParticipantController extends Controller
             });
             // return $schedules;
             return Inertia::render('Committee/Participant/HistoryClass', [
-                'schedule' => $schedules,
+                'schedules' => $schedules,
             ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
@@ -220,6 +224,27 @@ class ParticipantController extends Controller
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function historyClass in Participant/ParticipantController', $errors);
+        }
+    }
+
+    public function certificate(Request $request, $userId)
+    {
+        // return $userId;
+
+        try {
+
+            $users = User::with('profile', 'submissions.schedule')->where('id', $userId)->get();
+
+            // return $users;
+            return Inertia::render('Committee/Participant/Certificate', [
+                'certificate' => $users,
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function certificate in Participant/ParticipantController', $errors);
         }
     }
 }

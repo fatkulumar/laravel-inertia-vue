@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayoutCommittee from "@/Layouts/AuthenticatedLayoutCommittee.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head, useForm, Link } from "@inertiajs/vue3";
 import { onMounted, ref } from "vue";
 import { Modal } from "flowbite";
 import Swal from "sweetalert2";
@@ -11,7 +11,7 @@ onMounted(() => {
 });
 
 const props = defineProps({
-  schedule: {
+  schedules: {
     type: Object,
     default: () => ({}),
   },
@@ -43,13 +43,13 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
               <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <div v-if="props.schedule.length < 1">
+                <div v-if="props.schedules.length < 1">
                   <p class="text-center">Tidak Ada Kelas</p>
                 </div>
                 <div
                   v-else
                   class="flex gap-2 items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
-                  v-for="(item, index) in props.schedule"
+                  v-for="(item, index) in props.schedules"
                   :key="index"
                 >
                   <div
@@ -81,14 +81,23 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
                           <p>{{ submission.updated_at }}</p>
                         </div>
                       </div>
-                      <div
-                        class="rounded-md text-white px-1 m-10"
-                        :class="{
-                          'bg-green-500': submission.status == 'graduated',
-                          'bg-yellow-500': submission.status != 'graduated',
-                        }"
-                      >
-                        {{ submission.status }}
+                      <div class="flex flex-col gap-1">
+                        <div
+                          class="rounded-md text-white text-center px-1"
+                          :class="{
+                            'bg-green-500': submission.status == 'graduated',
+                            'bg-yellow-500': submission.status != 'graduated',
+                          }"
+                        >
+                          {{ submission.status }}
+                        </div>
+
+                        <Link :href="`/committee/participant/certificate/${submission.participant_id}`"
+                          v-if="submission.status == 'graduated'"
+                          class="rounded-md text-white px-1 bg-orange-500 hover:bg-orange-600"
+                        >
+                          Lihat Syahadah
+                        </Link>
                       </div>
                     </div>
                   </div>

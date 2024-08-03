@@ -70,14 +70,14 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
           </li>
           <li>
             <Link replace
-             :href="`/committee/participant/speaker-list/${id}`"
+             :href="`/committee/participant/history-class/${id}`"
               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >Riwayat Peserta</Link
             >
           </li>
           <li>
             <Link replace
-             :href="`/committee/participant/letter/${id}`"
+             :href="`/committee/participant/certificate/${id}`"
               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >Syahadah</Link
             >
@@ -123,13 +123,13 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
 
       <Link replace
         class="ring-2 rounded-md"
-        :href="`/committee/participant/letter/${id}`"
+        :href="`/committee/participant/certificate/${id}`"
       >
         <h2
           class="font-semibold leading-tight border-1 border-black px-5 py-1 rounded-md"
           :class="{
             'bg-blue-700 text-white': route().current(
-              'committee.participant.letter*'
+              'committee.participant.certificate*'
             ),
           }"
         >

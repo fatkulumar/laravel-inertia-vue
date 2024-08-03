@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Certificate;
 use App\Models\Schedule;
 use App\Models\Submission;
 use App\Traits\EntityValidator;
@@ -37,7 +38,7 @@ class SubmissionController extends Controller
                         $query->where('name', 'like', '%' . $request . '%');
                     });
                 })
-                ->with('participant', 'schedule', 'schedule.regional', 'schedule.classRoom','schedule.category')
+                ->with('participant.certificate', 'schedule', 'schedule.regional', 'schedule.classRoom','schedule.category')
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);
@@ -239,6 +240,22 @@ class SubmissionController extends Controller
         }
     }
 
+    public function graduatedSubmission(Request $request)
+    {
+        try {
+            $id = $request->post('id');
+            Submission::where('id', $id)->update([
+                'status' => 'graduated',
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function graduatedSubmission in SubmissionController', $errors);
+        }
+    }
+
     public function optionSubmission(Request $request)
     {
         try {
@@ -255,6 +272,55 @@ class SubmissionController extends Controller
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+        }
+    }
+
+    public function certificateSubmission(Request $request)
+    {
+        try {
+            $validasiData = $this->certificateValidator($request);
+            if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+
+            $submission_id = $request->post('submission_id');
+            $credential_id = $request->post('credential_id');
+            $participant_id = $request->post('participant_id');
+            $saveData = [
+                'submission_id' => $submission_id,
+                'credential_id' => $credential_id,
+                'certificateable_id' => $participant_id,
+                'certificateable_type' => 'App\Models\User',
+            ];
+            Certificate::create($saveData);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function certificateSubmission in SubmissionController', $errors);
+        }
+    }
+
+    private function certificateValidator(Request $request)
+    {
+        try {
+            $rules = [
+                'submission_id' => 'required|string|max:36',
+                'credential_id' => 'required|string|max:36|unique:certificates,credential_id',
+                'certificateable_id' => 'required|string|max:36',
+            ];
+            $Validatedata = [
+                'submission_id' => $request->post('submission_id'),
+                'credential_id' => $request->post('credential_id'),
+                'certificateable_id' => $request->post('participant_id'),
+            ];
+            $validator = EntityValidator::validate($Validatedata, $rules);
+            if ($validator->fails()) return $validator->errors();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function certificateValidator in SubmissionController', $errors);
         }
     }
 }

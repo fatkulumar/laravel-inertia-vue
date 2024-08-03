@@ -11,5 +11,7 @@
         Route::post('/reject-submission', [Dashboard\SubmissionController::class, 'rejectSubmission'])->name('rejectSubmission');
         Route::post('/approval-submission', [Dashboard\SubmissionController::class, 'approvalSubmission'])->name('approvalSubmission');
         Route::delete('/delete-submission/{id}', [Dashboard\SubmissionController::class, 'deleteSubmission'])->name('deleteSubmission');
+        Route::post('/graduated-submission', [Dashboard\SubmissionController::class, 'graduatedSubmission'])->name('graduatedSubmission');
+        Route::post('/certificate-submission', [Dashboard\SubmissionController::class, 'certificateSubmission'])->name('certificateSubmission');
         Route::post('/option-submission', [Dashboard\SubmissionController::class, 'optionSubmission'])->name('optionSubmission');
     });

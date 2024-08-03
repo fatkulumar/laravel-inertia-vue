@@ -163,7 +163,7 @@ class DatabaseSeeder extends Seeder
 
                 Profile::create([
                     'address' => 'Jl. Cempaka No. 3',
-                    'regional_id' => $id_regional3,
+                    'regional_id' => $id_regional2,
                     'profileable_id' => $userId3,
                     'profileable_type' => 'App\Models\User',
                     'hp' => '6281234567890',

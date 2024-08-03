@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayoutAdmin from "@/Layouts/AuthenticatedLayoutAdmin.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head, useForm, Link } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
@@ -36,13 +36,15 @@ watch(search, (value) => {
 });
 
 const form = useForm({
-    id: "",
-    participant_id: "",
-    committee_id: "",
-    status: "",
-    approval_date: "",
-    graduation_date: "",
-    file: "",
+  id: "",
+  participant_id: "",
+  committee_id: "",
+  status: "",
+  approval_date: "",
+  graduation_date: "",
+  file: "",
+  submission_id: "",
+  credential_id: "",
 });
 
 function resetForm() {
@@ -53,6 +55,8 @@ function resetForm() {
   form.approval_date = "";
   form.graduation_date = "";
   form.file = "";
+  form.submission_id = "";
+  form.credential_id = "";
 }
 
 function modalRoom(opt) {
@@ -80,16 +84,16 @@ function modalRoom(opt) {
   }
 }
 
-function addsubmission() {
-  form.post("/dashboard/schedule/store", {
-    preserveScroll: true,
-    onSuccess: () => {
-        resetForm();
-        modalRoom("hide");
-        toast("success", "Data Berhasil Ditambah");
-    }
-    });
-}
+// function addsubmission() {
+//   form.post("/dashboard/schedule/store", {
+//     preserveScroll: true,
+//     onSuccess: () => {
+//       resetForm();
+//       modalRoom("hide");
+//       toast("success", "Data Berhasil Ditambah");
+//     },
+//   });
+// }
 
 // function editClassRoom(data) {
 //   form.id = data.id;
@@ -109,36 +113,71 @@ function rejectSubmission(id, namePeserta) {
   form.post(`/dashboard/submission/reject-submission`, {
     preserveScroll: true,
     onSuccess: (e) => {
-        toast("success", "Berhasil");
-        resetForm();
+      toast("success", "Berhasil");
+      resetForm();
     },
   });
 }
 
 function approvalSubmission(id, namePeserta) {
-    form.id = id;
-    const konfirm = confirm(`Apakah anda yakin ingin menerima ${namePeserta}?`);
-    if (!konfirm) return;
-    form.post(`/dashboard/submission/approval-submission`, {
-        preserveScroll: true,
-        onSuccess: (e) => {
-            toast("success", "Berhasil");
-            resetForm();
-        },
-    });
+  form.id = id;
+  const konfirm = confirm(`Apakah anda yakin ingin menerima ${namePeserta}?`);
+  if (!konfirm) return;
+  form.post(`/dashboard/submission/approval-submission`, {
+    preserveScroll: true,
+    onSuccess: (e) => {
+      toast("success", "Berhasil");
+      resetForm();
+    },
+  });
 }
 
 function deleteSubmission(id, nameClass, category) {
-    form.id = id;
-    const konfirm = confirm(`Hapus ${nameClass} ${category}?`);
-    if (!konfirm) return;
-    form.delete(`/dashboard/submission/delete-submission/${id}`, {
-        preserveScroll: true,
-        onSuccess: (e) => {
-            toast("success", "Berhasil");
-            resetForm();
-        },
-    });
+  form.id = id;
+  const konfirm = confirm(`Hapus ${nameClass} ${category}?`);
+  if (!konfirm) return;
+  form.delete(`/dashboard/submission/delete-submission/${id}`, {
+    preserveScroll: true,
+    onSuccess: (e) => {
+      toast("success", "Berhasil");
+      resetForm();
+    },
+  });
+}
+
+function graduatedSubmission(id, namePeserta) {
+  form.id = id;
+  const konfirm = confirm(`Apakah lulus ${namePeserta}?`);
+  if (!konfirm) return;
+  form.post(`/dashboard/submission/graduated-submission`, {
+    preserveScroll: true,
+    onSuccess: (e) => {
+      toast("success", "Berhasil");
+      resetForm();
+    },
+  });
+}
+
+function certificateSubmission(
+  submissionId,
+  participantId,
+  credentialId = null
+) {
+  form.participant_id = participantId;
+  form.submission_id = submissionId;
+  form.credential_id = credentialId;
+  showModal("certificate-modal");
+}
+
+function handleCertificateSubmission() {
+  form.post(`/dashboard/submission/certificate-submission`, {
+    preserveScroll: true,
+    onSuccess: (e) => {
+      toast("success", "Berhasil");
+      closeModal("certificate-modal");
+      resetForm();
+    },
+  });
 }
 
 function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
@@ -160,9 +199,9 @@ function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
 }
 
 const closeModal = (targetModal = "crud-modal") => {
-  resetForm()
-  formCheckbox.id = []
-  formCheckbox.status = ""
+  resetForm();
+  formCheckbox.id = [];
+  formCheckbox.status = "";
   const $targetEl = document.getElementById(targetModal);
   const modal = new Modal($targetEl);
   modal.hide();
@@ -179,7 +218,8 @@ const formCheckbox = useForm({
   status: "",
 });
 
-const choice = ref(false)
+const choice = ref(false);
+
 function toggleCheckbox(id) {
   let checkbox = document.getElementById(`checkbox${id}`);
   let checkboxAll = document.getElementById(`checkboxAll`);
@@ -212,14 +252,15 @@ function toggleCheckbox(id) {
   if (props.submissions.to == totalChecked) {
     checkboxAll.checked = true;
   }
-  if(formCheckbox.id.length > 0) {
-    choice.value = true
-  }else{
-    choice.value = false
+  if (formCheckbox.id.length > 0) {
+    choice.value = true;
+  } else {
+    choice.value = false;
   }
 }
 
 const countCheckbox = ref(0);
+
 function checkedAll() {
   countCheckbox.value = 0;
   let checkedCheckboxes = document.querySelectorAll(
@@ -245,30 +286,32 @@ function checkedAll() {
     formCheckbox.status = "";
   }
 
-  if(formCheckbox.id.length > 0) {
-    choice.value = true
-  }else{
-    choice.value = false
+  if (formCheckbox.id.length > 0) {
+    choice.value = true;
+  } else {
+    choice.value = false;
   }
 }
 
 function optionSubmission() {
-    showModal()
+  showModal();
 }
 
 function handleOptionSubmission() {
-    formCheckbox.post("/dashboard/submission/option-submission", {
+  formCheckbox.post("/dashboard/submission/option-submission", {
     preserveScroll: true,
     onSuccess: () => {
-      choice.value = false
+      choice.value = false;
       formCheckbox.id = [];
       formCheckbox.status = "";
       toast("success", "Berhasil");
-      closeModal()
-      let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-        checkedCheckboxes.forEach(element => {
-            element.checked = false
-        });
+      closeModal();
+      let checkedCheckboxes = document.querySelectorAll(
+        'input[type="checkbox"]:checked'
+      );
+      checkedCheckboxes.forEach((element) => {
+        element.checked = false;
+      });
     },
   });
 }
@@ -312,17 +355,14 @@ function handleOptionSubmission() {
   <div>
     <AuthenticatedLayoutAdmin>
       <!-- <template #header>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">Article</h2>
-            </template> -->
+                    <h2 class="font-semibold text-xl text-gray-800 leading-tight">Article</h2>
+</template>-->
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 text-gray-900">
-              <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <div
-                  class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
-                >
-                  <!-- <div>
+          <div
+            class="p-6 flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
+          >
+            <!-- <div>
                     icon plus
                     <div
                       @click="showModal()"
@@ -354,36 +394,39 @@ function handleOptionSubmission() {
                     </div>
                   </div> -->
 
-                  <label for="table-search" class="sr-only">Search</label>
-                  <div class="relative">
-                    <div
-                      class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none"
-                    >
-                      <svg
-                        class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                        />
-                      </svg>
-                    </div>
-                    <input
-                      v-model="search"
-                      type="text"
-                      id="table-search-users"
-                      class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="Search for users"
-                    />
-                  </div>
-                </div>
+            <label for="table-search" class="sr-only">Search</label>
+            <div class="relative">
+              <div
+                class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none"
+              >
+                <svg
+                  class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                  />
+                </svg>
+              </div>
+              <input
+                v-model="search"
+                type="text"
+                id="table-search-users"
+                class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Search for users"
+              />
+            </div>
+          </div>
+          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6 text-gray-900">
+              <div class="overflow-x-auto shadow-md sm:rounded-lg">
                 <table
                   class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
                 >
@@ -419,6 +462,9 @@ function handleOptionSubmission() {
                         <p>Tanggal Selesai Kelas</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
+                        <p>Sertifikat</p>
+                      </th>
+                      <th scope="col" class="px-6 py-3">
                         <div class="flex gap-1 items-center">
                           <p class="text-center mt-1">Action</p>
                           <input
@@ -434,7 +480,31 @@ function handleOptionSubmission() {
                             title="Pilihan"
                             class="bg-red-100 p-0.5 rounded-md cursor-pointer"
                           >
-                            <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Edit / Select_Multiple"> <path id="Vector" d="M3 9V19.4C3 19.9601 3 20.2399 3.10899 20.4538C3.20487 20.642 3.35774 20.7952 3.5459 20.8911C3.7596 21 4.0395 21 4.59846 21H15.0001M17 8L13 12L11 10M7 13.8002V6.2002C7 5.08009 7 4.51962 7.21799 4.0918C7.40973 3.71547 7.71547 3.40973 8.0918 3.21799C8.51962 3 9.08009 3 10.2002 3H17.8002C18.9203 3 19.4801 3 19.9079 3.21799C20.2842 3.40973 20.5905 3.71547 20.7822 4.0918C21.0002 4.51962 21.0002 5.07969 21.0002 6.19978L21.0002 13.7998C21.0002 14.9199 21.0002 15.48 20.7822 15.9078C20.5905 16.2841 20.2842 16.5905 19.9079 16.7822C19.4805 17 18.9215 17 17.8036 17H10.1969C9.07899 17 8.5192 17 8.0918 16.7822C7.71547 16.5905 7.40973 16.2842 7.21799 15.9079C7 15.4801 7 14.9203 7 13.8002Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
+                            <svg
+                              class="h-8 w-8"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                              <g
+                                id="SVGRepo_tracerCarrier"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              ></g>
+                              <g id="SVGRepo_iconCarrier">
+                                <g id="Edit / Select_Multiple">
+                                  <path
+                                    id="Vector"
+                                    d="M3 9V19.4C3 19.9601 3 20.2399 3.10899 20.4538C3.20487 20.642 3.35774 20.7952 3.5459 20.8911C3.7596 21 4.0395 21 4.59846 21H15.0001M17 8L13 12L11 10M7 13.8002V6.2002C7 5.08009 7 4.51962 7.21799 4.0918C7.40973 3.71547 7.71547 3.40973 8.0918 3.21799C8.51962 3 9.08009 3 10.2002 3H17.8002C18.9203 3 19.4801 3 19.9079 3.21799C20.2842 3.40973 20.5905 3.71547 20.7822 4.0918C21.0002 4.51962 21.0002 5.07969 21.0002 6.19978L21.0002 13.7998C21.0002 14.9199 21.0002 15.48 20.7822 15.9078C20.5905 16.2841 20.2842 16.5905 19.9079 16.7822C19.4805 17 18.9215 17 17.8036 17H10.1969C9.07899 17 8.5192 17 8.0918 16.7822C7.71547 16.5905 7.40973 16.2842 7.21799 15.9079C7 15.4801 7 14.9203 7 13.8002Z"
+                                    stroke="#000000"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  ></path>
+                                </g>
+                              </g>
+                            </svg>
                           </div>
                         </div>
                       </th>
@@ -456,13 +526,19 @@ function handleOptionSubmission() {
                         {{ item.participant?.email }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.schedule?.class_room?.name }} {{ item.schedule?.category?.name }}
+                        {{ item.schedule?.class_room?.name }}
+                        {{ item.schedule?.category?.name }}
                       </td>
                       <td class="px-6 py-4">
                         {{ item.schedule?.regional?.name }}
                       </td>
                       <td class="px-6 py-4">
-                        <img width="100%" :src="item.link_proof" alt="" srcset="">
+                        <img
+                          width="100%"
+                          :src="item.link_proof"
+                          alt=""
+                          srcset=""
+                        />
                       </td>
                       <td class="px-6 py-4">
                         {{ item.status }}
@@ -473,7 +549,146 @@ function handleOptionSubmission() {
                       <td class="px-6 py-4">
                         {{ item.formatted_end_date_class }}
                       </td>
+                      <td
+                        class="px-6 py-4"
+                        v-if="item.participant?.certificate?.credential_id"
+                      >
+                        <Link
+                          class="text-blue-500 hover:underline"
+                          :href="item.participant?.certificate?.credential_id"
+                          >Sertifikat {{ item.participant?.name }}</Link
+                        >
+                      </td>
+                      <td class="px-6 py-4" v-else>Sertifikat Belum Ada</td>
                       <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                          <div
+                            title="Actions"
+                            class="w-5 cursor-pointer"
+                            id="dropdown-button"
+                            :data-dropdown-toggle="`dropdown${index}`"
+                          >
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                              <g
+                                id="SVGRepo_tracerCarrier"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              ></g>
+                              <g id="SVGRepo_iconCarrier">
+                                <path
+                                  d="M12 12H12.01M12 6H12.01M12 18H12.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM13 18C13 18.5523 12.5523 19 12 19C11.4477 19 11 18.5523 11 18C11 17.4477 11.4477 17 12 17C12.5523 17 13 17.4477 13 18ZM13 6C13 6.55228 12.5523 7 12 7C11.4477 7 11 6.55228 11 6C11 5.44772 11.4477 5 12 5C12.5523 5 13 5.44772 13 6Z"
+                                  stroke="#000000"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                ></path>
+                              </g>
+                            </svg>
+                          </div>
+                          <div
+                            :id="`dropdown${index}`"
+                            class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
+                          >
+                            <ul
+                              class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                              aria-labelledby="dropdown-button"
+                            >
+                              <li>
+                                <button
+                                  title="Terima"
+                                  @click="
+                                    approvalSubmission(
+                                      item.id,
+                                      item.participant?.name
+                                    )
+                                  "
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Terima
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  title="Tolak"
+                                  @click="
+                                    rejectSubmission(
+                                      item.id,
+                                      item.participant?.name
+                                    )
+                                  "
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Tolak
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  title="Hapus"
+                                  @click="
+                                    deleteSubmission(
+                                      item.id,
+                                      item.class_room?.name,
+                                      item.category?.name
+                                    )
+                                  "
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Hapus
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  title="Lulus"
+                                  @click="
+                                    graduatedSubmission(
+                                      item.id,
+                                      item.participant?.name
+                                    )
+                                  "
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Lulus
+                                </button>
+                              </li>
+                              <li v-if="item.status == 'graduated'">
+                                <button
+                                  title="Sertifikat"
+                                  @click="
+                                    certificateSubmission(
+                                      item.id,
+                                      item.participant?.id,
+                                      item.participant?.certificate
+                                        ?.credential_id
+                                    )
+                                  "
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Lihat Sertifikat
+                                </button>
+                              </li>
+                            </ul>
+                          </div>
+                          <div>
+                            <input
+                              @click="toggleCheckbox(item.id)"
+                              class="h-6 w-6"
+                              type="checkbox"
+                              :id="`checkbox${item.id}`"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <!-- <td class="px-6 py-4">
                         <div class="flex gap-2">
                           <div
                             @click="approvalSubmission(item.id, item.participant?.name)"
@@ -542,16 +757,15 @@ function handleOptionSubmission() {
                             />
                           </div>
                         </div>
-                      </td>
+                      </td> -->
                     </tr>
                   </tbody>
                 </table>
-
-                <Pagination
-                  class="my-6 flex justify-center md:justify-end"
-                  :links="props.submissions.links"
-                />
               </div>
+              <Pagination
+                class="my-6 flex justify-center md:justify-end"
+                :links="props.submissions.links"
+              />
             </div>
           </div>
         </div>
@@ -568,8 +782,12 @@ function handleOptionSubmission() {
           <!-- Modal content -->
           <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
             <!-- Modal header -->
-            <div class="text-red-600 text-sm ml-2" v-for="error, index in props.errors" :key="index">
-                *{{ error }}
+            <div
+              class="text-red-600 text-sm ml-2"
+              v-for="(error, index) in props.errors"
+              :key="index"
+            >
+              *{{ error }}
             </div>
             <div
               class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
@@ -613,7 +831,12 @@ function handleOptionSubmission() {
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >Graduation</label
                   >
-                  <select id="graduation" name="graduation" v-model="formCheckbox.status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  <select
+                    id="graduation"
+                    name="graduation"
+                    v-model="formCheckbox.status"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
                     <option selected value="">Choose a Option</option>
                     <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
@@ -628,6 +851,90 @@ function handleOptionSubmission() {
                 class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
                 {{ form.id ? "Update" : "Update" }}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- certificate modal -->
+      <div
+        id="certificate-modal"
+        tabindex="-1"
+        aria-hidden="true"
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+      >
+        <div class="relative p-4 w-full max-w-7xl max-h-full">
+          <!-- Modal content -->
+          <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div
+              class="text-red-600 text-sm ml-2"
+              v-for="(error, index) in props.errors"
+              :key="index"
+            >
+              *{{ error }}
+            </div>
+            <div
+              class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
+            >
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Sertifikat
+              </h3>
+              <button
+                type="button"
+                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                @click="closeModal('certificate-modal')"
+              >
+                <svg
+                  class="w-3 h-3"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 14 14"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                  />
+                </svg>
+                <span class="sr-only">Close modal</span>
+              </button>
+            </div>
+            <!-- Modal body -->
+            <form
+              @submit.prevent="handleCertificateSubmission"
+              class="p-4 md:p-5"
+            >
+              <div class="grid gap-4 mb-4 grid-cols-2">
+                <div class="col-span-2">
+                  <label
+                    for="credential_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Nomor Sertifikat</label
+                  >
+                  <input
+                    v-model="form.credential_id"
+                    type="text"
+                    name="credential_id"
+                    id="credential_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Nomor Kredensial Sertifikat"
+                  />
+                </div>
+                <div class="col-span-2" v-if="form.credential_id">
+                  Sertifikat ada
+                </div>
+              </div>
+              <button
+                title="Tambah Kelas"
+                type="submit"
+                class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                {{ form.id ? "Tambah" : "Tambah" }}
               </button>
             </form>
           </div>

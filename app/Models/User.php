@@ -68,4 +68,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(User::class, 'id');
     }
+
+    public function certificate(): MorphOne
+    {
+        return $this->morphOne(Certificate::class, 'certificateable');
+    }
 }
