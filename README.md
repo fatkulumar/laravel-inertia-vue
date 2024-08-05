@@ -17,6 +17,7 @@
 - [Sweetalert2 11.11.0](https://sweetalert2.github.io)
 - [Indonesia Province](https://github.com/laravolt/indonesia)
 - [Vue-QRCode](https://github.com/fengyuanchen/vue-qrcode)
+- [Laravel Excel](https://docs.laravel-excel.com/)
 
 ##### Requirements
 - PHP 8.1 - 8.2

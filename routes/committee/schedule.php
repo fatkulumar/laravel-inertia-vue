@@ -25,6 +25,18 @@
         Route::delete('/documentation/delete', [Committee\ScheduleController::class, 'documentationDelete'])->name('documentation.delete');
         // report
         Route::get('/report/{scheduleId}', [Committee\ScheduleController::class, 'report'])->name('report');
+
+        Route::get('/download/report-total-participant-by-schedule-class/{scheduleId}', [Committee\ScheduleController::class, 'downloadReportTotalParticipantByScheduleClass'])->name('report.total.participant.by.schedule.class');
+        Route::get('/download/report-total-male-participant-by-schedule-class/{scheduleId}', [Committee\ScheduleController::class, 'downloadReportTotalMaleParticipantByScheduleClass'])->name('report.total.male.participant.by.schedule.class');
+        Route::get('/download/report-total-female-participant-by-schedule-class/{scheduleId}', [Committee\ScheduleController::class, 'downloadReportTotalFemaleParticipantByScheduleClass'])->name('report.total.female.participant.by.schedule.class');
+
+        Route::get('/download/report-total-graduated-participant-by-schedule-class/{scheduleId}', [Committee\ScheduleController::class, 'downloadReportTotalGraduatedParticipantByScheduleClass'])->name('report.total.graduated.participant.by.schedule.class');
+        Route::get('/download/report-total-male-graduated-participant-by-schedule-class/{scheduleId}', [Committee\ScheduleController::class, 'downloadReportTotalMaleGraduatedParticipantByScheduleClass'])->name('report.total.male.graduated.participant.by.schedule.class');
+        Route::get('/download/report-total-female-graduated-participant-by-schedule-class/{scheduleId}', [Committee\ScheduleController::class, 'downloadReportTotalFemaleGraduatedParticipantByScheduleClass'])->name('report.total.female.graduated.participant.by.schedule.class');
+
+        Route::get('/download/report-total-not-graduated-participant-by-schedule-class/{scheduleId}', [Committee\ScheduleController::class, 'downloadReportTotalNotGraduatedParticipantByScheduleClass'])->name('report.total.not.graduated.participant.by.schedule.class');
+        Route::get('/download/report-total-male-not-graduated-participant-by-schedule-class/{scheduleId}', [Committee\ScheduleController::class, 'downloadReportTotalMaleNotGraduatedParticipantByScheduleClass'])->name('report.total.male.not.graduated.participant.by.schedule.class');
+        Route::get('/download/report-total-female-not-graduated-participant-by-schedule-class/{scheduleId}', [Committee\ScheduleController::class, 'downloadReportTotalFemaleNotGraduatedParticipantByScheduleClass'])->name('report.total.female.not.graduated.participant.by.schedule.class');
         // upload berita acara
         Route::post('/upload-appointment-file', [Committee\ScheduleController::class, 'uploadAppointmentFile'])->name('upload.appintment.file');
         Route::post('/appointment-file', [Committee\ScheduleController::class, 'appointmentFile'])->name('appintment.file');

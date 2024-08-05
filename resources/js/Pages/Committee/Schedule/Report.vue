@@ -64,11 +64,9 @@ function toast(icon = "success", text = "Data Berhasil Disimpan") {
 
 function uploadFile(e) {
   const file = e.target.files[0];
-  if (
-      (file.type == "application/pdf")
-    ) {
-      form.file = file;
-      form.name = file.name;
+  if (file.type == "application/pdf") {
+    form.file = file;
+    form.name = file.name;
   } else {
     form.file = null;
     form.name = null;
@@ -85,7 +83,6 @@ function addAppointmentFile() {
     },
   });
 }
-
 </script>
 
 <template>
@@ -95,9 +92,7 @@ function addAppointmentFile() {
       <template #header>
         <TabMenuDetailSchedule :id="idSubmissionLastSegment" />
       </template>
-      <template #headerTitle>
-        Laporan
-      </template>
+      <template #headerTitle> Laporan </template>
       <div class="md:py-12 mx-auto sm:px-6 lg:px-8">
         <div
           class="m-6 text-gray-700 bg-clip-border rounded-xl flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-12"
@@ -142,31 +137,37 @@ function addAppointmentFile() {
                   aria-labelledby="dropdown-button"
                 >
                   <li>
-                    <button
+                    <a
+                      target="_blank"
+                      :href="`/committee/schedule/download/report-total-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Total Peserta"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
                       Download Data Total Peserta
-                    </button>
+                    </a>
                   </li>
                   <li>
-                    <button
+                    <a
+                      target="_blank"
+                      :href="`/committee/schedule/download/report-total-male-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Laki Laki"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
                       Download Data Laki Laki
-                    </button>
+                    </a>
                   </li>
                   <li>
-                    <button
+                    <a
+                      target="_blank"
+                      :href="`/committee/schedule/download/report-total-female-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Perempuan"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
                       Download Data Perempuan
-                    </button>
+                    </a>
                   </li>
                 </ul>
               </div>
@@ -231,31 +232,37 @@ function addAppointmentFile() {
                   aria-labelledby="dropdown-button"
                 >
                   <li>
-                    <button
+                    <a
+                      target="_blank"
+                      :href="`/committee/schedule/download/report-total-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Total Peserta Lulus"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
                       Download Data Total Peserta Lulus
-                    </button>
+                    </a>
                   </li>
                   <li>
-                    <button
+                    <a
+                      target="_blank"
+                      :href="`/committee/schedule/download/report-total-male-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Laki Laki Lulus"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
                       Download Data Laki Laki Lulus
-                    </button>
+                    </a>
                   </li>
                   <li>
-                    <button
+                    <a
+                      target="_blank"
+                      :href="`/committee/schedule/download/report-total-female-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Perempuan Lulus"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
                       Download Data Perempuan Lulus
-                    </button>
+                    </a>
                   </li>
                 </ul>
               </div>
@@ -322,31 +329,37 @@ function addAppointmentFile() {
                   aria-labelledby="dropdown-button"
                 >
                   <li>
-                    <button
+                    <a
+                      target="_blank"
+                      :href="`/committee/schedule/download/report-total-not-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Total Tidak Lulus"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
                       Download Data Total Peserta Tidak Lulus
-                    </button>
+                    </a>
                   </li>
                   <li>
-                    <button
+                    <a
+                      target="_blank"
+                      :href="`/committee/schedule/download/report-total-male-not-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Laki Laki Tidak Lulus"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
                       Download Data Laki Laki Tidak Lulus
-                    </button>
+                    </a>
                   </li>
                   <li>
-                    <button
+                    <a
+                      target="_blank"
+                      :href="`/committee/schedule/download/report-total-female-not-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Perempuan Tidak Lulus"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
                       Download Data Perempuan Tidak Lulus
-                    </button>
+                    </a>
                   </li>
                 </ul>
               </div>
@@ -379,27 +392,53 @@ function addAppointmentFile() {
           </div>
         </div>
 
-        <div
-          class=" text-gray-700 bg-clip-border rounded-xl"
-        >
-        <div class="text-red-600 text-sm ml-2" v-for="error, index in props.errors" :key="index">
+        <div class="text-gray-700 bg-clip-border rounded-xl">
+          <div
+            class="text-red-600 text-sm ml-2"
+            v-for="(error, index) in props.errors"
+            :key="index"
+          >
             *{{ error }}
-        </div>
+          </div>
           <div class="bg-white shadow-lg">
-            <label for="apoointment_file" class="mx-auto flex justify-center">Berita Acara Baiat</label>
-            <div class="bg-gray-100 flex items-center mb-2" v-if="props.appointmentFiles">
-                <div class="w-1/12 bg-gray-200 flex">
-                    <p class="w-1/12 p-6 text-red-500 font-bold text-lg">
-                        PDF
-                    </p>
-                </div>
-                <div class="ml-2">
-                    <a class="hover:underline hover:text-blue-500" :href="props.appointmentFiles[0]?.name" target="_blank" rel="noopener noreferrer">{{ props.appointmentFiles[0]?.name }}</a>
-                </div>
+            <label for="apoointment_file" class="mx-auto flex justify-center"
+              >Berita Acara Baiat</label
+            >
+            <div
+              class="bg-gray-100 flex items-center mb-2"
+              v-if="props.appointmentFiles"
+            >
+              <div class="w-1/12 bg-gray-200 flex">
+                <p class="w-1/12 p-6 text-red-500 font-bold text-lg">PDF</p>
+              </div>
+              <div class="ml-2">
+                <a
+                  class="hover:underline hover:text-blue-500"
+                  :href="props.appointmentFiles[0]?.name"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >{{ props.appointmentFiles[0]?.name }}</a
+                >
+              </div>
             </div>
-            <form @submit.prevent="addAppointmentFile" enctype="multipart/form-data">
-                <input @change="uploadFile" required accept="application/pdf" type="file" name="apoointment_file" class="w-full">
-                <button type="submit" class="w-full p-2 bg-blue-500 text-white md:rounded-lg">Upload</button>
+            <form
+              @submit.prevent="addAppointmentFile"
+              enctype="multipart/form-data"
+            >
+              <input
+                @change="uploadFile"
+                required
+                accept="application/pdf"
+                type="file"
+                name="apoointment_file"
+                class="w-full"
+              />
+              <button
+                type="submit"
+                class="w-full p-2 bg-blue-500 text-white md:rounded-lg"
+              >
+                Upload
+              </button>
             </form>
           </div>
         </div>

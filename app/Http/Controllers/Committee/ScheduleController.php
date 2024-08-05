@@ -2,6 +2,15 @@
 
 namespace App\Http\Controllers\Committee;
 
+use App\Exports\TotalFemaleGraduatedParticipantByScheduleClassExport;
+use App\Exports\TotalFemaleNotGraduatedParticipantByScheduleClassExport;
+use App\Exports\TotalFemaleParticipantByScheduleClassExport;
+use App\Exports\TotalGraduatedParticipantByScheduleClassExport;
+use App\Exports\TotalMaleGraduatedParticipantByScheduleClassExport;
+use App\Exports\TotalMaleNotGraduatedParticipantByScheduleClassExport;
+use App\Exports\TotalMaleParticipantByScheduleClassExport;
+use App\Exports\TotalNotGraduatedParticipantByScheduleClassExport;
+use App\Exports\TotalParticipantByScheduleClassExport;
 use App\Http\Controllers\Controller;
 use App\Models\AppointmentFile;
 use App\Models\Category;
@@ -22,6 +31,7 @@ use Inertia\Inertia;
 use App\Traits\FileUpload;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ScheduleController extends Controller
 {
@@ -65,8 +75,8 @@ class ScheduleController extends Controller
             $typeActivities = TypeActivity::all(['id', 'name']);
             $regional_id = Auth::user()->profile->regional->id;
             $regencyRegionals = RegencyRegional::with('regional')
-                                ->where('regional_id', $regional_id)
-                                ->get();
+                ->where('regional_id', $regional_id)
+                ->get();
             // return $regencyRegional;
 
             return Inertia::render('Committee/Schedule/Schedule', [
@@ -392,8 +402,8 @@ class ScheduleController extends Controller
         $typeActivities = TypeActivity::all(['id', 'name']);
         $regional_id = Auth::user()->profile->regional->id;
         $regencyRegionals = RegencyRegional::with('regional')
-                                ->where('regional_id', $regional_id)
-                                ->get();
+            ->where('regional_id', $regional_id)
+            ->get();
         return Inertia::render('Committee/Schedule/DetailSchedule', [
             'schedule' => $schedule,
             'classRooms' => $classRooms,
@@ -1040,6 +1050,123 @@ class ScheduleController extends Controller
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function storeAppointmentFileValidator in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalParticipantByScheduleClassExport($scheduleId), "Total Peserta.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalMaleParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalMaleParticipantByScheduleClassExport($scheduleId), "Total Peserta Laki Laki.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalMaleParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalFemaleParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalFemaleParticipantByScheduleClassExport($scheduleId), "Total Peserta Perempuan.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalMaleParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalGraduatedParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalGraduatedParticipantByScheduleClassExport($scheduleId), "Total Peserta Lulus.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalGraduatedParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalMaleGraduatedParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalMaleGraduatedParticipantByScheduleClassExport($scheduleId), "Total Peserta Lulus Laki Laki.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalMaleGraduatedParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalFemaleGraduatedParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalFemaleGraduatedParticipantByScheduleClassExport($scheduleId), "Total Peserta Lulus Perempuab.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalFemaleGraduatedParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalNotGraduatedParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalNotGraduatedParticipantByScheduleClassExport($scheduleId), "Total Peserta Tidak Lulus.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalNotGraduatedParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalMaleNotGraduatedParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalMaleNotGraduatedParticipantByScheduleClassExport($scheduleId), "Total Peserta Laki Laki Tidak Lulus.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalMaleNotGraduatedParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalFemaleNotGraduatedParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalFemaleNotGraduatedParticipantByScheduleClassExport($scheduleId), "Total Peserta Perempuan Tidak Lulus.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalFemaleNotGraduatedParticipantByScheduleClass in Committee/ScheduleController', $errors);
         }
     }
 }
