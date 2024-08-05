@@ -1,16 +1,18 @@
 <script setup>
 import AuthenticatedLayoutParticipant from "@/Layouts/AuthenticatedLayoutParticipant.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head, useForm, Link } from "@inertiajs/vue3";
 import { onMounted, ref } from "vue";
 import { Modal } from "flowbite";
 import Swal from "sweetalert2";
+import TabMenuDetailParticipant from "@/Components/Participant/TabMenuDetailParticipant.vue";
+
 
 onMounted(() => {
-    initFlowbite();
-})
+  initFlowbite();
+});
 
 const props = defineProps({
-  schedule: {
+  histories: {
     type: Object,
     default: () => ({}),
   },
@@ -24,13 +26,17 @@ const props = defineProps({
   },
 });
 
-const form = useForm({
-    schedule_id: "",
-    proof: null,
-})
+const urlPath = window.location.pathname;
+const segments = urlPath.split("/");
+const idSubmissionLastSegment = segments.pop() || segments.pop();
 
-let nameClassRoom = ref('')
-let category = ref("")
+const form = useForm({
+  schedule_id: "",
+  proof: null,
+});
+
+let nameClassRoom = ref("");
+let category = ref("");
 
 const showModal = (
   targetModal = "submission-modal",
@@ -47,7 +53,7 @@ const showModal = (
 };
 
 const closeModal = (targetModal = "submission-modal") => {
-  previewProof.value = null
+  previewProof.value = null;
   const $targetEl = document.getElementById(targetModal);
   const modal = new Modal($targetEl);
   modal.hide();
@@ -71,7 +77,7 @@ function handleFileUpload(e) {
     reader.readAsDataURL(image);
     reader.onload = (e) => {
       previewProof.value = e.target.result;
-      form.proof = image
+      form.proof = image;
     };
   } else {
     toast("warning", "Harus Format Gambar");
@@ -96,7 +102,6 @@ function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
   });
 }
 
-
 function hanldeRegisterClass() {
   form.post("/participant/participant/register-class", {
     preserveScroll: true,
@@ -107,70 +112,138 @@ function hanldeRegisterClass() {
     },
   });
 }
-
-
 </script>
 
 <template>
-  <Head title="Event Tersedia" />
+  <Head title="History Kelas" />
   <div>
     <AuthenticatedLayoutParticipant>
+        <template #header>
+          <TabMenuDetailParticipant />
+        </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
               <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <div v-if="props.schedule.length < 1">
-                    <p class="text-center">Tidak Ada Kelas</p>
+                <div v-if="props.histories.length < 1">
+                  <p class="text-center">Tidak Ada Kelas</p>
                 </div>
                 <div
                   v-else
                   class="flex gap-2 items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
-                  v-for="(item, index) in props.schedule"
+                  v-for="(item, index) in props.histories"
                   :key="index"
                 >
                   <div
-                    @click="
-                      showModal(
-                        'submission-modal',
-                        item.id,
-                        item.class_room?.name,
-                        item.category?.name
-                      )
-                    "
-                    class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 w-full cursor-pointer"
+                    v-for="(submission, indexSubmission) in item.submissions"
+                    :key="indexSubmission"
+                    class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 w-full"
                   >
                     <img
                       class="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-48 md:rounded-none md:rounded-s-lg"
                       :src="item.poster"
                       alt=""
                     />
-                    <div
-                      class="flex flex-col justify-between p-4 leading-normal"
-                    >
-                      <h5
-                        class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-                      >
-                        {{ item.class_room?.name }} | {{ item.category?.name }} <small class="text-xs text-yellow-500 absolute">Lulus</small>
-                      </h5>
-                      <div class="flex gap-2 bg-gray-400 p-1 rounded-sm">
-                        <p>{{ item.start_date_class }}</p>
-                        <p>-</p>
-                        <p>{{ item.end_date_class }}</p>
+                    <div class="flex justify-between items-center">
+                      <div class="flex flex-col justify-between leading-normal">
+                        <div class="flex">
+                          <h5
+                            class="tracking-tight text-gray-900 dark:text-white"
+                          >
+                            <span class="font-bold"
+                              >{{ submission.schedule.class_room.name }} |
+                              {{ submission.schedule.category.name }}</span
+                            >
+                            <div>
+                              Angkatan Ke
+                              <span class="font-bold">{{
+                                submission.schedule.periode
+                              }}</span>
+                            </div>
+                          </h5>
+                        </div>
+
+                        <div class="flex gap-2 rounded-sm flex-col">
+                          <p>{{ item.formatted_updated_at }}</p>
+                        </div>
                       </div>
-                      <p
-                        class="mb-3 font-normal text-gray-700 dark:text-gray-400"
-                      >
-                        {{ item.facility }}
-                      </p>
-                      <p
-                        class="mb-3 font-normal text-gray-700 dark:text-gray-400"
-                      >
-                        {{ item.benefit }}
-                      </p>
+                      <div class="flex flex-col gap-1 ml-16">
+                        <div
+                          class="rounded-md text-white text-center px-1"
+                          :class="{
+                            'bg-green-500': submission.status == 'graduated',
+                            'bg-yellow-500': submission.status != 'graduated',
+                          }"
+                        >
+                          {{ submission.status }}
+                        </div>
+
+                        <Link
+                          :href="`/participant/participant/certificate/${submission.certificate?.credential_id}`"
+                          v-if="submission.status == 'graduated'"
+                          class="rounded-md text-white text-center px-1 bg-orange-500 hover:bg-orange-600"
+                        >
+                          Sertifikat
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
+                <!-- <div
+                  v-else
+                  class="flex gap-2 items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
+                  v-for="(item, index) in props.histories"
+                  :key="index"
+                >
+                  <div
+                    v-for="(submission, indexSubmission) in item.submissions"
+                    :key="indexSubmission"
+                  >
+                    {{ submission.schedule.class_room.name }}
+                    {{ submission.schedule.category.name }}
+                    {{ submission.schedule.regency_regional.regency }}
+                    {{ submission.status }}
+
+                    <div
+                      class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 w-full cursor-pointer"
+                    >
+                      <img
+                      class="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-48 md:rounded-none md:rounded-s-lg"
+                      :src="item.poster"
+                      alt=""
+                    />
+                      <div
+                        class="flex flex-col justify-between p-4 leading-normal"
+                      >
+                        <h5
+                          class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+                        >
+                          {{ submission.schedule.class_room.name }} |
+                          {{ submission.schedule.category.name }}
+                          <small class="text-xs text-yellow-500 absolute"
+                            >Lulus</small
+                          >
+                        </h5>
+                        <div class="flex gap-2 bg-gray-400 p-1 rounded-sm">
+                          <p>{{ item.start_date_class }}</p>
+                          <p>-</p>
+                          <p>{{ item.end_date_class }}</p>
+                        </div>
+                        <p
+                          class="mb-3 font-normal text-gray-700 dark:text-gray-400"
+                        >
+                          {{ item.facility }}
+                        </p>
+                        <p
+                          class="mb-3 font-normal text-gray-700 dark:text-gray-400"
+                        >
+                          {{ item.benefit }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div> -->
               </div>
             </div>
           </div>
@@ -230,10 +303,7 @@ function hanldeRegisterClass() {
                 class="hidden"
               />
 
-              <div
-                @click="triggerFileInput"
-                class="cursor-pointer"
-              >
+              <div @click="triggerFileInput" class="cursor-pointer">
                 <div v-if="previewProof == null" class="w-5/12 mx-auto">
                   <svg
                     fill="#000000"

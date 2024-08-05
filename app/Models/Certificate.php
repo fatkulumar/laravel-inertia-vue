@@ -16,6 +16,7 @@ class Certificate extends Model
         'certificateable_id', //id_user
         'certificateable_type',
         'credential_id',
+        'expired_at',
     ];
 
      public function certificateable(): MorphTo

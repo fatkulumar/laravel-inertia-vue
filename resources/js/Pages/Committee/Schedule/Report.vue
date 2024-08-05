@@ -386,6 +386,7 @@ function addAppointmentFile() {
             *{{ error }}
         </div>
           <div class="bg-white shadow-lg">
+            <label for="apoointment_file" class="mx-auto flex justify-center">Berita Acara Baiat</label>
             <div class="bg-gray-100 flex items-center mb-2" v-if="props.appointmentFiles">
                 <div class="w-1/12 bg-gray-200 flex">
                     <p class="w-1/12 p-6 text-red-500 font-bold text-lg">
@@ -397,7 +398,7 @@ function addAppointmentFile() {
                 </div>
             </div>
             <form @submit.prevent="addAppointmentFile" enctype="multipart/form-data">
-                <input @change="uploadFile" required accept="application/pdf" type="file" class="w-full">
+                <input @change="uploadFile" required accept="application/pdf" type="file" name="apoointment_file" class="w-full">
                 <button type="submit" class="w-full p-2 bg-blue-500 text-white md:rounded-lg">Upload</button>
             </form>
           </div>

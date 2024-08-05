@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignUuid('certificateable_id')->references('id')->on('users');
             $table->string('certificateable_type');
             $table->string('credential_id')->unique();
+            $table->date('expired_at')->nullable();
             $table->timestamps();
         });
     }

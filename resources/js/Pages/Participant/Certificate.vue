@@ -1,10 +1,11 @@
 <script setup>
-import AuthenticatedLayoutCommittee from "@/Layouts/AuthenticatedLayoutCommittee.vue";
+import AuthenticatedLayoutParticipant from "@/Layouts/AuthenticatedLayoutParticipant.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, defineComponent } from "vue";
 import { Modal } from "flowbite";
 import Swal from "sweetalert2";
-import TabMenuDetailParticipant from "@/Components/Committee/TabMenuDetailParticipant.vue";
+import VueQrcode from "@chenfengyuan/vue-qrcode";
+import TabMenuDetailParticipant from "@/Components/Participant/TabMenuDetailParticipant.vue";
 
 onMounted(() => {
   initFlowbite();
@@ -33,8 +34,8 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
 <template>
   <Head title="Sertifikat" />
   <div>
-    <AuthenticatedLayoutCommittee>
-      <template #headerTitle> Syahadah </template>
+    <AuthenticatedLayoutParticipant>
+      <template #headerTitle> Sertifikat </template>
       <template #header>
         <TabMenuDetailParticipant :id="idSubmissionLastSegment" />
       </template>
@@ -112,6 +113,6 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
           </div>
         </div>
       </div>
-    </AuthenticatedLayoutCommittee>
+    </AuthenticatedLayoutParticipant>
   </div>
 </template>

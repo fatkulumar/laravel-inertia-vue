@@ -15,9 +15,10 @@
         "postcss": "^8.4.31",
         "tailwindcss": "^3.2.1",
         "vite": "^5.0",
-        "vue": "^3.4.0"
+        "vue": "^3.4.35"
     },
     "dependencies": {
+        "@chenfengyuan/vue-qrcode": "^2.0.0",
         "@ckeditor/ckeditor5-alignment": "^41.4.2",
         "@ckeditor/ckeditor5-basic-styles": "^41.4.2",
         "@ckeditor/ckeditor5-build-classic": "^41.4.2",
@@ -31,8 +32,13 @@
         "@tinymce/tinymce-vue": "^5.1.1",
         "@vueup/vue-quill": "^1.2.0",
         "flowbite": "^2.3.0",
+        "qrcode": "^1.5.3",
+        "qrcode-reader-vue3": "^3.1.2",
+        "qrcode-vue3": "^1.6.8",
+        "qrcode.vue": "^3.4.1",
         "quill-blot-formatter": "^1.0.5",
         "sweetalert2": "^11.11.0",
-        "tinymce": "^7.1.2"
+        "tinymce": "^7.1.2",
+        "vue-html-to-paper": "^2.0.3"
     }
 }

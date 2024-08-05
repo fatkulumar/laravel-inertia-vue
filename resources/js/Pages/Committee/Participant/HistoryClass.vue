@@ -31,7 +31,7 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
 </script>
 
 <template>
-  <Head title="Event Tersedia" />
+  <Head title="Riwayat Kelas" />
   <div>
     <AuthenticatedLayoutCommittee>
       <template #headerTitle> Riwayat Kelas </template>
@@ -60,7 +60,7 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
                     <img
                       class="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-48 md:rounded-none md:rounded-s-lg"
                       :src="item.poster"
-                      alt=""
+                      :alt="item.class_room?.name"
                     />
                     <div class="flex justify-between items-center">
                       <div class="flex flex-col justify-between leading-normal">
@@ -72,16 +72,18 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
                               >{{ item.class_room?.name }} |
                               {{ item.category?.name }}</span
                             >
-                            Angkatan Ke
-                            <span class="font-bold">{{ item.periode }}</span>
+                            <div>
+                              Angkatan Ke
+                              <span class="font-bold">{{ item.periode }}</span>
+                            </div>
                           </h5>
                         </div>
 
                         <div class="flex gap-2 rounded-sm flex-col">
-                          <p>{{ submission.updated_at }}</p>
+                          <p>{{ item.formatted_updated_at }}</p>
                         </div>
                       </div>
-                      <div class="flex flex-col gap-1">
+                      <div class="flex flex-col gap-1 ml-20">
                         <div
                           class="rounded-md text-white text-center px-1"
                           :class="{
@@ -92,11 +94,12 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
                           {{ submission.status }}
                         </div>
 
-                        <Link :href="`/committee/participant/certificate/${submission.participant_id}`"
+                        <Link
+                          :href="`/committee/participant/certificate/${submission.certificate.credential_id}/${submission.participant_id}`"
                           v-if="submission.status == 'graduated'"
-                          class="rounded-md text-white px-1 bg-orange-500 hover:bg-orange-600"
+                          class="rounded-md text-white px-1 bg-orange-500 hover:bg-orange-600 text-center"
                         >
-                          Lihat Syahadah
+                          Sertifikat
                         </Link>
                       </div>
                     </div>

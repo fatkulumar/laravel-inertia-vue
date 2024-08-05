@@ -185,11 +185,17 @@ class ParticipantController extends Controller
         try {
             $users = Auth::user();
             $profile = Profile::where('profileable_id', $users->id)->first();
-            $schedules = Schedule::with(['classRoom', 'category', 'submissions' => function ($query) use ($userId) {
-                $query->whereHas('participant', function ($query) use ($userId) {
-                    $query->where('id', $userId);
-                });
-            }])
+            $schedules = Schedule::with([
+                'classRoom',
+                'category',
+                'submissions.certificate',
+                'submissions' => function ($query) use ($userId) {
+                    $query->whereHas('participant', function ($query) use ($userId) {
+                        $query->where('id', $userId);
+                    });
+                },
+                'regencyRegional'
+            ])
             ->where('regional_id', $profile->regional_id)
             ->whereHas('submissions', function ($query) use ($userId) {
                 $query->whereHas('participant', function ($query) use ($userId) {
@@ -200,13 +206,16 @@ class ParticipantController extends Controller
 
             $schedules->map(function ($schedule) {
                 $this->fileSettings();
+                foreach ($schedule->submissions as $submission) {
+                    if (isset($submission->schedule->updated_at)) {
+                        $schedule->formatted_updated_at = isset($schedule->updated_at) ? Carbon::parse($schedule->updated_at)->format('d-m-Y') : null;;
+                    } else {
+                        $schedule->formatted_updated_at = null;
+                    }
+                }
+
                 if (isset($schedule['poster'])) {
                     $schedule['poster'] = $this->getFileAttribute($schedule['poster']);
-                } else {
-                    $schedule['poster'] = null;
-                }
-                if (isset($schedule['proposal'])) {
-                    $schedule['proposal'] = $this->getFileAttribute($schedule['proposal']);
                 } else {
                     $schedule['poster'] = null;
                 }
@@ -227,13 +236,18 @@ class ParticipantController extends Controller
         }
     }
 
-    public function certificate(Request $request, $userId)
+    public function certificate(Request $request, $credentialId, $userId)
     {
         // return $userId;
 
         try {
 
-            $users = User::with('profile', 'submissions.schedule')->where('id', $userId)->get();
+            $users = User::with(['profile', 'submissions.schedule', 'certificate'])
+                        ->where('id', $userId)
+                        ->whereHas('certificate', function ($query) use ($credentialId) {
+                            $query->where('credential_id', $credentialId);
+                        })
+                        ->get();
 
             // return $users;
             return Inertia::render('Committee/Participant/Certificate', [

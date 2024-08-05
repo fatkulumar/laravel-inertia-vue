@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayoutAdmin from "@/Layouts/AuthenticatedLayoutAdmin.vue";
+import AuthenticatedLayoutCommittee from "@/Layouts/AuthenticatedLayoutCommittee.vue";
 import { Head, useForm } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
@@ -254,7 +254,7 @@ function deleteGuideCadreDestroy() {
 <template>
   <Head title="Panduan Kaderisasi" />
   <div>
-    <AuthenticatedLayoutAdmin>
+    <AuthenticatedLayoutCommittee>
       <template #header>
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
           Panduan Kaderisasi
@@ -641,6 +641,6 @@ function deleteGuideCadreDestroy() {
           </div>
         </div>
       </div>
-    </AuthenticatedLayoutAdmin>
+    </AuthenticatedLayoutCommittee>
   </div>
 </template>

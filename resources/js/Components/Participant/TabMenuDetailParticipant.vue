@@ -12,6 +12,7 @@ const props = defineProps({
   id: {
     type: String,
     default: () => ({}),
+    required: false,
   },
 });
 
@@ -63,21 +64,21 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
         >
           <li>
             <Link replace
-             :href="`/committee/participant/detail/${id}`"
+             :href="`/participant/participant/detail`"
               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >Data Peserta</Link
             >
           </li>
           <li>
             <Link replace
-             :href="`/committee/participant/history-class/${id}`"
+             :href="`/participant/participant/history-class`"
               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >Riwayat Peserta</Link
             >
           </li>
           <!-- <li>
             <Link replace
-             :href="`/committee/participant/certificate/${id}`"
+             :href="`/participant/participant/certificate/${id}`"
               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >Sertifikat</Link
             >
@@ -91,13 +92,13 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
     <div class="md:flex flex-wrap gap-2 hidden">
       <Link replace
         class="ring-2 rounded-md"
-        :href="`/committee/participant/detail/${id}`"
+        :href="`/participant/participant/detail`"
       >
         <h2
           class="font-semibold leading-tight border-1 border-black px-5 py-1 rounded-md"
           :class="{
             'bg-blue-700 text-white': route().current(
-              'committee.participant.detail*'
+              'participant.participant.detail*'
             ),
           }"
         >
@@ -107,13 +108,13 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
 
       <Link replace
         class="ring-2 rounded-md"
-        :href="`/committee/participant/history-class/${id}`"
+        :href="`/participant/participant/history-class`"
       >
         <h2
           class="font-semibold leading-tight border-1 border-black px-5 py-1 rounded-md"
           :class="{
             'bg-blue-700 text-white': route().current(
-              'committee.participant.history.class*'
+              'participant.participant.history.class*'
             ),
           }"
         >
@@ -123,13 +124,13 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
 
       <!-- <Link replace
         class="ring-2 rounded-md"
-        :href="`/participant/participant/certificate/${id}`"
+        :href="`/participant/participant/certificate`"
       >
         <h2
           class="font-semibold leading-tight border-1 border-black px-5 py-1 rounded-md"
           :class="{
             'bg-blue-700 text-white': route().current(
-              'committee.participant.certificate*'
+              'participant.participant.certificate*'
             ),
           }"
         >

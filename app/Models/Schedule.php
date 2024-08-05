@@ -82,4 +82,9 @@ class Schedule extends Model
     {
         return $this->hasOne(Letter::class, 'schedule_id', 'id');
     }
+
+    public function regencyRegional()
+    {
+        return $this->hasOne(RegencyRegional::class, 'id', 'regency_regional_id');
+    }
 }

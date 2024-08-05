@@ -16,7 +16,8 @@
 - [Flowbite 3.2.0](https://flowbite.com)
 - [Sweetalert2 11.11.0](https://sweetalert2.github.io)
 - [Indonesia Province](https://github.com/laravolt/indonesia)
-    - php artisan laravolt:indonesia:seed
+- [Vue-QRCode](https://github.com/fengyuanchen/vue-qrcode)
+
 ##### Requirements
 - PHP 8.1 - 8.2
 

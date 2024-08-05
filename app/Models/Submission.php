@@ -26,4 +26,9 @@ class Submission extends Model
     {
         return $this->belongsTo(User::class, 'participant_id');
     }
+
+    public function certificate()
+    {
+        return $this->hasOne(Certificate::class, 'submission_id', 'id');
+    }
 }
