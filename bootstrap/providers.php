@@ -5,4 +5,5 @@ return [
     Spatie\Permission\PermissionServiceProvider::class,
     Laravolt\Indonesia\ServiceProvider::class,
     Maatwebsite\Excel\ExcelServiceProvider::class,
+    Barryvdh\DomPDF\ServiceProvider::class,
 ];

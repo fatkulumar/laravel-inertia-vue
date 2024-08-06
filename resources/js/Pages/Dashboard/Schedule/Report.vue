@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayoutCommittee from "@/Layouts/AuthenticatedLayoutCommittee.vue";
+import AuthenticatedLayoutAdmin from "@/Layouts/AuthenticatedLayoutAdmin.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
 import { computed, onMounted, ref, watch } from "vue";
@@ -75,7 +75,7 @@ function uploadFile(e) {
 }
 
 function addAppointmentFile() {
-  form.post("/committee/schedule/upload-appointment-file", {
+  form.post("/dashboard/schedule/upload-appointment-file", {
     preserveScroll: true,
     onSuccess: () => {
       resetForm();
@@ -88,11 +88,8 @@ function addAppointmentFile() {
 <template>
   <Head title="Laporan" />
   <div>
-    <AuthenticatedLayoutCommittee>
-      <template #header>
-        <TabMenuDetailSchedule :id="idSubmissionLastSegment" />
-      </template>
-      <template #headerTitle> Laporan </template>
+    <AuthenticatedLayoutAdmin>
+      <template #header> Laporan </template>
       <div class="md:py-12 mx-auto sm:px-6 lg:px-8">
         <div
           class="m-6 text-gray-700 bg-clip-border rounded-xl flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-12"
@@ -139,7 +136,7 @@ function addAppointmentFile() {
                   <li>
                     <a
                       target="_blank"
-                      :href="`/committee/schedule/download/report-total-participant-by-schedule-class/${idSubmissionLastSegment}`"
+                      :href="`/dashboard/schedule/download/report-total-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Total Peserta"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -150,7 +147,7 @@ function addAppointmentFile() {
                   <li>
                     <a
                       target="_blank"
-                      :href="`/committee/schedule/download/report-total-male-participant-by-schedule-class/${idSubmissionLastSegment}`"
+                      :href="`/dashboard/schedule/download/report-total-male-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Laki Laki"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -161,7 +158,7 @@ function addAppointmentFile() {
                   <li>
                     <a
                       target="_blank"
-                      :href="`/committee/schedule/download/report-total-female-participant-by-schedule-class/${idSubmissionLastSegment}`"
+                      :href="`/dashboard/schedule/download/report-total-female-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Perempuan"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -234,7 +231,7 @@ function addAppointmentFile() {
                   <li>
                     <a
                       target="_blank"
-                      :href="`/committee/schedule/download/report-total-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
+                      :href="`/dashboard/schedule/download/report-total-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Total Peserta Lulus"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -245,7 +242,7 @@ function addAppointmentFile() {
                   <li>
                     <a
                       target="_blank"
-                      :href="`/committee/schedule/download/report-total-male-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
+                      :href="`/dashboard/schedule/download/report-total-male-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Laki Laki Lulus"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -256,7 +253,7 @@ function addAppointmentFile() {
                   <li>
                     <a
                       target="_blank"
-                      :href="`/committee/schedule/download/report-total-female-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
+                      :href="`/dashboard/schedule/download/report-total-female-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Perempuan Lulus"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -331,7 +328,7 @@ function addAppointmentFile() {
                   <li>
                     <a
                       target="_blank"
-                      :href="`/committee/schedule/download/report-total-not-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
+                      :href="`/dashboard/schedule/download/report-total-not-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Total Tidak Lulus"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -342,7 +339,7 @@ function addAppointmentFile() {
                   <li>
                     <a
                       target="_blank"
-                      :href="`/committee/schedule/download/report-total-male-not-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
+                      :href="`/dashboard/schedule/download/report-total-male-not-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Laki Laki Tidak Lulus"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -353,7 +350,7 @@ function addAppointmentFile() {
                   <li>
                     <a
                       target="_blank"
-                      :href="`/committee/schedule/download/report-total-female-not-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
+                      :href="`/dashboard/schedule/download/report-total-female-not-graduated-participant-by-schedule-class/${idSubmissionLastSegment}`"
                       title="Download Data Perempuan Tidak Lulus"
                       type="button"
                       class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -488,6 +485,6 @@ function addAppointmentFile() {
           </div>
         </div>
       </div>
-    </AuthenticatedLayoutCommittee>
+    </AuthenticatedLayoutAdmin>
   </div>
 </template>

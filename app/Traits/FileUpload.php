@@ -73,6 +73,16 @@ trait FileUpload
             null;
     }
 
+    public function getDonwloadPublicFileAttribute($value)
+    {
+        if ($value instanceof UploadedFile) return $value;
+
+        return $value ?
+            // asset('storage/app/' . $this->settings['path'] . $value) : //get path storege
+            public_path().'/' . $this->settings['path'] . $value :
+            null;
+    }
+
     protected function storeFile($attribute, $file)
     {
         $this->deleteFile($attribute);

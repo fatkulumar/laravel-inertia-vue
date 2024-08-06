@@ -8,8 +8,10 @@ use App\Models\Schedule;
 use App\Models\Submission;
 use App\Traits\EntityValidator;
 use App\Traits\FileUpload;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
@@ -278,8 +280,24 @@ class SubmissionController extends Controller
     public function certificateSubmission(Request $request)
     {
         try {
-            $validasiData = $this->certificateValidator($request);
-            if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+
+            $data = ['title' => 'Welcome to Laravel PDF Generation'];
+
+            $pdf = Pdf::loadView('pdf_template_certificate', $data)
+                        ->setPaper('a4', 'landscape')
+                        ->setOptions([
+                            'margin-left' => 0,
+                            'margin-right' => 0,
+                            'margin-top' => 0,
+                            'margin-bottom' => 0
+                        ]);
+            $pdfContent = $pdf->output();
+
+            $filePath = public_path('file/certificate.pdf');
+            File::put($filePath, $pdfContent);
+
+            // $validasiData = $this->certificateValidator($request);
+            // if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
 
             $submission_id = $request->post('submission_id');
             $credential_id = $request->post('credential_id');
@@ -290,7 +308,7 @@ class SubmissionController extends Controller
                 'certificateable_id' => $participant_id,
                 'certificateable_type' => 'App\Models\User',
             ];
-            Certificate::create($saveData);
+            Certificate::createOrUpdate($saveData);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();

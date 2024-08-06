@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayoutAdmin from "@/Layouts/AuthenticatedLayoutAdmin.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head, useForm, Link } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
@@ -744,13 +744,13 @@ function uploadImage(e) {
                                 </button>
                               </li>
                               <li>
-                                <button
-                                  title="Hapus"
+                                <Link :href="`/dashboard/schedule/report/${item.id}`"
+                                  title="Laporan"
                                   type="button"
-                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                  class="cursor-pointer inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                                 >
                                   Laporan
-                                </button>
+                                </Link>
                               </li>
                             </ul>
                           </div>

@@ -925,7 +925,7 @@ function handleOptionSubmission() {
                     placeholder="Nomor Kredensial Sertifikat"
                   />
                 </div>
-                <div class="col-span-2" v-if="form.credential_id">
+                <div class="col-span-2 text-red-600 text-xs" v-if="form.credential_id">
                   Sertifikat ada
                 </div>
               </div>

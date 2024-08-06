@@ -2,15 +2,28 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Exports\TotalFemaleGraduatedParticipantByScheduleClassExport;
+use App\Exports\TotalFemaleNotGraduatedParticipantByScheduleClassExport;
+use App\Exports\TotalFemaleParticipantByScheduleClassExport;
+use App\Exports\TotalGraduatedParticipantByScheduleClassExport;
+use App\Exports\TotalMaleGraduatedParticipantByScheduleClassExport;
+use App\Exports\TotalMaleNotGraduatedParticipantByScheduleClassExport;
+use App\Exports\TotalMaleParticipantByScheduleClassExport;
+use App\Exports\TotalNotGraduatedParticipantByScheduleClassExport;
+use App\Exports\TotalParticipantByScheduleClassExport;
 use App\Http\Controllers\Controller;
+use App\Models\AppointmentFile;
 use App\Models\Schedule;
 use App\Models\Submission;
+use App\Models\User;
 use App\Traits\EntityValidator;
 use App\Traits\FileUpload;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ScheduleController extends Controller
 {
@@ -59,7 +72,7 @@ class ScheduleController extends Controller
                 return $submission;
             });
             // return $schedules;
-            return Inertia::render('Dashboard/Schedule', [
+            return Inertia::render('Dashboard/Schedule/Schedule', [
                 'schedules' => $schedules,
             ]);
         } catch (\Exception $exception) {
@@ -69,14 +82,6 @@ class ScheduleController extends Controller
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function index in Dashboard/SubmissionController', $errors);
         }
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -145,22 +150,6 @@ class ScheduleController extends Controller
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function storeValidator in SubmissionController', $errors);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
     }
 
     /**
@@ -296,6 +285,323 @@ class ScheduleController extends Controller
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+        }
+    }
+
+    public function report(Request $request, $scheduleId)
+    {
+        try {
+            // Mengambil pengguna dengan role 'peserta'
+            $participants = User::with(['profile', 'submissions'])
+                ->whereHas('roles', function ($query) {
+                    $query->where('name', 'peserta');
+                })
+                ->whereHas('submissions', function ($query) use ($scheduleId) {
+                    $query->where('schedule_id', $scheduleId);
+                })
+                ->get();
+
+            $totalParticipants = $participants->count();
+
+            $totalMaleParticipants = $participants->filter(function ($user) {
+                return $user->profile && $user->profile->gender == 'laki-laki';
+            })->count();
+
+            $totalFemaleParticipants = $participants->filter(function ($user) {
+                return $user->profile && $user->profile->gender == 'perempuan';
+            })->count();
+
+            $totalGraduatedParticipants = $participants->filter(function ($user) {
+                return $user->submissions->contains('status', 'graduated');
+            })->count();
+
+            $totalNotGraduatedParticipants = $participants->filter(function ($user) {
+                return !$user->submissions->contains('status', 'graduated');
+            })->count();
+
+            $totalGraduatedMaleParticipants = $participants->filter(function ($user) {
+                return $user->submissions->contains('status', 'graduated') && $user->profile && $user->profile->gender == 'laki-laki';
+            })->count();
+
+            $totalGraduatedFemaleParticipants = $participants->filter(function ($user) {
+                return $user->submissions->contains('status', 'graduated') && $user->profile && $user->profile->gender == 'perempuan';
+            })->count();
+
+            $totalNotGraduatedMaleParticipants = $participants->filter(function ($user) {
+                return !$user->submissions->contains('status', 'graduated') && $user->profile && $user->profile->gender == 'laki-laki';
+            })->count();
+
+            $totalNotGraduatedFemaleParticipants = $participants->filter(function ($user) {
+                return !$user->submissions->contains('status', 'graduated') && $user->profile && $user->profile->gender == 'perempuan';
+            })->count();
+
+            $reports = [
+                'participants' => [
+                    'total' => $totalParticipants,
+                    'male' => $totalMaleParticipants,
+                    'female' => $totalFemaleParticipants,
+                ],
+                'participant_graduated' => [
+                    'total' => $totalGraduatedParticipants,
+                    'male' => $totalGraduatedMaleParticipants,
+                    'female' => $totalGraduatedFemaleParticipants,
+                ],
+                'participant_not_graduated' => [
+                    'total' => $totalNotGraduatedParticipants,
+                    'male' => $totalNotGraduatedMaleParticipants,
+                    'female' => $totalNotGraduatedFemaleParticipants,
+                ],
+            ];
+
+            $appointmentFiles = AppointmentFile::where('schedule_id', $scheduleId)->get();
+
+            $appointmentFiles->map(function ($appointmentFile) {
+                $this->fileSettings();
+                if (isset($appointmentFile['file'])) {
+                    $appointmentFile['file'] = $this->getFileAttribute($appointmentFile['file']);
+                }
+                return $appointmentFile;
+            });
+            // return $appointmentFiles;
+
+            return Inertia::render('Dashboard/Schedule/Report', [
+                'reports' => $reports,
+                'appointmentFiles' => $appointmentFiles,
+            ]);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function report in SubmissionController', $errors);
+        }
+    }
+
+    function downloadReportTotalParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalParticipantByScheduleClassExport($scheduleId), "Total Peserta.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalMaleParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalMaleParticipantByScheduleClassExport($scheduleId), "Total Peserta Laki Laki.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalMaleParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalFemaleParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalFemaleParticipantByScheduleClassExport($scheduleId), "Total Peserta Perempuan.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalMaleParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalGraduatedParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalGraduatedParticipantByScheduleClassExport($scheduleId), "Total Peserta Lulus.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalGraduatedParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalMaleGraduatedParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalMaleGraduatedParticipantByScheduleClassExport($scheduleId), "Total Peserta Lulus Laki Laki.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalMaleGraduatedParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalFemaleGraduatedParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalFemaleGraduatedParticipantByScheduleClassExport($scheduleId), "Total Peserta Lulus Perempuab.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalFemaleGraduatedParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalNotGraduatedParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalNotGraduatedParticipantByScheduleClassExport($scheduleId), "Total Peserta Tidak Lulus.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalNotGraduatedParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalMaleNotGraduatedParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalMaleNotGraduatedParticipantByScheduleClassExport($scheduleId), "Total Peserta Laki Laki Tidak Lulus.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalMaleNotGraduatedParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    function downloadReportTotalFemaleNotGraduatedParticipantByScheduleClass(Request $request, $scheduleId)
+    {
+        try {
+            return Excel::download(new TotalFemaleNotGraduatedParticipantByScheduleClassExport($scheduleId), "Total Peserta Perempuan Tidak Lulus.xlsx");
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function downloadReportTotalFemaleNotGraduatedParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    public function uploadAppointmentFile(Request $request)
+    {
+        try {
+            $id = $request->post('id');
+            if ($id) {
+                $validasiData = $this->updateAppointmentFileValidator($request);
+                if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+                // return $validasiData;
+
+                // return $validasiData;
+                $appointmentFile = AppointmentFile::where('id', $id)->first();
+
+                $file = $request->file('file');
+                if ($file) {
+                    $this->fileSettings();
+                    $uploadFile = $this->uploadFile($file);
+                } else {
+                    $uploadFile = $appointmentFile->file;
+                }
+
+
+                $saveData = [
+                    'schedule_id' => $request->post('schedule_id'),
+                    'name' => $request->post('name'),
+                    'file' => $uploadFile,
+                ];
+
+                $result = $appointmentFile->update($saveData);
+
+                // return $schedule;
+                if (!$result) return redirect()->back()->withErrors($result)->withInput();
+            } else {
+                // return $request->all();
+                $validasiData = $this->storeAppointmentFileValidator($request);
+                if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+                $file = $request->file('file');
+                if ($file) {
+                    $this->fileSettings();
+                    $uploadFile = $this->uploadFile($file);
+                } else {
+                    $uploadFile = "File Tidak Ada";
+                }
+
+                $saveData = [
+                    'schedule_id' => $request->post('schedule_id'),
+                    'name' => $request->post('name'),
+                    'file' => $uploadFile,
+                ];
+                $result = AppointmentFile::create($saveData);
+
+                if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
+            }
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function uploadAppointmentFile in Committee/ScheduleController', $errors);
+        }
+    }
+
+    private function updateAppointmentFileValidator(Request $request)
+    {
+        try {
+            $rules = [
+                'schedule_id' => 'required|string|max:36',
+                'name' => 'required|string|max:5000',
+                'file' => 'nullable|mimes:pdf|max:2048',
+
+            ];
+            $Validatedata = [
+                'schedule_id' => $request->post('schedule_id'),
+                'name' => $request->post('name'),
+                'file' => $request->file('file'),
+            ];
+            $validator = EntityValidator::validate($Validatedata, $rules);
+            if ($validator->fails()) return $validator->errors();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function updateAppointmentFileValidator in Dashboard/ScheduleController', $errors);
+        }
+    }
+
+    private function storeAppointmentFileValidator(Request $request)
+    {
+        try {
+            $rules = [
+                'schedule_id' => 'required|string|max:36',
+                'name' => 'required|string|max:5000',
+                'file' => 'required|mimes:pdf|max:2048',
+
+            ];
+            $Validatedata = [
+                'schedule_id' => $request->post('schedule_id'),
+                'name' => $request->post('name'),
+                'file' => $request->file('file'),
+            ];
+            $validator = EntityValidator::validate($Validatedata, $rules);
+            if ($validator->fails()) return $validator->errors();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function storeAppointmentFileValidator in Dashboard/ScheduleController', $errors);
         }
     }
 }

@@ -18,6 +18,7 @@
 - [Indonesia Province](https://github.com/laravolt/indonesia)
 - [Vue-QRCode](https://github.com/fengyuanchen/vue-qrcode)
 - [Laravel Excel](https://docs.laravel-excel.com/)
+- [Brevo Email](https://app.brevo.com/)
 
 ##### Requirements
 - PHP 8.1 - 8.2

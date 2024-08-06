@@ -19,6 +19,7 @@ const user = usePage().props.auth.user;
 const form = useForm({
     name: user.name,
     email: user.email,
+    image: user.image,
 });
 </script>
 
@@ -33,6 +34,22 @@ const form = useForm({
         </header>
 
         <form @submit.prevent="form.patch(route('profile.update'))" class="mt-6 space-y-6">
+            <div>
+                <InputLabel for="image" value="Name" />
+
+                <TextInput
+                    id="image"
+                    type="file"
+                    class="mt-1 block w-full"
+                    v-model="form.image"
+                    required
+                    autofocus
+                    autocomplete="image"
+                />
+
+                <InputError class="mt-2" :message="form.errors.image" />
+            </div>
+
             <div>
                 <InputLabel for="name" value="Name" />
 

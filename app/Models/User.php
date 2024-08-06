@@ -4,13 +4,16 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable, HasRoles;
 
@@ -72,5 +75,17 @@ class User extends Authenticatable
     public function certificate(): MorphOne
     {
         return $this->morphOne(Certificate::class, 'certificateable');
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $url = url('/invoice/' . $this->invoice->id);
+
+        return (new MailMessage)
+            ->greeting('Hello!')
+            ->line('One of your invoices has been paid!')
+            ->lineIf($this->amount > 0, "Amount paid: {$this->amount}")
+            ->action('View Invoice', $url)
+            ->line('Thank you for using our application!');
     }
 }
