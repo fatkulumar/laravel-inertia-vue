@@ -20,6 +20,7 @@ return new class extends Migration
             $table->uuid('chief_id'); //ketua pelaksana
             $table->uuid('type_activity_id');
             $table->uuid('regency_regional_id');
+            $table->text('regency_regional_ids');
             $table->bigInteger('periode');
             $table->text('poster'); //konsep kegiatan
             $table->text('concept'); //konsep kegiatan

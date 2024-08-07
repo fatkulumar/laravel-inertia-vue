@@ -37,10 +37,10 @@ class ParticipantController extends Controller
             if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
 
             $proof = $request->file('proof');
-            if($proof) {
+            if ($proof) {
                 $this->fileSettings();
                 $uploadProof = $this->uploadFile($proof);
-            }else{
+            } else {
                 $uploadProof = "Proof Tidak Ada";
             }
 
@@ -52,7 +52,6 @@ class ParticipantController extends Controller
 
             $result = Submission::create($saveData);
             if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
-
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
@@ -90,7 +89,13 @@ class ParticipantController extends Controller
         try {
             $users = Auth::user();
             $profile = Profile::where('profileable_id', $users->id)->first();
-            $schedules = Schedule::with('classRoom', 'category')->where('regional_id', $profile->regional_id)
+            $regency_regional_ids = Schedule::where('regency_regional_id', $profile->regional_id)
+                ->pluck('regency_regional_ids')
+                ->toArray(); // Ambil array dari kolom regency_regional_ids
+            // return $regency_regional_ids;
+            $schedules = Schedule::with('classRoom', 'category')
+                ->where('regional_id', $profile->regional_id)
+                ->whereIn('regency_regional_ids', $regency_regional_ids)
                 ->where('status', 'approval')
                 ->whereDate('end_date_class', '>=', Carbon::now())
                 ->whereDoesntHave('submissions')
@@ -223,13 +228,13 @@ class ParticipantController extends Controller
         try {
             $userId = Auth::user()->id;
             $histories = User::with([
-                                    'profile',
-                                    'submissions.schedule.classRoom',
-                                    'submissions.schedule.category',
-                                    'submissions.schedule.regencyRegional',
-                                    ])
-                                ->where('id', $userId)
-                                ->get();
+                'profile',
+                'submissions.schedule.classRoom',
+                'submissions.schedule.category',
+                'submissions.schedule.regencyRegional',
+            ])
+                ->where('id', $userId)
+                ->get();
 
             $histories->map(function ($history) {
                 $this->fileSettings();
@@ -250,7 +255,6 @@ class ParticipantController extends Controller
                         $submission->schedule->formatted_start_date_class = null;
                         $submission->schedule->formatted_end_date_class = null;
                     }
-
                 }
 
                 return $history;
@@ -276,11 +280,11 @@ class ParticipantController extends Controller
         try {
             $userId = Auth::user()->id;
             $users = User::with(['profile', 'submissions.schedule', 'certificate'])
-                        ->where('id', $userId)
-                        ->whereHas('certificate', function ($query) use ($credentialId) {
-                            $query->where('credential_id', $credentialId);
-                        })
-                        ->get();
+                ->where('id', $userId)
+                ->whereHas('certificate', function ($query) use ($credentialId) {
+                    $query->where('credential_id', $credentialId);
+                })
+                ->get();
             // return $users;
             return Inertia::render('Participant/Certificate', [
                 'certificate' => $users,
@@ -299,36 +303,36 @@ class ParticipantController extends Controller
         try {
             $id = Auth::user()->id;
             $participant = User::with('profile.regional', 'submissions.schedule', 'submissions.schedule.classRoom', 'submissions.schedule.category')
-            ->where('id', $id)->get();
-        $participant->each(function ($user) {
-            $this->fileSettings();
+                ->where('id', $id)->get();
+            $participant->each(function ($user) {
+                $this->fileSettings();
 
-            // Proses gambar profil pengguna jika ada
-            if (isset($user->profile->image)) {
-                $user->profile->image = $this->getFileAttribute($user->profile->image);
-            } else {
-                $user->profile->image = null;
-            }
-
-            // Proses setiap submission pengguna
-            $user->submissions->each(function ($submission) {
-                if (isset($submission->schedule->poster)) {
-                    $submission->schedule->poster = $this->getFileAttribute($submission->schedule->poster);
+                // Proses gambar profil pengguna jika ada
+                if (isset($user->profile->image)) {
+                    $user->profile->image = $this->getFileAttribute($user->profile->image);
                 } else {
-                    $submission->schedule->poster = null;
+                    $user->profile->image = null;
                 }
 
-                return $submission;
-            });
+                // Proses setiap submission pengguna
+                $user->submissions->each(function ($submission) {
+                    if (isset($submission->schedule->poster)) {
+                        $submission->schedule->poster = $this->getFileAttribute($submission->schedule->poster);
+                    } else {
+                        $submission->schedule->poster = null;
+                    }
 
-            return $user;
-        });
-        $regionals = Regional::all();
-        // return $participant;
-        return Inertia::render('Participant/DetailParticipant', [
-            'participant' => $participant,
-            'regionals' => $regionals,
-        ]);
+                    return $submission;
+                });
+
+                return $user;
+            });
+            $regionals = Regional::all();
+            // return $participant;
+            return Inertia::render('Participant/DetailParticipant', [
+                'participant' => $participant,
+                'regionals' => $regionals,
+            ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();

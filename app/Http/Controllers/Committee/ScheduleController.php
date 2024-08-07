@@ -74,8 +74,11 @@ class ScheduleController extends Controller
             $committees = User::with('profile.regional', 'chief')->role('panitia')->get();
             $typeActivities = TypeActivity::all(['id', 'name']);
             $regional_id = Auth::user()->profile->regional->id;
-            $regencyRegionals = RegencyRegional::with('regional')
+            $regencyRegional = RegencyRegional::with('regional')
                 ->where('regional_id', $regional_id)
+                ->take(1)
+                ->get();
+            $regencyRegionals = RegencyRegional::with('regional')
                 ->get();
             // return $regencyRegional;
 
@@ -87,6 +90,7 @@ class ScheduleController extends Controller
                 'categories' => $categories,
                 'typeActivities' => $typeActivities,
                 'regencyRegionals' => $regencyRegionals,
+                'regencyRegional' => $regencyRegional,
             ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
@@ -104,6 +108,19 @@ class ScheduleController extends Controller
     {
         try {
             $id = $request->post('id');
+
+            $regionalIds = array();
+            $jsonRegencyRegionalIds = $request->post('regency_regional_ids');
+            if (json_last_error() === JSON_ERROR_NONE) {
+                // Proses setiap elemen dalam array menggunakan foreach
+                foreach ($jsonRegencyRegionalIds as $item) {
+                    // return "Name: " . $item['name'] . ", ID: " . $item['id'] . "\n";
+                    $regionalIds[] = $item['id'];
+                }
+            } else {
+                return "Error decoding JSON: " . json_last_error_msg();
+            }
+            // return $regionalIds;
             if ($id) {
                 $validasiData = $this->updateValidator($request);
                 if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
@@ -134,7 +151,8 @@ class ScheduleController extends Controller
                     'committee_id' => $request->post('committee_id'),
                     'class_room_id' => $request->post('class_room_id'),
                     'category_id' => $request->post('category_id'),
-                    'regency_regional_id' => $request->post('regency_regional_id'),
+                    'regency_regional_id' => $request->post('category_id'),
+                    'regency_regional_ids' => json_encode($regionalIds),
                     'status' => $request->post('status'),
                     'start_date_class' => $request->post('start_date_class'),
                     'end_date_class' => $request->post('end_date_class'),
@@ -188,6 +206,7 @@ class ScheduleController extends Controller
                     'class_room_id' => $request->post('class_room_id'),
                     'category_id' => $request->post('category_id'),
                     'regency_regional_id' => $request->post('regency_regional_id'),
+                    'regency_regional_ids' => json_encode($regionalIds),
                     'status' => $request->post('status'),
                     'start_date_class' => $request->post('start_date_class'),
                     'end_date_class' => $request->post('end_date_class'),
@@ -236,6 +255,7 @@ class ScheduleController extends Controller
                 'class_room_id' => 'required|string|max:36',
                 'category_id' => 'required|string|max:36',
                 'regency_regional_id' => 'required|string|max:36',
+                // 'regency_regional_ids' => 'required|string',
                 'start_date_class' => 'required|string|max:15',
                 'end_date_class' => 'required|string|max:15',
                 'location' => 'required|string|max:255',
@@ -264,6 +284,7 @@ class ScheduleController extends Controller
                 'class_room_id' => $request->post('class_room_id'),
                 'category_id' => $request->post('category_id'),
                 'regency_regional_id' => $request->post('regency_regional_id'),
+                // 'regency_regional_ids' => $request->post('regency_regional_ids'),
                 'status' => $request->post('status'),
                 'start_date_class' => $request->post('start_date_class'),
                 'end_date_class' => $request->post('end_date_class'),
@@ -305,6 +326,7 @@ class ScheduleController extends Controller
                 'class_room_id' => 'required|string|max:36',
                 'category_id' => 'required|string|max:36',
                 'regency_regional_id' => 'required|string|max:36',
+                'regency_regional_ids' => 'required|string',
                 'start_date_class' => 'required|string|max:15',
                 'end_date_class' => 'required|string|max:15',
                 'location' => 'required|string|max:255',
@@ -332,6 +354,7 @@ class ScheduleController extends Controller
                 'class_room_id' => $request->post('class_room_id'),
                 'category_id' => $request->post('category_id'),
                 'regency_regional_id' => $request->post('regency_regional_id'),
+                'regency_regional_ids' => $request->post('regency_regional_ids'),
                 'status' => $request->post('status'),
                 'start_date_class' => $request->post('start_date_class'),
                 'end_date_class' => $request->post('end_date_class'),

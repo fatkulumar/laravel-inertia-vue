@@ -7,6 +7,7 @@ import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
 import { Modal } from "flowbite";
 import axios from "axios";
+import Multiselect from 'vue-multiselect'
 
 onMounted(() => {
   initFlowbite();
@@ -26,6 +27,10 @@ const props = defineProps({
     default: () => ({}),
   },
   regencyRegionals: {
+    type: Object,
+    default: () => ({}),
+  },
+  regencyRegional: {
     type: Object,
     default: () => ({}),
   },
@@ -51,6 +56,31 @@ const props = defineProps({
   },
 });
 
+const transformedDataRegencyRegional = props.regencyRegional.map(item => ({
+  name: item.regency,
+  id: item.id
+}));
+
+const transformedDataRegencyRegionals = props.regencyRegionals.map(item => ({
+  name: item.regency,
+  id: item.id
+}));
+
+
+const value = ref(transformedDataRegencyRegional);
+const options = ref(transformedDataRegencyRegionals);
+
+const addTag = (newTag) => {
+    alert('ok')
+  const tag = {
+    name: newTag,
+    id: newTag.substring(0, 2) + Math.floor(Math.random() * 10000000),
+  };
+  options.value.push(tag);
+  value.value.push(tag);
+};
+
+
 let search = ref(props.filters.search);
 
 watch(search, (value) => {
@@ -65,8 +95,14 @@ watch(search, (value) => {
 });
 
 const committeeName = computed(() => props.committee.name);
-const regionalName = computed(() => props.committee.profile?.regional?.name);
+const regionalId = computed(() => props.committee.profile?.regional?.id);
 // const linkFile = ref(props.schedule[0].linkFile);
+const isInvalidDateRange = computed(() => {
+  if (!form.start_date_class || !form.end_date_class) {
+    return false;
+  }
+  return new Date(form.start_date_class) > new Date(form.end_date_class);
+});
 
 const form = useForm({
   id: "",
@@ -74,7 +110,8 @@ const form = useForm({
   //   participant_id: "",
   committee_id: props.committee.id,
   hp: props.committee.profile?.hp,
-  regency_regional_id: "",
+  regency_regional_id: props.regencyRegional ? props.regencyRegional : null,
+  regency_regional_ids: value.value,
   category_id: "",
   class_room_id: "",
   chief_id: "", //ketua pelaksana
@@ -107,6 +144,9 @@ function resetForm() {
     form.category_id = "",
     form.class_room_id = "",
     form.chief_id = "", //ketua pelaksana
+    form.hp_chief = "", //ketua pelaksana
+    form.regency_regional_id = "",
+    form.regency_regional_ids = "",
     form.type_activity_id = "", //jenis kegiatan
     form.periode = "",
     form.poster = "", //konsep kegiatan
@@ -127,7 +167,7 @@ function resetForm() {
     form.approval_date = "",
     form.graduation_date = "",
     form.proposal = "",
-    previewPoster.value = "";
+    previewPoster.value = ""
 }
 
 function modalAddSchedule(opt) {
@@ -156,6 +196,9 @@ function modalAddSchedule(opt) {
 }
 
 function addSchedule() {
+  if (isInvalidDateRange.value) {
+    alert('Tanggal mulai tidak boleh lebih dari tanggal berakhir.');
+  }else{}
   form.post("/committee/schedule/store", {
     preserveScroll: true,
     onSuccess: () => {
@@ -367,13 +410,13 @@ const speakers = ref([]);
 const setSpeaker = async (classRoomId) => {
   try {
     await axios
-    .get(`/committee/schedule/speaker/${classRoomId}`)
-    .then((response) => {
-      speakers.value = response.data;
-    })
-    .catch((error) => speakers.value = "");
+      .get(`/committee/schedule/speaker/${classRoomId}`)
+      .then((response) => {
+        speakers.value = response.data;
+      })
+      .catch((error) => (speakers.value = ""));
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 };
 </script>
@@ -724,6 +767,7 @@ const setSpeaker = async (classRoomId) => {
                     placeholder="Tanggal Muali"
                   />
                 </div>
+
                 <div class="col-span-2 sm:col-span-1">
                   <label
                     for="end_date_class"
@@ -738,6 +782,7 @@ const setSpeaker = async (classRoomId) => {
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder="Tanggal Selesai"
                   />
+                  <p v-if="isInvalidDateRange" class="text-red-600">*Tanggal mulai tidak boleh lebih dari tanggal berakhir.</p>
                 </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label
@@ -1023,7 +1068,25 @@ const setSpeaker = async (classRoomId) => {
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >Kecamatan</label
                   >
-                  <select
+
+                  <multiselect
+                    v-model="value"
+                    tag-placeholder="Add this as new tag"
+                    placeholder="Search or add a tag"
+                    label="name"
+                    track-by="id"
+                    :options="options"
+                    :multiple="true"
+                    :taggable="true"
+                    @tag="addTag"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 cursor-pointer"
+                  >
+                  <template #tag="{ option, remove }"><span class="custom__tag"><span>{{ option.name }}</span><span
+                    class="custom__remove" @click="remove(option)">❌</span></span></template>
+                </multiselect>
+
+                  <!-- <pre class="language-json"><code>{{ value }}</code></pre> -->
+                  <!-- <select
                     v-model="form.regency_regional_id"
                     name="regency_regional_id"
                     id="regency_regional_id"
@@ -1044,7 +1107,7 @@ const setSpeaker = async (classRoomId) => {
                     >
                       {{ item.regency }}
                     </option>
-                  </select>
+                  </select> -->
                 </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label

@@ -39,6 +39,7 @@
         "quill-blot-formatter": "^1.0.5",
         "sweetalert2": "^11.11.0",
         "tinymce": "^7.1.2",
-        "vue-html-to-paper": "^2.0.3"
+        "vue-html-to-paper": "^2.0.3",
+        "vue-multiselect": "^3.0.0"
     }
 }

@@ -35,17 +35,9 @@ const form = useForm({
 
         <form @submit.prevent="form.patch(route('profile.update'))" class="mt-6 space-y-6">
             <div>
-                <InputLabel for="image" value="Name" />
+                <InputLabel for="image" value="Photo" />
 
-                <TextInput
-                    id="image"
-                    type="file"
-                    class="mt-1 block w-full"
-                    v-model="form.image"
-                    required
-                    autofocus
-                    autocomplete="image"
-                />
+                <input type="file" name="" id="">
 
                 <InputError class="mt-2" :message="form.errors.image" />
             </div>

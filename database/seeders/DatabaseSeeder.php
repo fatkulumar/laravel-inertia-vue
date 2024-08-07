@@ -203,6 +203,7 @@ class DatabaseSeeder extends Seeder
                     'chief_id' => $userId3, //ketua pelaksana
                     'type_activity_id' => $type_activity_id,
                     'regency_regional_id' => $regency_regional_id,
+                    'regency_regional_ids' => json_encode(["n8zyi6st7qscsg88cs8kwsw804kk48s","n8zyi6st7qscsg88cs8kwsw804kk48u"]),
                     'periode' => 14,
                     'poster' => 'Link Poster', //konsep kegiatan
                     'concept' => 'konsep', //konsep kegiatan
