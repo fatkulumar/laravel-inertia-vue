@@ -483,7 +483,7 @@ function addAppointmentFile() {
             </div>
             <!-- Modal body -->
             <div class="p-4 md:p-5 space-y-4">
-                <iframe :src="props.appointmentFiles[0].file" width="100%" height="600px"></iframe>
+                <iframe :src="props.appointmentFiles[0]?.file" width="100%" height="600px"></iframe>
             </div>
           </div>
         </div>

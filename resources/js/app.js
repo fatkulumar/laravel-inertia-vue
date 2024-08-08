@@ -8,6 +8,7 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import 'flowbite';
 import 'sweetalert2';
 import CKEditor from '@ckeditor/ckeditor5-vue';
+import { jsPDF } from "jspdf";
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -19,6 +20,7 @@ createInertiaApp({
             .use(plugin)
             .use(ZiggyVue)
             .use( CKEditor )
+            .use( jsPDF )
             .mount(el);
     },
     progress: {

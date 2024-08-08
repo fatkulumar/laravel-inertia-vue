@@ -236,23 +236,25 @@ class ParticipantController extends Controller
         }
     }
 
-    public function certificate(Request $request, $credentialId, $userId)
+    // public function certificate(Request $request, $credentialId, $userId)
+    public function certificate(Request $request)
     {
         // return $userId;
 
         try {
 
-            $users = User::with(['profile', 'submissions.schedule', 'certificate'])
-                        ->where('id', $userId)
-                        ->whereHas('certificate', function ($query) use ($credentialId) {
-                            $query->where('credential_id', $credentialId);
-                        })
-                        ->get();
+            // $users = User::with(['profile', 'submissions.schedule', 'certificate'])
+            //             ->where('id', $userId)
+            //             ->whereHas('certificate', function ($query) use ($credentialId) {
+            //                 $query->where('credential_id', $credentialId);
+            //             })
+            //             ->get();
 
             // return $users;
-            return Inertia::render('Committee/Participant/Certificate', [
-                'certificate' => $users,
-            ]);
+            // return Inertia::render('Committee/Participant/Certificate', [
+            //     'certificate' => $users,
+            // ]);
+            return Inertia::render('Committee/Participant/Certificate');
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
