@@ -72,11 +72,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(User::class, 'id');
     }
 
-    public function certificate(): MorphOne
-    {
-        return $this->morphOne(Certificate::class, 'certificateable');
-    }
-
     public function toMail(object $notifiable): MailMessage
     {
         $url = url('/invoice/' . $this->invoice->id);

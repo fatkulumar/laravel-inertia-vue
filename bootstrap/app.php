@@ -67,6 +67,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->name('dashboard.regencyRegional.')
                 ->group(base_path('routes/dashboard/regency_regional.php'));
 
+            Route::middleware('web')
+                ->prefix('dashboard/head-organization')
+                ->name('dashboard.headOrganization.')
+                ->group(base_path('routes/dashboard/head_organization.php'));
+
             //committee
             Route::middleware('web')
                 ->prefix('committee/schedule')

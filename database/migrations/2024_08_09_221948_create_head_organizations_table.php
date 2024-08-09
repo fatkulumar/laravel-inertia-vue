@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,13 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('certificates', function (Blueprint $table) {
+        Schema::create('head_organizations', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('head_organization_id');
-            $table->uuid('submission_id');
-            $table->foreignUuid('user_id')->references('id')->on('users');
-            $table->string('credential_id')->unique();
-            $table->date('expired_at')->nullable();
+            $table->string('name');
+            $table->string('status');
+            $table->date('start_date');
+            $table->date('end_date');
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('certificates');
+        Schema::dropIfExists('head_organizations');
     }
 };

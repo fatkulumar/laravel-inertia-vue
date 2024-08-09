@@ -118,22 +118,23 @@ const printCertificate = () => {
                     <div class="grid grid-cols-2 gap-4">
                       <div class="flex flex-col p-8">
                         <div class="flex-1">
-                          <h1 class="text-5xl font-bold mb-24">Madrasah</h1>
+                          <h1 class="text-5xl font-bold mb-24">Madrasah MPJ</h1>
                           <span
                             class="bg-gray-900 text-white font-bold p-1 py-2 rounded-sm"
-                            >RVZKOK6WDDMD</span
+                            >{{ certificate[0].credential_id }}</span
                           >
                           <p class="mt-16">Diberikan kepada</p>
                           <h1 class="text-blue-400 font-bold text-3xl">
-                            Fatkul Umar
+                            {{ certificate[0].name }}
                           </h1>
                           <p class="mt-3">Atas kelulusanya pada kelas</p>
                           <h1 class="text-blue-400 font-bold text-xl">
-                            Desain Grafis Intermediate 1
+                            {{ certificate[0].user.submissions[0].schedule.class_room.name }}
+                            {{ certificate[0].user.submissions[0].schedule.category.name }}
                           </h1>
                         </div>
                         <div class="mt-5">
-                          <p class="mt-16 mb-3">04 Mei 2024</p>
+                          <p class="mt-16 mb-3">{{ certificate[0].formatted_created_at }} - {{ certificate[0].expired_at }}</p>
                           <div class="w-24 py-2">
                             <img
                               width="100%"
@@ -142,9 +143,9 @@ const printCertificate = () => {
                             />
                           </div>
                         </div>
-                        <p class="font-bold">Ahmad Tajudin Zahro'u</p>
+                        <p class="font-bold">{{ certificate[0].head_organization.name }}</p>
                         <p class="text-xs">Chief Executive Officer</p>
-                        <p class="text-xs">Madrasah</p>
+                        <p class="text-xs">Madrasah Media Pondok Jatim</p>
                       </div>
                       <div class="flex flex-col p-8">
                         <div class="flex-1 flex flex-col items-end">

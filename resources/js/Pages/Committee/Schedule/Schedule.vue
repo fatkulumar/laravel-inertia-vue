@@ -198,8 +198,8 @@ function modalAddSchedule(opt) {
 function addSchedule() {
   if (isInvalidDateRange.value) {
     alert('Tanggal mulai tidak boleh lebih dari tanggal berakhir.');
-  }else{}
-  form.post("/committee/schedule/store", {
+  }else{
+    form.post("/committee/schedule/store", {
     preserveScroll: true,
     onSuccess: () => {
       resetForm();
@@ -207,6 +207,7 @@ function addSchedule() {
       toast("success", "Data Berhasil Ditambah");
     },
   });
+  }
 }
 
 function toast(icon = "success", text = "Data Berhasil Ditambahkan") {

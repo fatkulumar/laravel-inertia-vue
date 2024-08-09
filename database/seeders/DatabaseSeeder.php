@@ -5,9 +5,11 @@ namespace Database\Seeders;
 use App\Models\AppointmentFile;
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Certificate;
 use App\Models\ClassRoom;
 use App\Models\Documentation;
 use App\Models\GuideCadre;
+use App\Models\HeadOrganization;
 use App\Models\Letter;
 use App\Models\Profile;
 use App\Models\RegencyRegional;
@@ -196,7 +198,7 @@ class DatabaseSeeder extends Seeder
                 $scheduleId = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 Schedule::create([
                     'id' => $scheduleId,
-                    'regional_id' => $id_regional3,
+                    'regional_id' => $id_regional2,
                     'committee_id' => $userId3,
                     'category_id' => $Category3->id,
                     'class_room_id' => $classRoom3->id,
@@ -227,12 +229,13 @@ class DatabaseSeeder extends Seeder
                     'date_received' => now(),
                 ]);
 
+                $submission_id = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 Submission::create([
-                    'id' => substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36),
+                    'id' => $submission_id,
                     'schedule_id' => $scheduleId,
                     'participant_id' => $userId2,
                     'proof' => 'Link Proof',
-                    'status' => 'approved',
+                    'status' => 'graduated',
                 ]);
 
                 Submission::create([
@@ -275,6 +278,23 @@ class DatabaseSeeder extends Seeder
                     'name' => 'name',
                     'link' => 'link',
                     'information' => 'Persiapan Pelaksanaan Kegiatan',
+                ]);
+
+                $headOrganization_id = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                HeadOrganization::create([
+                    'id' => $headOrganization_id,
+                    'name' => "Ahmad Tajudin Zahro'u",
+                    'status' => 'active',
+                    'start_date' => '2021-01-01',
+                    'end_date' => '2022-01-01',
+                ]);
+
+                Certificate::create([
+                    'submission_id' => $submission_id,
+                    'user_id' => $userId2, //id_user
+                    'credential_id' => '2024101001123123',
+                    'expired_at' => now(),
+                    'head_organization_id' => $headOrganization_id
                 ]);
             }
         }

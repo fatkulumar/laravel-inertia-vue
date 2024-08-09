@@ -95,7 +95,7 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
                         </div>
 
                         <Link
-                          :href="`/committee/participant/certificate/${submission.certificate.credential_id}/${submission.participant_id}`"
+                          :href="`/committee/participant/certificate/${submission.certificate?.credential_id}/${submission.participant_id}`"
                           v-if="submission.status == 'graduated'"
                           class="rounded-md text-white px-1 bg-orange-500 hover:bg-orange-600 text-center"
                         >

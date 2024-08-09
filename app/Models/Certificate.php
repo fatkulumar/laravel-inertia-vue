@@ -13,14 +13,18 @@ class Certificate extends Model
 
     protected $fillable = [
         'submission_id',
-        'certificateable_id', //id_user
-        'certificateable_type',
+        'head_organization_id',
+        'user_id',
         'credential_id',
         'expired_at',
     ];
-
-     public function certificateable(): MorphTo
+    public function user()
     {
-        return $this->morphTo();
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function headOrganization()
+    {
+        return $this->hasOne(HeadOrganization::class, 'id', 'head_organization_id');
     }
 }

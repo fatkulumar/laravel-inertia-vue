@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Committee;
 
 use App\Http\Controllers\Controller;
+use App\Models\Certificate;
 use App\Models\Profile;
 use App\Models\Regional;
 use App\Models\Schedule;
@@ -184,7 +185,7 @@ class ParticipantController extends Controller
 
         try {
             $users = Auth::user();
-            $profile = Profile::where('profileable_id', $users->id)->first();
+            $profile = Profile::with('regional')->where('profileable_id', $users->id)->first();
             $schedules = Schedule::with([
                 'classRoom',
                 'category',
@@ -236,25 +237,28 @@ class ParticipantController extends Controller
         }
     }
 
-    // public function certificate(Request $request, $credentialId, $userId)
-    public function certificate(Request $request)
+    public function certificate(Request $request, $credentialId, $userId)
     {
-        // return $userId;
-
         try {
 
-            // $users = User::with(['profile', 'submissions.schedule', 'certificate'])
-            //             ->where('id', $userId)
-            //             ->whereHas('certificate', function ($query) use ($credentialId) {
-            //                 $query->where('credential_id', $credentialId);
-            //             })
-            //             ->get();
+            $certificate = Certificate::with([
+                'headOrganization',
+                'user.submissions.schedule.category',
+                'user.submissions.schedule.classRoom',
+            ])
+            ->where('user_id', $userId)
+            ->where('credential_id', $credentialId)
+            ->get();
 
-            // return $users;
-            // return Inertia::render('Committee/Participant/Certificate', [
-            //     'certificate' => $users,
-            // ]);
-            return Inertia::render('Committee/Participant/Certificate');
+            $certificate->map(function ($certif) {
+                $certif->formatted_created_at = Carbon::parse($certif->created_at)->format('d-m-Y');
+                return $certif;
+            });
+
+            // return $certificate;
+            return Inertia::render('Committee/Participant/Certificate', [
+                'certificate' => $certificate,
+            ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
