@@ -15,8 +15,20 @@ defineProps({
         type: String,
     },
     role: {
-        type: String,
-    }
+        type: Object,
+    },
+    regionals: {
+        type: Object,
+    },
+    regencyRegionals: {
+        type: Object,
+    },
+    user: {
+        type: Object,
+    },
+    current_regional: {
+        type: Object,
+    },
 });
 </script>
 
@@ -34,7 +46,6 @@ defineProps({
                     <UpdateProfileInformationForm
                         :must-verify-email="mustVerifyEmail"
                         :status="status"
-                        class="max-w-xl"
                     />
                 </div>
 
@@ -59,7 +70,6 @@ defineProps({
                     <UpdateProfileInformationForm
                         :must-verify-email="mustVerifyEmail"
                         :status="status"
-                        class="max-w-xl"
                     />
                 </div>
 
@@ -84,7 +94,10 @@ defineProps({
                     <UpdateProfileInformationForm
                         :must-verify-email="mustVerifyEmail"
                         :status="status"
-                        class="max-w-xl"
+                        :regionals="regionals"
+                        :regencyRegionals="regencyRegionals"
+                        :user="user"
+                        :current_regional="current_regional"
                     />
                 </div>
 

@@ -1,0 +1,1 @@
+Jangan macam macam ya

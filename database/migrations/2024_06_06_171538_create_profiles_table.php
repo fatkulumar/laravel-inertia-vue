@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignUuid('regional_id');
             $table->foreignUuid('address')->nullable();
             $table->string('hp', 13)->nullable();
+            $table->text('image')->nullable();
             $table->enum('gender', ['laki-laki', 'perempuan'])->nullable();
             $table->timestamps();
 

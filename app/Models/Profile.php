@@ -19,6 +19,7 @@ class Profile extends Model
         'address',
         'hp',
         'gender',
+        'image',
     ];
 
     public function profileable(): MorphTo

@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
             return (new MailMessage)
                 ->subject('Verifikasi Email Madrasah MPJ')
                 ->line(new HtmlString('<img src="' . $logoUrl . '" alt="Logo" style="width:100px;height:auto;">'))
-                ->line('Klik tomble di bawah ini untuk melakukan verifikasi email anda.')
+                ->line('Klik tombol di bawah ini untuk melakukan verifikasi email anda.')
                 ->action('Verifikasi Email', $url)
                 ->line('Jika Anda tidak membuat akun, tidak diperlukan tindakan lebih lanjut.');
         });

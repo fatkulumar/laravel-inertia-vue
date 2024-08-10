@@ -17,7 +17,8 @@ return new class extends Migration
             $table->uuid('submission_id');
             $table->foreignUuid('user_id')->references('id')->on('users');
             $table->string('credential_id')->unique();
-            $table->date('expired_at')->nullable();
+            $table->dateTime('expired_at')->nullable();
+            $table->text('image')->nullable();
             $table->timestamps();
         });
     }

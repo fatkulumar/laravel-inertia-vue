@@ -72,15 +72,20 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(User::class, 'id');
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function certificate()
     {
-        $url = url('/invoice/' . $this->invoice->id);
-
-        return (new MailMessage)
-            ->greeting('Hello!')
-            ->line('One of your invoices has been paid!')
-            ->lineIf($this->amount > 0, "Amount paid: {$this->amount}")
-            ->action('View Invoice', $url)
-            ->line('Thank you for using our application!');
+        return $this->belongsTo(Certificate::class, 'id', 'user_id');
     }
+
+    // public function toMail(object $notifiable): MailMessage
+    // {
+    //     $url = url('/invoice/' . $this->invoice->id);
+
+    //     return (new MailMessage)
+    //         ->greeting('Hello!')
+    //         ->line('One of your invoices has been paid!')
+    //         ->lineIf($this->amount > 0, "Amount paid: {$this->amount}")
+    //         ->action('View Invoice', $url)
+    //         ->line('Thank you for using our application!');
+    // }
 }

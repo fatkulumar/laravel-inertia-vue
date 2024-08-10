@@ -251,7 +251,8 @@ class ParticipantController extends Controller
             ->get();
 
             $certificate->map(function ($certif) {
-                $certif->formatted_created_at = Carbon::parse($certif->created_at)->format('d-m-Y');
+                $certif->formatted_created_at = \Carbon\Carbon::now()->translatedFormat('l, d F Y');
+                $certif->formatted_expired_at = \Carbon\Carbon::now()->translatedFormat('l, d F Y');
                 return $certif;
             });
 

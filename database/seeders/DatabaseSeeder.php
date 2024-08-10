@@ -294,7 +294,8 @@ class DatabaseSeeder extends Seeder
                     'user_id' => $userId2, //id_user
                     'credential_id' => '2024101001123123',
                     'expired_at' => now(),
-                    'head_organization_id' => $headOrganization_id
+                    'head_organization_id' => $headOrganization_id,
+                    'image' => 'image',
                 ]);
             }
         }

@@ -19,4 +19,9 @@ class Regional extends Model
     {
         return $this->hasMany(Schedule::class, 'regional_id');
     }
+
+    public function regencyRegional()
+    {
+        return $this->hasOne(RegencyRegional::class, 'regional_id', 'id');
+    }
 }

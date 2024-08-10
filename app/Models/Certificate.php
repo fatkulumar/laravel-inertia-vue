@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Acessor\ConverDateToIndonesia;
 use App\Traits\GenUid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Certificate extends Model
 {
-    use HasFactory, GenUid;
+    use HasFactory, GenUid, ConverDateToIndonesia;
 
     protected $fillable = [
         'submission_id',
@@ -17,6 +18,7 @@ class Certificate extends Model
         'user_id',
         'credential_id',
         'expired_at',
+        'image',
     ];
     public function user()
     {
@@ -25,6 +27,6 @@ class Certificate extends Model
 
     public function headOrganization()
     {
-        return $this->hasOne(HeadOrganization::class, 'id', 'head_organization_id');
+        return $this->belongsTo(HeadOrganization::class, 'head_organization_id');
     }
 }

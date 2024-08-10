@@ -82,6 +82,7 @@ const printCertificate = () => {
     window.open(pdf.output("bloburl"), "_blank"); // Membuka PDF di tab baru
   });
 };
+
 </script>
 
 <template>
@@ -125,16 +126,24 @@ const printCertificate = () => {
                           >
                           <p class="mt-16">Diberikan kepada</p>
                           <h1 class="text-blue-400 font-bold text-3xl">
-                            {{ certificate[0].name }}
+                            {{ certificate[0].user?.name }}
                           </h1>
                           <p class="mt-3">Atas kelulusanya pada kelas</p>
                           <h1 class="text-blue-400 font-bold text-xl">
-                            {{ certificate[0].user.submissions[0].schedule.class_room.name }}
-                            {{ certificate[0].user.submissions[0].schedule.category.name }}
+                            {{
+                              certificate[0].user.submissions[0].schedule
+                                .class_room.name
+                            }}
+                            {{
+                              certificate[0].user.submissions[0].schedule
+                                .category.name
+                            }}
                           </h1>
                         </div>
                         <div class="mt-5">
-                          <p class="mt-16 mb-3">{{ certificate[0].formatted_created_at }} - {{ certificate[0].expired_at }}</p>
+                          <p class="mt-16 mb-3">
+                            {{ certificate[0].formatted_created_at }}
+                          </p>
                           <div class="w-24 py-2">
                             <img
                               width="100%"
@@ -143,7 +152,9 @@ const printCertificate = () => {
                             />
                           </div>
                         </div>
-                        <p class="font-bold">{{ certificate[0].head_organization.name }}</p>
+                        <p class="font-bold">
+                          {{ certificate[0]?.head_organization.name }}
+                        </p>
                         <p class="text-xs">Chief Executive Officer</p>
                         <p class="text-xs">Madrasah Media Pondok Jatim</p>
                       </div>
@@ -168,10 +179,28 @@ const printCertificate = () => {
                             />
                           </div>
                         </div>
-                        <div class="flex justify-end">
-                          <vue-qrcode
-                            value="https://mediapondokjatim.com/"
-                          ></vue-qrcode>
+                        <div class="flex flex-col items-end mt-auto">
+                          <div>
+                            <vue-qrcode
+                              :value="`${fullUrl}/certificate/${certificate[0].credential_id}`"
+                            ></vue-qrcode>
+                          </div>
+                          <div class="text-right">
+                            <p class="font-bold">Verifikasi Sertifikat</p>
+                            <p class="text-xs">
+                              {{
+                                fullUrl +
+                                "/certificate/" +
+                                certificate[0].credential_id
+                              }}
+                            </p>
+                            <p class="text-xs">
+                              Berlaku hingga
+                              <span class="font-bold">{{
+                                certificate[0].formatted_expired_at
+                              }}</span>
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>

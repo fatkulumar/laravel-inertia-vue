@@ -180,7 +180,7 @@ function hanldeRegisterClass() {
                         </div>
 
                         <Link
-                          :href="`/participant/participant/certificate/${submission.certificate?.credential_id}`"
+                          :href="`/participant/participant/certificate/${item.certificate?.credential_id}`"
                           v-if="submission.status == 'graduated'"
                           class="rounded-md text-white text-center px-1 bg-orange-500 hover:bg-orange-600"
                         >
