@@ -5,6 +5,7 @@ import { router } from "@inertiajs/vue3";
 import { computed, onMounted, ref, watch } from "vue";
 import Swal from "sweetalert2";
 import TabMenuDetailSchedule from "@/Components/Committee/TabMenuDetailSchedule.vue";
+import Multiselect from 'vue-multiselect'
 
 onMounted(() => {
   initFlowbite();
@@ -31,6 +32,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  regencyRegional: {
+    type: Object,
+    default: () => ({}),
+  },
   regencyRegionals: {
     type: Object,
     default: () => ({}),
@@ -50,6 +55,34 @@ const segments = urlPath.split("/");
 const idSubmissionLastSegment = segments.pop() || segments.pop();
 
 let search = ref(props.filters.search);
+
+const transformedDataRegencyRegional = props.regencyRegional.map(item => ({
+  name: item.regency,
+  id: item.id
+}));
+
+const transformedDataRegencyRegionals = props.regencyRegionals.map(item => ({
+  name: item.regency,
+  id: item.id
+}));
+
+const filteredData = transformedDataRegencyRegionals.filter(item =>
+  props.schedule[0].regency_regional_ids.includes(item.id)
+);
+
+const value = ref(filteredData);
+const options = ref(transformedDataRegencyRegionals);
+
+const addTag = (newTag) => {
+    alert('ok')
+  const tag = {
+    name: newTag,
+    id: newTag.substring(0, 2) + Math.floor(Math.random() * 10000000),
+  };
+  options.value.push(tag);
+  value.value.push(tag);
+  form.regency_regional_ids = value.value
+};
 
 watch(search, (value) => {
   router.get(
@@ -72,6 +105,7 @@ const form = useForm({
   category_id: props.schedule[0].category_id,
   class_room_id: props.schedule[0].class_room_id,
   regency_regional_id: props.schedule[0].regency_regional_id,
+  regency_regional_ids: value.value,
   hp: props.schedule[0].committee?.profile?.hp,
   start_date_class: props.schedule[0].formatted_start_date_class,
   end_date_class: props.schedule[0].formatted_end_date_class,
@@ -219,7 +253,12 @@ function uploadPoster(e) {
 }
 
 function updateSchedule() {
+    console.log(value.value)
   form.post("/committee/schedule/store", {
+    data: {
+      // Tambahkan data yang relevan jika diperlukan
+      umaselectedValuesr: value.value
+    },
     preserveScroll: true,
     onSuccess: () => {
       toast("success", "Data Berhasil Diedit");
@@ -612,23 +651,27 @@ function updateSchedule() {
                       />
                     </div>
                     <div class="col-span-2 sm:col-span-1">
-                    <label
+                        <label
                         for="regency_regional_id"
                         class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                        >Kecamatan</label
-                    >
-                    <select
-                        v-model="form.regency_regional_id"
-                        name="regency_regional_id"
-                        id="regency_regional_id"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="Lokasi"
-                    >
-                    <option value="" :selected="form.regency_regional_id == null">Pilih Kecamatan</option>
-                    <option v-for="item, index in props.regencyRegionals" :key="index" :selected="form.regency_regional_id == item.id" :value="item.id">
-                        {{ item.regency }}
-                    </option>
-                    </select>
+                        >Kabupaten</label
+                      >
+
+                      <multiselect
+                        v-model="value"
+                        tag-placeholder="Add this as new tag"
+                        placeholder="Search or add a tag"
+                        label="name"
+                        track-by="id"
+                        :options="options"
+                        :multiple="true"
+                        :taggable="true"
+                        @tag="addTag"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 cursor-pointer"
+                      >
+                      <template #tag="{ option, remove }"><span class="custom__tag"><span>{{ option.name }}</span><span
+                        class="custom__remove" @click="remove(option)">❌</span></span></template>
+                    </multiselect>
                     </div>
                     <div class="col-span-2 sm:col-span-1">
                       <label

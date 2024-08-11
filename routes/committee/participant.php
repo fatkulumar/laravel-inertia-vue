@@ -9,5 +9,5 @@
         Route::get('/list-participant-class-room', [Committee\ParticipantController::class, 'participantClassRoom'])->name('participantClassRoom');
         Route::get('/history-class/{userId}', [Committee\ParticipantController::class, 'historyClass'])->name('history.class');
         Route::get('/certificate/{credentialId}/{userId}', [Committee\ParticipantController::class, 'certificate'])->name('certificate');
-        // Route::get('/certificate', [Committee\ParticipantController::class, 'certificate'])->name('certificate');
+        Route::post('/change-image', [Committee\ParticipantController::class, 'changeImage'])->name('change.image');
     });

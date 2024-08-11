@@ -20,7 +20,7 @@ defineProps({
     regionals: {
         type: Object,
     },
-    regencyRegionals: {
+    regencyRegional: {
         type: Object,
     },
     user: {
@@ -46,6 +46,10 @@ defineProps({
                     <UpdateProfileInformationForm
                         :must-verify-email="mustVerifyEmail"
                         :status="status"
+                        :regionals="regionals"
+                        :regencyRegional="regencyRegional"
+                        :user="user"
+                        :current_regional="current_regional"
                     />
                 </div>
 
@@ -70,6 +74,10 @@ defineProps({
                     <UpdateProfileInformationForm
                         :must-verify-email="mustVerifyEmail"
                         :status="status"
+                        :regionals="regionals"
+                        :regencyRegional="regencyRegional"
+                        :user="user"
+                        :current_regional="current_regional"
                     />
                 </div>
 
@@ -95,7 +103,7 @@ defineProps({
                         :must-verify-email="mustVerifyEmail"
                         :status="status"
                         :regionals="regionals"
-                        :regencyRegionals="regencyRegionals"
+                        :regencyRegional="regencyRegional"
                         :user="user"
                         :current_regional="current_regional"
                     />

@@ -73,10 +73,9 @@ class ScheduleController extends Controller
             $committee = User::with('profile.regional')->where('id', Auth()->user()->id)->first();
             $committees = User::with('profile.regional', 'chief')->role('panitia')->get();
             $typeActivities = TypeActivity::all(['id', 'name']);
-            $regional_id = Auth::user()->profile->regional->id;
+            $regency_regional_id = Auth::user()->profile->regency_regional_id;
             $regencyRegional = RegencyRegional::with('regional')
-                ->where('regional_id', $regional_id)
-                ->take(1)
+                ->where('id', $regency_regional_id)
                 ->get();
             $regencyRegionals = RegencyRegional::with('regional')
                 ->get();
@@ -110,7 +109,8 @@ class ScheduleController extends Controller
             $id = $request->post('id');
 
             $regionalIds = array();
-            $jsonRegencyRegionalIds = $request->post('regency_regional_ids');
+            $jsonRegencyRegionalIds = $request->post('umar');
+            return $request;
             if (json_last_error() === JSON_ERROR_NONE) {
                 // Proses setiap elemen dalam array menggunakan foreach
                 foreach ($jsonRegencyRegionalIds as $item) {
@@ -255,7 +255,7 @@ class ScheduleController extends Controller
                 'class_room_id' => 'required|string|max:36',
                 'category_id' => 'required|string|max:36',
                 'regency_regional_id' => 'required|string|max:36',
-                // 'regency_regional_ids' => 'required|string',
+                'regency_regional_ids' => 'required',
                 'start_date_class' => 'required|string|max:15',
                 'end_date_class' => 'required|string|max:15',
                 'location' => 'required|string|max:255',
@@ -326,7 +326,7 @@ class ScheduleController extends Controller
                 'class_room_id' => 'required|string|max:36',
                 'category_id' => 'required|string|max:36',
                 'regency_regional_id' => 'required|string|max:36',
-                'regency_regional_ids' => 'required|string',
+                'regency_regional_ids' => 'required',
                 'start_date_class' => 'required|string|max:15',
                 'end_date_class' => 'required|string|max:15',
                 'location' => 'required|string|max:255',
@@ -423,9 +423,11 @@ class ScheduleController extends Controller
         $categories = Category::all(['id', 'name']);
         $chiefs = User::with('profile.regional')->role('panitia')->get();
         $typeActivities = TypeActivity::all(['id', 'name']);
-        $regional_id = Auth::user()->profile->regional->id;
+        $regency_regional_id = Auth::user()->profile->regency_regional_id;
+        $regencyRegional = RegencyRegional::with('regional')
+            ->where('id', $regency_regional_id)
+            ->get();
         $regencyRegionals = RegencyRegional::with('regional')
-            ->where('regional_id', $regional_id)
             ->get();
         return Inertia::render('Committee/Schedule/DetailSchedule', [
             'schedule' => $schedule,
@@ -434,6 +436,7 @@ class ScheduleController extends Controller
             'chiefs' => $chiefs,
             'typeActivities' => $typeActivities,
             'regencyRegionals' => $regencyRegionals,
+            'regencyRegional' => $regencyRegional,
         ]);
     }
 

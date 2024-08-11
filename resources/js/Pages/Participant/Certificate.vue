@@ -231,7 +231,7 @@ function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
                           <p class="mt-16 mb-3">
                             {{ certificate[0].formatted_created_at }}
                           </p>
-                          <div class="w-24 py-2">
+                          <div class="w-24 pt-2">
                             <img
                               width="100%"
                               src="/mpj.svg"
@@ -332,7 +332,7 @@ function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
                           <p class="mt-8 mb-2">
                             {{ certificate[0].formatted_created_at }}
                           </p>
-                          <div class="w-20 py-1">
+                          <div class="w-20 pb-2">
                             <img
                               width="100%"
                               src="/mpj.svg"

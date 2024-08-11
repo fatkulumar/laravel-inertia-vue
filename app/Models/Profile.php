@@ -14,6 +14,7 @@ class Profile extends Model
 
     protected $fillable = [
         'regional_id',
+        'regency_regional_id',
         'profileable_id',
         'profileable_type',
         'address',
@@ -30,5 +31,10 @@ class Profile extends Model
     public function regional()
     {
         return $this->belongsTo(Regional::class);
+    }
+
+    public function regencyRegional()
+    {
+        return $this->belongsTo(RegencyRegional::class, 'regency_regional_id', 'id');
     }
 }

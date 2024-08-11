@@ -52,6 +52,21 @@ class DatabaseSeeder extends Seeder
                     'id' => $id_regional1,
                     'name' => 'Surabaya',
                 ]);
+
+                $regency_regional_id1 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                RegencyRegional::create([
+                    'id' => $regency_regional_id1,
+                    'regional_id' => $id_regional1,
+                    'regency' => 'Ngoro',
+                ]);
+
+                $regency_regional_id2 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                RegencyRegional::create([
+                    'id' => $regency_regional_id2,
+                    'regional_id' => $id_regional1,
+                    'regency' => 'Sidoarjo',
+                ]);
+
                 $userId1 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 $user1 = User::create([
                     'id' => $userId1,
@@ -68,6 +83,7 @@ class DatabaseSeeder extends Seeder
                 Profile::create([
                     'address' => 'Jl. Cempaka No. 1',
                     'regional_id' => $id_regional1,
+                    'regency_regional_id' => $regency_regional_id1,
                     'profileable_id' => $userId1,
                     'profileable_type' => 'App\Models\User',
                     'hp' => '6281234567890',
@@ -89,6 +105,20 @@ class DatabaseSeeder extends Seeder
                     'name' => 'Ngawi',
                 ]);
 
+                $regency_regional_id3 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                RegencyRegional::create([
+                    'id' => $regency_regional_id3,
+                    'regional_id' => $id_regional2,
+                    'regency' => 'Kedunggalar',
+                ]);
+
+                $regency_regional_id4 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                RegencyRegional::create([
+                    'id' => $regency_regional_id4,
+                    'regional_id' => $id_regional2,
+                    'regency' => 'Paron',
+                ]);
+
                 $userId2 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 $user2 = User::create([
                     'id' => $userId2,
@@ -105,13 +135,12 @@ class DatabaseSeeder extends Seeder
                 Profile::create([
                     'address' => 'Jl. Cempaka No. 2',
                     'regional_id' => $id_regional2,
+                    'regency_regional_id' => $regency_regional_id3,
                     'profileable_id' => $userId2,
                     'profileable_type' => 'App\Models\User',
                     'hp' => '6281234567890',
                     'gender' => 'Laki-laki',
                 ]);
-
-                //
 
                 $userIdPeserta2 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 $userPeserta2 = User::create([
@@ -129,6 +158,7 @@ class DatabaseSeeder extends Seeder
                 Profile::create([
                     'address' => 'Jl. Cempaka No. 2',
                     'regional_id' => $id_regional2,
+                    'regency_regional_id' => $regency_regional_id4,
                     'profileable_id' => $userIdPeserta2,
                     'profileable_type' => 'App\Models\User',
                     'hp' => '6281234567890',
@@ -150,6 +180,21 @@ class DatabaseSeeder extends Seeder
                     'id' => $id_regional3,
                     'name' => 'Malang',
                 ]);
+
+                $regency_regional_id5 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                RegencyRegional::create([
+                    'id' => $regency_regional_id5,
+                    'regional_id' => $id_regional3,
+                    'regency' => 'Karang Besuki',
+                ]);
+
+                $regency_regional_id6 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+                RegencyRegional::create([
+                    'id' => $regency_regional_id6,
+                    'regional_id' => $id_regional3,
+                    'regency' => 'Sukun',
+                ]);
+
                 $userId3 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 $user3 = User::create([
                     'id' => $userId3,
@@ -166,6 +211,7 @@ class DatabaseSeeder extends Seeder
                 Profile::create([
                     'address' => 'Jl. Cempaka No. 3',
                     'regional_id' => $id_regional2,
+                    'regency_regional_id' => $regency_regional_id5,
                     'profileable_id' => $userId3,
                     'profileable_type' => 'App\Models\User',
                     'hp' => '6281234567890',
@@ -188,13 +234,6 @@ class DatabaseSeeder extends Seeder
                     'category_id' => $Category1->id,
                 ]);
 
-                $regency_regional_id = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
-                RegencyRegional::create([
-                    'id' => $regency_regional_id,
-                    'regional_id' => $id_regional3,
-                    'regency' => 'Sukun',
-                ]);
-
                 $scheduleId = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
                 Schedule::create([
                     'id' => $scheduleId,
@@ -204,7 +243,7 @@ class DatabaseSeeder extends Seeder
                     'class_room_id' => $classRoom3->id,
                     'chief_id' => $userId3, //ketua pelaksana
                     'type_activity_id' => $type_activity_id,
-                    'regency_regional_id' => $regency_regional_id,
+                    'regency_regional_id' => $regency_regional_id3,
                     'regency_regional_ids' => json_encode(["n8zyi6st7qscsg88cs8kwsw804kk48s","n8zyi6st7qscsg88cs8kwsw804kk48u"]),
                     'periode' => 14,
                     'poster' => 'Link Poster', //konsep kegiatan
@@ -224,7 +263,6 @@ class DatabaseSeeder extends Seeder
                     'start_date_class' => now(),
                     'end_date_class' => now(),
                     'graduation_date' => now(),
-                    // 'proposal' => 'Link File',
                     'date_overview' => now(),
                     'date_received' => now(),
                 ]);

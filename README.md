@@ -80,3 +80,6 @@
     ```
     php artisan optimize
     ```
+#### Saran Foto Sertifikat
+width: 472px
+height: 709px

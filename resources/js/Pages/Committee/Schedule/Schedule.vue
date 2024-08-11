@@ -1067,7 +1067,7 @@ const setSpeaker = async (classRoomId) => {
                   <label
                     for="regency_regional_id"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Kecamatan</label
+                    >Kabupaten</label
                   >
 
                   <multiselect
@@ -1085,30 +1085,6 @@ const setSpeaker = async (classRoomId) => {
                   <template #tag="{ option, remove }"><span class="custom__tag"><span>{{ option.name }}</span><span
                     class="custom__remove" @click="remove(option)">❌</span></span></template>
                 </multiselect>
-
-                  <!-- <pre class="language-json"><code>{{ value }}</code></pre> -->
-                  <!-- <select
-                    v-model="form.regency_regional_id"
-                    name="regency_regional_id"
-                    id="regency_regional_id"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Lokasi"
-                  >
-                    <option
-                      value=""
-                      :selected="form.regency_regional_id == null"
-                    >
-                      Pilih Kecamatan
-                    </option>
-                    <option
-                      v-for="(item, index) in props.regencyRegionals"
-                      :key="index"
-                      :selected="form.regency_regional_id == item.id"
-                      :value="item.id"
-                    >
-                      {{ item.regency }}
-                    </option>
-                  </select> -->
                 </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label

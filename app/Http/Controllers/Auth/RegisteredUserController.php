@@ -32,10 +32,13 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
+    // : RedirectResponse
     {
+        // return $request;
         $request->validate([
-            'id' => 'required'|'string'|'max:36',
+            'regional_id' => 'required|string|max:36',
+            'regency_regional_id' => 'required|string|max:36',
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
@@ -53,6 +56,7 @@ class RegisteredUserController extends Controller
             'profileable_id' => $user_id,
             'profileable_type' => 'App\Models\User',
             'regional_id' => $request->regional_id,
+            'regency_regional_id' => $request->regional_id,
         ];
 
         $user->profile()->create($saveProfile);

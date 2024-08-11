@@ -12,9 +12,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Traits\EntityValidator;
 
 class ProfileController extends Controller
 {
@@ -22,24 +24,25 @@ class ProfileController extends Controller
     /**
      * Display the user's profile form.
      */
-    public function edit(Request $request): Response
+    public function edit(Request $request)
+    // : Response
     {
         $userId = Auth::user()->id;
-        $user = User::with(['profile.regional.regencyRegional'])->where('id', $userId)->get();
+        $user = User::with(['profile.regional', 'profile.regencyRegional'])->where('id', $userId)->get();
         $regionals = Regional::all(['id', 'name']);
-        $regencyRegionals = RegencyRegional::all(['id', 'regency']);
+        $regencyRegional = RegencyRegional::where('id', $user[0]->profile->regency_regional_id ?? '')->get();
         $user->map(function ($us) {
             $us->profile->image = isset($us->image) ?  asset($this->directoryProfile . $us->profile->image) : // get path public
                 null;
             return $us;
         });
-        // return $user;
+        // return $regencyRegionals;
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
             'role' => Auth::user()->roles,
             'regionals' => $regionals,
-            'regencyRegionals' => $regencyRegionals,
+            'regencyRegional' => $regencyRegional,
             'user' => $user,
         ]);
     }
@@ -50,43 +53,89 @@ class ProfileController extends Controller
     public function update(Request $request)
     // : RedirectResponse
     {
-        $updateData = DB::transaction(function () use ($request) {
-            $data = Profile::where('profileable_id', $request->user()->id)->first();
+        try {
+            $validasiData = $this->updateValidator($request);
+            if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+            DB::transaction(function () use ($request) {
+                $data = Profile::where('profileable_id', $request->user()->id)->first();
 
-            $image = $request->file('image');
-            if ($image) {
-                $filePath = public_path($this->directoryProfile . $data->image);
-                if (file_exists($filePath)) {
-                    unlink($filePath);
+                $image = $request->file('image');
+                if ($image) {
+                    $filePath = public_path($this->directoryProfile . $data->image);
+                    if (file_exists($filePath) && $data->image) {
+                        unlink($filePath);
+                    }
+                    $fileName = "{$image->hashName()}-{$image->getClientOriginalName()}";
+                    $image->move(public_path($this->directoryProfile), $fileName);
+                    $uploadImage = $fileName;
+                } else {
+                    $uploadImage = $data->image;
                 }
-                $fileName = "{$image->hashName()}-{$image->getClientOriginalName()}";
-                $image->move(public_path($this->directoryProfile), $fileName);
-                $uploadImage = $fileName;
-            } else {
-                $uploadImage = "Foto Tidak Ada";
-            }
 
-            $saveProfile = [
+                $saveProfile = [
+                    'hp' => $request->post('hp'),
+                    'address' => $request->post('address'),
+                    'gender' => $request->post('gender'),
+                    'regional_id' => $request->post('regional_id'),
+                    'regency_regional_id' => $request->post('regency_regional_id'),
+                    'image' => $uploadImage,
+                ];
+
+                $saveUser = [
+                    'name' => $request->post('name'),
+                    'email' => $request->post('email'),
+                    'image' => $uploadImage,
+                ];
+
+                $data->update($saveProfile);
+                User::where('id', $request->user()->id)->update($saveUser);
+                RegencyRegional::where('id', $request->post('regency_id'))->update([
+                    'regency' => $request->post('regency_name'),
+                ]);
+            });
+
+            return back()->with('success', 'Profile updated successfully!');
+        } catch (\Exception $exception) {
+            return back()->with('error', 'Profile failed to update!');
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function update in ProfileController', $errors);
+        }
+    }
+
+    private function updateValidator(Request $request)
+    {
+        try {
+            $rules = [
+                'hp' => 'required|string|max:13',
+                'address' => 'required|string|max:255',
+                'gender' => 'required|string|10',
+                'regional_id' => 'required|string|max:36',
+                'regency_regional_id' => 'required|string|max:36',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'name' => 'required|string|max:100',
+                'email' => 'required|string|max:225',
+            ];
+            $Validatedata = [
                 'hp' => $request->post('hp'),
                 'address' => $request->post('address'),
                 'gender' => $request->post('gender'),
                 'regional_id' => $request->post('regional_id'),
-                'image' => $uploadImage,
-            ];
-
-            $saveUser = [
+                'regency_regional_id' => $request->post('regency_regional_id'),
+                'image' => $request->post('image'),
                 'name' => $request->post('name'),
                 'email' => $request->post('email'),
             ];
-
-            $data->update($saveProfile);
-            User::where('id', $request->user()->id)->update($saveUser);
-        });
-
-        if($updateData) {
-            return Redirect::route('profile.edit')->with('success', 'Profile updated successfully!');
-        }else{
-            return Redirect::route('profile.edit')->with('error', 'Profile failed to update!');
+            $validator = EntityValidator::validate($Validatedata, $rules);
+            if ($validator->fails()) return $validator->errors();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function updateValidator in SubmissionController', $errors);
         }
     }
 
@@ -109,5 +158,22 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+     /**
+     * Get Regency Regional By Regional Id the user's account.
+     */
+    public function regencyRegional(Request $request, $regionalId)
+    {
+        try {
+            $regencyRegionals = RegencyRegional::where('regional_id', $regionalId)->get();
+            return response()->json($regencyRegionals);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function regencyRegional in ProfileController', $errors);
+        }
     }
 }

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignUuid('profileable_id');
             $table->string('profileable_type');
             $table->foreignUuid('regional_id');
+            $table->foreignUuid('regency_regional_id');
             $table->foreignUuid('address')->nullable();
             $table->string('hp', 13)->nullable();
             $table->text('image')->nullable();

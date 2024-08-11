@@ -32,6 +32,7 @@ class ParticipantController extends Controller
         ];
     }
 
+    protected $directoryCertificate = '/file/certificate/';
     private function updateValidator(Request $request)
     {
         try {
@@ -253,6 +254,7 @@ class ParticipantController extends Controller
             $certificate->map(function ($certif) {
                 $certif->formatted_created_at = \Carbon\Carbon::now()->translatedFormat('l, d F Y');
                 $certif->formatted_expired_at = \Carbon\Carbon::now()->translatedFormat('l, d F Y');
+                $certif->image = asset($this->directoryCertificate . $certif->image);
                 return $certif;
             });
 
@@ -266,6 +268,65 @@ class ParticipantController extends Controller
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function certificate in Participant/ParticipantController', $errors);
+        }
+    }
+
+    public function changeImage(Request $request)
+    {
+        try {
+            $validasiData = $this->changeImageValidator($request);
+            if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+
+            $data = Certificate::where('credential_id', $request->post('credential_id'))->first();
+            $filePath = public_path($this->directoryCertificate . $data->image);
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+            $image = $request->file('image');
+            if ($image) {
+                $fileName = "{$image->hashName()}-{$image->getClientOriginalName()}";
+                $image->move(public_path($this->directoryCertificate), $fileName);
+                $uploadImage = $fileName;
+            } else {
+                $uploadImage = "Foto Tidak Ada";
+            }
+
+            $saveData = [
+                'image' => $uploadImage,
+            ];
+
+            $result = Certificate::where('credential_id', $request->post('credential_id'))->update($saveData);
+
+            if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function changeImage in Commmittee/ParticipantController', $errors);
+        }
+    }
+
+    private function changeImageValidator(Request $request)
+    {
+        try {
+            $rules = [
+                'credential_id' => 'required|string|max:36',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
+            ];
+            $Validatedata = [
+                'credential_id' => $request->post('credential_id'),
+                'image' => $request->file('poster'),
+            ];
+            $validator = EntityValidator::validate($Validatedata, $rules);
+            if ($validator->fails()) return $validator->errors();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function changeImageValidator in Committee/ScheduleController', $errors);
         }
     }
 }
