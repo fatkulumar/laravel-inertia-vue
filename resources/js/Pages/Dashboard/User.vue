@@ -262,7 +262,7 @@ function uploadImage(e) {
 </script>
 
 <template>
-  <Head title="Article" />
+  <Head title="Users" />
   <div>
     <AuthenticatedLayoutAdmin>
       <!-- <template #header>
@@ -270,74 +270,75 @@ function uploadImage(e) {
             </template> -->
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div
+            class="p-6 flex flex-col items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
+          >
+            <div>
+              <!-- icon plus -->
+              <div
+                @click="showModal()"
+                title="Tambah Artikel"
+                class="cursor-pointer"
+              >
+                <svg
+                  class="h-8 w-8 bg-green-400 p-1 rounded-lg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g
+                    id="SVGRepo_tracerCarrier"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <path
+                      d="M4 12H20M12 4V20"
+                      stroke="#000000"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                  </g>
+                </svg>
+              </div>
+            </div>
+
+            <label for="table-search" class="sr-only">Search</label>
+            <div class="relative">
+              <div
+                class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none"
+              >
+                <svg
+                  class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                  />
+                </svg>
+              </div>
+              <input
+                v-model="search"
+                type="text"
+                id="table-search-users"
+                class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Nama"
+              />
+            </div>
+          </div>
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
-              <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <div
-                  class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
-                >
-                  <div>
-                    <!-- icon plus -->
-                    <div
-                      @click="showModal()"
-                      title="Tambah Artikel"
-                      class="cursor-pointer"
-                    >
-                      <svg
-                        class="h-8 w-8 bg-green-400 p-1 rounded-lg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g
-                          id="SVGRepo_tracerCarrier"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        ></g>
-                        <g id="SVGRepo_iconCarrier">
-                          <path
-                            d="M4 12H20M12 4V20"
-                            stroke="#000000"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          ></path>
-                        </g>
-                      </svg>
-                    </div>
-                  </div>
+              <div class="overflow-x-auto shadow-md sm:rounded-lg">
 
-                  <label for="table-search" class="sr-only">Search</label>
-                  <div class="relative">
-                    <div
-                      class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none"
-                    >
-                      <svg
-                        class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                        />
-                      </svg>
-                    </div>
-                    <input
-                      v-model="search"
-                      type="text"
-                      id="table-search-users"
-                      class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="Search for users"
-                    />
-                  </div>
-                </div>
                 <table
                   class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
                 >
@@ -423,67 +424,12 @@ function uploadImage(e) {
                       <td class="px-6 py-4">
                         <div class="flex gap-2">
                           <div
-                            @click="editUser(item, item.roles, item.profile)"
-                            title="Edit"
-                            class="bg-green-100 p-0.5 rounded-md"
+                            title="Actions"
+                            class="w-5 cursor-pointer"
+                            id="dropdown-button"
+                            :data-dropdown-toggle="`dropdown${index}`"
                           >
                             <svg
-                              class="h-6 w-6 cursor-pointer"
-                              viewBox="0 0 192 192"
-                              xmlns="http://www.w3.org/2000/svg"
-                              xml:space="preserve"
-                              fill="none"
-                            >
-                              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                              <g
-                                id="SVGRepo_tracerCarrier"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              ></g>
-                              <g id="SVGRepo_iconCarrier">
-                                <path
-                                  d="m104.175 90.97-4.252 38.384 38.383-4.252L247.923 15.427V2.497L226.78-18.646h-12.93zm98.164-96.96 31.671 31.67"
-                                  class="cls-1"
-                                  style="
-                                    fill: none;
-                                    fill-opacity: 1;
-                                    fill-rule: nonzero;
-                                    stroke: #000000;
-                                    stroke-width: 12;
-                                    stroke-linecap: round;
-                                    stroke-linejoin: round;
-                                    stroke-dasharray: none;
-                                    stroke-opacity: 1;
-                                  "
-                                  transform="translate(-77.923 40.646)"
-                                ></path>
-                                <path
-                                  d="m195.656 33.271-52.882 52.882"
-                                  style="
-                                    fill: none;
-                                    fill-opacity: 1;
-                                    fill-rule: nonzero;
-                                    stroke: #000000;
-                                    stroke-width: 12;
-                                    stroke-linecap: round;
-                                    stroke-linejoin: round;
-                                    stroke-miterlimit: 5;
-                                    stroke-dasharray: none;
-                                    stroke-opacity: 1;
-                                  "
-                                  transform="translate(-77.923 40.646)"
-                                ></path>
-                              </g>
-                            </svg>
-                          </div>
-
-                          <div
-                            @click="deleteUser(item.id, item.title)"
-                            title="Hapus"
-                            class="bg-red-100 p-0.5 rounded-md"
-                          >
-                            <svg
-                              class="h-6 w-6 cursor-pointer"
                               viewBox="0 0 24 24"
                               fill="none"
                               xmlns="http://www.w3.org/2000/svg"
@@ -496,7 +442,7 @@ function uploadImage(e) {
                               ></g>
                               <g id="SVGRepo_iconCarrier">
                                 <path
-                                  d="M10 12L14 16M14 12L10 16M18 6L17.1991 18.0129C17.129 19.065 17.0939 19.5911 16.8667 19.99C16.6666 20.3412 16.3648 20.6235 16.0011 20.7998C15.588 21 15.0607 21 14.0062 21H9.99377C8.93927 21 8.41202 21 7.99889 20.7998C7.63517 20.6235 7.33339 20.3412 7.13332 19.99C6.90607 19.5911 6.871 19.065 6.80086 18.0129L6 6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6"
+                                  d="M12 12H12.01M12 6H12.01M12 18H12.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM13 18C13 18.5523 12.5523 19 12 19C11.4477 19 11 18.5523 11 18C11 17.4477 11.4477 17 12 17C12.5523 17 13 17.4477 13 18ZM13 6C13 6.55228 12.5523 7 12 7C11.4477 7 11 6.55228 11 6C11 5.44772 11.4477 5 12 5C12.5523 5 13 5.44772 13 6Z"
                                   stroke="#000000"
                                   stroke-width="2"
                                   stroke-linecap="round"
@@ -504,6 +450,36 @@ function uploadImage(e) {
                                 ></path>
                               </g>
                             </svg>
+                          </div>
+                          <div
+                            :id="`dropdown${index}`"
+                            class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
+                          >
+                            <ul
+                              class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                              aria-labelledby="dropdown-button"
+                            >
+                              <li>
+                                <button
+                                  title="Edit Ketua"
+                                    @click="editUser(item, item.roles, item.profile)"
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Edit
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  title="Hapus Ketua"
+                                  @click="deleteUser(item.id, item.title)"
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Hapus
+                                </button>
+                              </li>
+                            </ul>
                           </div>
                           <div>
                             <input
@@ -519,11 +495,11 @@ function uploadImage(e) {
                   </tbody>
                 </table>
 
-                <Pagination
-                  class="my-6 flex justify-center md:justify-end"
-                  :links="props.users.links"
-                />
-              </div>
+            </div>
+            <Pagination
+              class="my-6 flex justify-center md:justify-end"
+              :links="props.users.links"
+            />
             </div>
           </div>
         </div>
@@ -549,7 +525,7 @@ function uploadImage(e) {
             >
 
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                {{ form.id ? "Update User" : "Tambah User" }}
+                User
             </h3>
 
               <button
@@ -653,11 +629,10 @@ function uploadImage(e) {
                 </div>
               </div>
               <button
-                title="Tambah User"
                 type="submit"
                 class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
-                {{ form.id ? "Update User" : "Tambah User" }}
+                {{ form.id ? "Update" : "Add" }}
               </button>
             </form>
           </div>

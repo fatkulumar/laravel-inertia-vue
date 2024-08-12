@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\ServiceProvider;
 
@@ -31,5 +32,9 @@ class AppServiceProvider extends ServiceProvider
                 ->action('Verifikasi Email', $url)
                 ->line('Jika Anda tidak membuat akun, tidak diperlukan tindakan lebih lanjut.');
         });
+
+        if(config('app.env') === 'local') {
+            URL::forceScheme('https');
+        }
     }
 }

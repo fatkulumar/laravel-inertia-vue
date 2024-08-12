@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('schedules', function (Blueprint $table) {
             $table->uuid('id')->primary()->unique();
             $table->uuid('regional_id');
-            $table->uuid('committee_id');
+            $table->uuid('committee_id')->references('id')->on('users')->onDelete('cascade');;
             $table->uuid('category_id'); // kategori kelas
             $table->uuid('class_room_id');
             $table->uuid('chief_id'); //ketua pelaksana

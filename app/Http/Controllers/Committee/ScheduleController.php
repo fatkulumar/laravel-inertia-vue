@@ -109,8 +109,8 @@ class ScheduleController extends Controller
             $id = $request->post('id');
 
             $regionalIds = array();
-            $jsonRegencyRegionalIds = $request->post('umar');
-            return $request;
+            $jsonRegencyRegionalIds = $request->post('regency_regional_ids');
+            // return $request;
             if (json_last_error() === JSON_ERROR_NONE) {
                 // Proses setiap elemen dalam array menggunakan foreach
                 foreach ($jsonRegencyRegionalIds as $item) {
@@ -284,7 +284,7 @@ class ScheduleController extends Controller
                 'class_room_id' => $request->post('class_room_id'),
                 'category_id' => $request->post('category_id'),
                 'regency_regional_id' => $request->post('regency_regional_id'),
-                // 'regency_regional_ids' => $request->post('regency_regional_ids'),
+                'regency_regional_ids' => $request->post('regency_regional_ids'),
                 'status' => $request->post('status'),
                 'start_date_class' => $request->post('start_date_class'),
                 'end_date_class' => $request->post('end_date_class'),

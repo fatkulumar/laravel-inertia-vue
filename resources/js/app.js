@@ -10,7 +10,7 @@ import 'sweetalert2';
 import CKEditor from '@ckeditor/ckeditor5-vue';
 import { jsPDF } from "jspdf";
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Madrasah MPJ';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

@@ -654,11 +654,11 @@ function updateSchedule() {
                         <label
                         for="regency_regional_id"
                         class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                        >Kabupaten</label
+                        >Kabupaten <span class="text-xs text-red-600">*Kabupaten yang bisa mendaftar kelas</span></label
                       >
 
                       <multiselect
-                        v-model="value"
+                        v-model="form.regency_regional_ids"
                         tag-placeholder="Add this as new tag"
                         placeholder="Search or add a tag"
                         label="name"

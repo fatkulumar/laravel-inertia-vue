@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('head_organization_id');
             $table->uuid('submission_id');
-            $table->foreignUuid('user_id')->references('id')->on('users');
+            $table->foreignUuid('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('credential_id')->unique();
             $table->dateTime('expired_at')->nullable();
             $table->text('image')->nullable();

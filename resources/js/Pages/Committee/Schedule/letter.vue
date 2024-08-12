@@ -99,7 +99,7 @@ function uploadLetter(e) {
 </script>
 
 <template>
-  <Head title="Narasumber" />
+  <Head title="Surat Tugas" />
   <div>
     <AuthenticatedLayoutCommittee>
       <template #header>

@@ -228,8 +228,8 @@ function toggleCheckbox(id) {
   }
 
   if (checkbox.checked == true) {
-    const articleId = formCheckbox.id.includes(id);
-    if (!articleId) {
+    const submissId = formCheckbox.id.includes(id);
+    if (!submissId) {
       formCheckbox.id.push(id);
     }
   } else {
@@ -351,7 +351,7 @@ function handleOptionSubmission() {
 </script>
 
 <template>
-  <Head title="Article" />
+  <Head title="Pengajuan Kelas" />
   <div>
     <AuthenticatedLayoutAdmin>
       <!-- <template #header>
@@ -360,7 +360,7 @@ function handleOptionSubmission() {
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div
-            class="p-6 flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
+            class="p-6 flex flex-col items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
           >
             <!-- <div>
                     icon plus
@@ -420,7 +420,7 @@ function handleOptionSubmission() {
                 type="text"
                 id="table-search-users"
                 class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Search for users"
+                placeholder="Nama"
               />
             </div>
           </div>
@@ -918,6 +918,7 @@ function handleOptionSubmission() {
                   >
                   <input
                     v-model="form.credential_id"
+                    :readonly="form.credential_id"
                     type="text"
                     name="credential_id"
                     id="credential_id"
@@ -926,15 +927,16 @@ function handleOptionSubmission() {
                   />
                 </div>
                 <div class="col-span-2 text-red-600 text-xs" v-if="form.credential_id">
-                  Sertifikat ada
+                  Sudah ada sertifikat
                 </div>
               </div>
               <button
                 title="Tambah Kelas"
+                :disabled="form.credential_id"
                 type="submit"
                 class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
-                {{ form.id ? "Tambah" : "Tambah" }}
+                {{ form.credential_id ? "Update" : "Add" }}
               </button>
             </form>
           </div>

@@ -136,7 +136,7 @@ function editDocumentation(data) {
 </script>
 
 <template>
-  <Head title="Documentation" />
+  <Head title="Dokumentasi" />
   <div>
     <AuthenticatedLayoutCommittee>
       <template #header>

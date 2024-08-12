@@ -314,7 +314,7 @@ function uploadImage(e) {
 </script>
 
 <template>
-  <Head title="Article" />
+  <Head title="Data Peserta" />
   <div>
     <AuthenticatedLayoutCommittee>
       <template #header>

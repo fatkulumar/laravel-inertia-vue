@@ -178,7 +178,13 @@ const fullUrl = ref(window.location.origin);
                     class="sm:hidden"
                 >
                     <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('dashboard.committee')" :active="route().current('dashboard')">
+                        <ResponsiveNavLink class="text-white" :href="route('dashboard.committee')"
+                        :class="{
+                            'bg-gray-500': route().current(
+                              'dashboard.committee*'
+                            ),
+                          }"
+                        >
                             Dashboard
                         </ResponsiveNavLink>
                     </div>
@@ -186,15 +192,21 @@ const fullUrl = ref(window.location.origin);
                     <!-- Responsive Settings Options -->
                     <div class="pt-4 pb-1 border-t border-gray-200">
                         <div class="px-4">
-                            <div class="font-medium text-base text-gray-800">
+                            <div class="font-medium text-base text-white">
                                 {{ $page.props.auth.user.name }}
                             </div>
-                            <div class="font-medium text-sm text-gray-500">{{ $page.props.auth.user.email }}</div>
+                            <div class="font-medium text-sm text-gray-300">{{ $page.props.auth.user.email }}</div>
                         </div>
 
                         <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')"> Profile </ResponsiveNavLink>
-                            <ResponsiveNavLink :href="route('logout')" method="post" as="button">
+                            <ResponsiveNavLink class="text-white" :href="route('profile.edit')"
+                            :class="{
+                                'bg-gray-500': route().current(
+                                  'profile*'
+                                ),
+                              }"
+                            > Profile </ResponsiveNavLink>
+                            <ResponsiveNavLink class="text-white" :href="route('logout')" method="post" as="button">
                                 Log Out
                             </ResponsiveNavLink>
                         </div>

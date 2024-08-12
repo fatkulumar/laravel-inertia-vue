@@ -173,7 +173,7 @@ const fullUrl = ref(window.location.origin);
                     class="sm:hidden"
                 >
                     <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('dashboard.admin')" :active="route().current('dashboard')">
+                        <ResponsiveNavLink :href="route('dashboard.admin')" :active="route().current('dashboard.admin')">
                             Dashboard
                         </ResponsiveNavLink>
                     </div>
@@ -188,7 +188,7 @@ const fullUrl = ref(window.location.origin);
                         </div>
 
                         <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')"> Profile </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('profile.edit')" :active="route().current('profile*')"> Profile </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('logout')" method="post" as="button">
                                 Log Out
                             </ResponsiveNavLink>

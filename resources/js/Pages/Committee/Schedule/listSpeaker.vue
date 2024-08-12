@@ -293,10 +293,10 @@ function uploadImage(e) {
 
 const cities = ref([]);
 const chainedProvince = async (provinceCode) => {
-    await axios
+  await axios
     .get(`/dashboard/speaker/city/${provinceCode}`)
     .then((response) => {
-        cities.value = response.data;
+      cities.value = response.data;
     })
     .catch((error) => console.error(error));
 };
@@ -307,82 +307,79 @@ const chainedProvince = async (provinceCode) => {
   <div>
     <AuthenticatedLayoutCommittee>
       <template #header>
-            <TabMenuDetailSchedule :id="idSubmissionLastSegment" />
+        <TabMenuDetailSchedule :id="idSubmissionLastSegment" />
       </template>
-      <template #headerTitle>
-        Narasumber
-      </template>
+      <template #headerTitle> Narasumber </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <!-- <div
+            class="p-6 flex items-center justify-center flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
+          >
+            <div>
+              icon plus
+              <div
+                @click="showModal()"
+                title="Tambah Narasumber"
+                class="cursor-pointer"
+              >
+                <svg
+                  class="h-8 w-8 bg-green-400 p-1 rounded-lg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g
+                    id="SVGRepo_tracerCarrier"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <path
+                      d="M4 12H20M12 4V20"
+                      stroke="#000000"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                  </g>
+                </svg>
+              </div>
+            </div>
+
+            <label for="table-search" class="sr-only">Search</label>
+            <div class="relative">
+              <div
+                class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none"
+              >
+                <svg
+                  class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                  />
+                </svg>
+              </div>
+              <input
+                v-model="search"
+                type="text"
+                id="table-search-users"
+                class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Nama"
+              />
+            </div>
+          </div> -->
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
               <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <div
-                  class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
-                >
-                  <!-- <div> -->
-                    <!-- icon plus -->
-                    <!-- <div
-                      @click="showModal()"
-                      title="Tambah Narasumber"
-                      class="cursor-pointer"
-                    >
-                      <svg
-                        class="h-8 w-8 bg-green-400 p-1 rounded-lg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g
-                          id="SVGRepo_tracerCarrier"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        ></g>
-                        <g id="SVGRepo_iconCarrier">
-                          <path
-                            d="M4 12H20M12 4V20"
-                            stroke="#000000"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          ></path>
-                        </g>
-                      </svg>
-                    </div>
-                  </div> -->
-
-
-                  <label for="table-search" class="sr-only">Search</label>
-                  <div class="relative">
-                    <div
-                      class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none"
-                    >
-                      <svg
-                        class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                        />
-                      </svg>
-                    </div>
-                    <input
-                      v-model="search"
-                      type="text"
-                      id="table-search-users"
-                      class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="Nama"
-                    />
-                  </div>
-                </div>
                 <table
                   class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
                 >
@@ -570,12 +567,11 @@ const chainedProvince = async (provinceCode) => {
                     </tr>
                   </tbody>
                 </table>
-
-                <Pagination
-                  class="my-6 flex justify-center md:justify-end"
-                  :links="props.speakers.links"
-                />
               </div>
+              <Pagination
+                class="my-6 flex justify-center md:justify-end"
+                :links="props.speakers.links"
+              />
             </div>
           </div>
         </div>

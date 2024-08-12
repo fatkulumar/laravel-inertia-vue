@@ -263,13 +263,13 @@ function uploadImage(e) {
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div
-            class="p-6 flex items-center justify-center md:justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
+            class="p-6 flex flex-col items-center justify-center md:justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
           >
             <div>
               <!-- icon plus -->
               <div
                 @click="showModal()"
-                title="Tambah Artikel"
+                title="Tambah Regional"
                 class="cursor-pointer"
               >
                 <svg
@@ -497,12 +497,11 @@ function uploadImage(e) {
                     </tr>
                   </tbody>
                 </table>
-
-                <Pagination
-                  class="my-6 flex justify-center md:justify-end"
-                  :links="props.regionals.links"
-                />
               </div>
+              <Pagination
+                class="my-6 flex justify-center md:justify-end"
+                :links="props.regionals.links"
+              />
             </div>
           </div>
         </div>
@@ -531,7 +530,7 @@ function uploadImage(e) {
               class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
             >
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                Tambah Artikel
+                Regional
               </h3>
               <button
                 type="button"
@@ -580,11 +579,10 @@ function uploadImage(e) {
                 </div>
               </div>
               <button
-                title="Tambah Kelas"
                 type="submit"
                 class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
-                {{ form.id ? "Update Kelas" : "Add Kelas" }}
+                {{ form.id ? "Update" : "Add" }}
               </button>
             </form>
           </div>

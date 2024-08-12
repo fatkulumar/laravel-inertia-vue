@@ -214,8 +214,8 @@ function toggleCheckbox(id) {
   }
 
   if (checkbox.checked == true) {
-    const articleId = formCheckbox.id.includes(id);
-    if (!articleId) {
+    const scheduleId = formCheckbox.id.includes(id);
+    if (!scheduleId) {
       formCheckbox.id.push(id);
     }
   } else {
@@ -340,7 +340,7 @@ function uploadImage(e) {
 </script>
 
 <template>
-  <Head title="Article" />
+  <Head title="Pengajuan Jadwal" />
   <div>
     <AuthenticatedLayoutAdmin>
       <!-- <template #header>
@@ -348,13 +348,10 @@ function uploadImage(e) {
             </template> -->
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 text-gray-900">
-              <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <div
-                  class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
-                >
-                  <!-- <div>
+          <div
+            class="p-6 flex flex-col items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
+          >
+            <!-- <div>
                     icon plus
                     <div
                       @click="showModal()"
@@ -386,36 +383,39 @@ function uploadImage(e) {
                     </div>
                   </div> -->
 
-                  <label for="table-search" class="sr-only">Search</label>
-                  <div class="relative">
-                    <div
-                      class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none"
-                    >
-                      <svg
-                        class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                        />
-                      </svg>
-                    </div>
-                    <input
-                      v-model="search"
-                      type="text"
-                      id="table-search-users"
-                      class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="Search for Schedule"
-                    />
-                  </div>
-                </div>
+            <label for="table-search" class="sr-only">Search</label>
+            <div class="relative">
+              <div
+                class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none"
+              >
+                <svg
+                  class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                  />
+                </svg>
+              </div>
+              <input
+                v-model="search"
+                type="text"
+                id="table-search-users"
+                class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Panitia"
+              />
+            </div>
+          </div>
+          <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6 text-gray-900">
+              <div class="overflow-x-auto shadow-md sm:rounded-lg">
                 <table
                   class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
                 >
@@ -690,7 +690,12 @@ function uploadImage(e) {
                               <li>
                                 <button
                                   title="Overview"
-                                  @click="overviewSchedule(item.id, item.participant?.name)"
+                                  @click="
+                                    overviewSchedule(
+                                      item.id,
+                                      item.participant?.name
+                                    )
+                                  "
                                   type="button"
                                   class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                                 >
@@ -700,7 +705,12 @@ function uploadImage(e) {
                               <li>
                                 <button
                                   title="Received"
-                                  @click="receivedSchedule(item.id, item.participant?.name)"
+                                  @click="
+                                    receivedSchedule(
+                                      item.id,
+                                      item.participant?.name
+                                    )
+                                  "
                                   type="button"
                                   class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                                 >
@@ -710,7 +720,12 @@ function uploadImage(e) {
                               <li>
                                 <button
                                   title="Reject"
-                                  @click="rejectSchedule(item.id, item.participant?.name)"
+                                  @click="
+                                    rejectSchedule(
+                                      item.id,
+                                      item.participant?.name
+                                    )
+                                  "
                                   type="button"
                                   class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                                 >
@@ -744,7 +759,8 @@ function uploadImage(e) {
                                 </button>
                               </li>
                               <li>
-                                <Link :href="`/dashboard/schedule/report/${item.id}`"
+                                <Link
+                                  :href="`/dashboard/schedule/report/${item.id}`"
                                   title="Laporan"
                                   type="button"
                                   class="cursor-pointer inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -767,12 +783,11 @@ function uploadImage(e) {
                     </tr>
                   </tbody>
                 </table>
-
-                <Pagination
-                  class="my-6 flex justify-center md:justify-end"
-                  :links="props.schedules.links"
-                />
               </div>
+              <Pagination
+                class="my-6 flex justify-center md:justify-end"
+                :links="props.schedules.links"
+              />
             </div>
           </div>
         </div>

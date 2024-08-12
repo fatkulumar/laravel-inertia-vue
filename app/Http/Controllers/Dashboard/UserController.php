@@ -23,14 +23,17 @@ class UserController extends Controller
     {
         try {
             $users = User::orderBy('created_at', 'desc')
-                ->with('roles','profile', 'profile.regional')
+                ->with('roles', 'profile', 'profile.regional')
+                ->whereDoesntHave('roles', function ($query) {
+                    $query->where('name', 'admin');
+                })
                 ->when($request['search'], function ($query, $request) {
                     $query->where('name', 'like', '%' . $request . '%');
                 })
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);
-            $regionals = Regional::select('id','name')->get();
+            $regionals = Regional::select('id', 'name')->get();
             // return $users;
             return Inertia::render('Dashboard/User', [
                 'users' => $users,

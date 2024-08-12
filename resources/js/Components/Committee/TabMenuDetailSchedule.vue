@@ -64,12 +64,22 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
             <Link replace
              :href="`/committee/schedule/detail/${id}`"
               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+              :class="{
+                'bg-blue-700 text-white': route().current(
+                  'committee.schedule.detail*'
+                ),
+              }"
               >Detail Jadwal</Link
             >
           </li>
           <li>
             <Link replace
              :href="`/committee/schedule/speaker-list/${id}`"
+             :class="{
+                'bg-blue-700 text-white': route().current(
+                  'committee.schedule.speaker*'
+                ),
+              }"
               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >Narasumber</Link
             >
@@ -78,6 +88,11 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
             <Link replace
              :href="`/committee/schedule/letter/${id}`"
               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+              :class="{
+                'bg-blue-700 text-white': route().current(
+                  'committee.schedule.letter*'
+                ),
+              }"
               >Surat Tugas</Link
             >
           </li>
@@ -85,6 +100,11 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
           <li>
             <Link replace
             :href="`/committee/schedule/list-participant/${id}`"
+            :class="{
+                'bg-blue-700 text-white': route().current(
+                  'committee.schedule.participant*'
+                ),
+              }"
               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >Data Peserta</Link
             >
@@ -94,6 +114,11 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
             <Link replace
               :href="`/committee/schedule/report/${id}`"
               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+              :class="{
+                'bg-blue-700 text-white': route().current(
+                  'committee.schedule.report*'
+                ),
+              }"
               >Laporan</Link
             >
           </li>

@@ -65,12 +65,20 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
           <li>
             <Link replace
              :href="`/participant/participant/detail`"
+             :class="{
+                'bg-blue-700 text-white': route().current(
+                  'participant.participant.detail*')
+            }"
               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >Data Peserta</Link
             >
           </li>
           <li>
             <Link replace
+            :class="{
+                'bg-blue-700 text-white': route().current(
+                  'participant.participant.history.class*')
+            }"
              :href="`/participant/participant/history-class`"
               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >Riwayat Peserta</Link

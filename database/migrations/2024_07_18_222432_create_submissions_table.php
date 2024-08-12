@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('submissions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('schedule_id');
-            $table->foreignUuid('participant_id');
+            $table->foreignUuid('participant_id')->references('id')->on('users')->onDelete('cascade');
             $table->text('proof');
             $table->enum('status', ['pending', 'approved', 'rejected', 'graduated'])->default('pending');
             $table->timestamps();
