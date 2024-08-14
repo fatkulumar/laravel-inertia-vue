@@ -138,12 +138,12 @@ function hanldeRegisterClass() {
                   <div
                     v-for="(submission, indexSubmission) in item.submissions"
                     :key="indexSubmission"
-                    class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 w-full"
+                    class="flex flex-col gap-4 items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 w-full"
                   >
                     <img
                       class="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-48 md:rounded-none md:rounded-s-lg"
-                      :src="item.poster"
-                      alt=""
+                      :src="submission.schedule.poster"
+                      :alt="submission.schedule.class_room.name"
                     />
                     <div class="flex justify-between items-center">
                       <div class="flex flex-col justify-between leading-normal">
@@ -180,8 +180,8 @@ function hanldeRegisterClass() {
                         </div>
 
                         <Link
-                          :href="`/participant/participant/certificate/${item.certificate?.credential_id}`"
-                          v-if="submission.status == 'graduated'"
+                          :href="`/participant/participant/certificate/${submission.certificate.credential_id}`"
+                          v-if="submission.status == 'graduated' && submission.certificate"
                           class="rounded-md text-white text-center px-1 bg-orange-500 hover:bg-orange-600"
                         >
                           Sertifikat

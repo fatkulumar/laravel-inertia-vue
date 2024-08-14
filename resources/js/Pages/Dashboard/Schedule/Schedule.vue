@@ -2,13 +2,31 @@
 import AuthenticatedLayoutAdmin from "@/Layouts/AuthenticatedLayoutAdmin.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
 import { Modal } from "flowbite";
+import axios from "axios";
+import Multiselect from "vue-multiselect";
 
 const props = defineProps({
   schedules: {
+    type: Object,
+    default: () => ({}),
+  },
+  classRooms: {
+    type: Object,
+    default: () => ({}),
+  },
+  categories: {
+    type: Object,
+    default: () => ({}),
+  },
+  regencyRegionals: {
+    type: Object,
+    default: () => ({}),
+  },
+  regencyRegional: {
     type: Object,
     default: () => ({}),
   },
@@ -20,7 +38,49 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  regionals: {
+    type: Object,
+    default: () => ({}),
+  },
+  committees: {
+    type: Object,
+    default: () => ({}),
+  },
+  typeActivities: {
+    type: Object,
+    default: () => ({}),
+  },
 });
+
+const isInvalidDateRange = computed(() => {
+  if (!form.start_date_class || !form.end_date_class) {
+    return false;
+  }
+  return new Date(form.start_date_class) > new Date(form.end_date_class);
+});
+
+const transformedDataRegencyRegional = props.regencyRegional.map((item) => ({
+  name: item.regency,
+  id: item.id,
+}));
+
+const transformedDataRegencyRegionals = props.regencyRegionals.map((item) => ({
+  name: item.regency,
+  id: item.id,
+}));
+
+const value = ref([]);
+const options = ref(transformedDataRegencyRegionals);
+
+const addTag = (newTag) => {
+  alert("ok");
+  const tag = {
+    name: newTag,
+    id: newTag.substring(0, 2) + Math.floor(Math.random() * 10000000),
+  };
+  options.value.push(tag);
+  value.value.push(tag);
+};
 
 let search = ref(props.filters.search);
 
@@ -37,22 +97,71 @@ watch(search, (value) => {
 
 const form = useForm({
   id: "",
-  participant_id: "",
+  regional_id: "",
   committee_id: "",
-  status: "",
+  //   hp: "",
+  regency_regional_id: "",
+  regency_regional_ids: value.value,
+  category_id: "",
+  class_room_id: "",
+  chief_id: "", //ketua pelaksana
+  hp_chief: "", //ketua pelaksana
+  type_activity_id: "", //jenis kegiatan
+  periode: "",
+  poster: "", //konsep kegiatan
+  concept: "", //konsep kegiatan
+  committee_layout: "", //susunan panitia
+  target_participant: "", //target peserta
+  speaker_id: "", //pemateri
+  total_activity: "", // total kegiatan yang sudah dikerjakan
+  price: "", // harga
+  facility: "", // fasiliitas
+  total_rooms_stay: "", // jumlah ruang menginap
+  benefit: "", // jumlah ruang menginap
+  location: "",
+  google_maps: "",
+  address: "",
+  status: "pending",
+  start_date_class: "",
+  end_date_class: "",
   approval_date: "",
   graduation_date: "",
-  file: "",
+  proposal: "",
 });
 
 function resetForm() {
   form.id = "";
-  form.participant_id = "";
+  form.regional_id = "";
   form.committee_id = "";
-  form.status = "";
+  //   form.hp = "";
+  //   form.regency_regional_id = "";
+  form.regency_regional_ids = value.value;
+  form.category_id = "";
+  form.class_room_id = "";
+  form.chief_id = ""; //ketua pelaksana
+  form.hp_chief = ""; //ketua pelaksana
+  form.type_activity_id = ""; //jenis kegiatan
+  form.periode = "";
+  form.poster = null; //konsep kegiatan
+  form.concept = ""; //konsep kegiatan
+  form.committee_layout = ""; //susunan panitia
+  form.target_participant = ""; //target peserta
+  form.speaker_id = ""; //pemateri
+  form.total_activity = ""; // total kegiatan yang sudah dikerjakan
+  form.price = ""; // harga
+  form.facility = ""; // fasiliitas
+  form.total_rooms_stay = ""; // jumlah ruang menginap
+  form.benefit = ""; // jumlah ruang menginap
+  form.location = "";
+  form.google_maps = "";
+  form.address = "";
+  form.status = "pending";
+  form.start_date_class = "";
+  form.end_date_class = "";
   form.approval_date = "";
   form.graduation_date = "";
-  form.file = "";
+  form.proposal = null;
+  previewPoster.value = "";
 }
 
 function modalRoom(opt) {
@@ -80,25 +189,81 @@ function modalRoom(opt) {
   }
 }
 
-// function addsubmission() {
-//   form.post("/dashboard/schedule/store", {
-//     preserveScroll: true,
-//     onSuccess: () => {
-//         resetForm();
-//         modalRoom("hide");
-//         toast("success", "Data Berhasil Ditambah");
-//     }
-//     });
-// }
+function addSchedule() {
+  form.post("/dashboard/schedule/store", {
+    preserveScroll: true,
+    onSuccess: () => {
+      resetForm();
+      modalRoom("hide");
+      toast("success", "Data Berhasil Ditambah");
+    },
+  });
+}
 
-function editClassRoom(data) {
+function formatDateIndonesia(timestamp) {
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Bulan dimulai dari 0
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${day}-${month}-${year}`;
+}
+
+function formatDate(timestamp) {
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Bulan dimulai dari 0
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+async function editSchedule(data) {
+  const dataRegencyRegionals = await axios
+    .get(`/dashboard/schedule/regency_regional_ids/${data.id}`)
+    .then((response) => {
+      const transformedRegencyRegional = response.data.map((item) => ({
+        name: item.regency,
+        id: item.id,
+      }));
+      return transformedRegencyRegional; // Return the transformed data
+    })
+    .catch((error) => {
+      form.regional_id = "";
+      return []; // Return an empty array or any other default value in case of an error
+    });
+
   form.id = data.id;
-  form.participant_id = data.participant_id;
+  form.regional_id = data.regional_id;
   form.committee_id = data.committee_id;
+  //   form.hp = data.hp
+  //   form.regency_regional_id = data.regency_regional_id
+  form.regency_regional_ids = dataRegencyRegionals;
+  form.category_id = data.category_id;
+  form.class_room_id = data.class_room_id;
+  form.chief_id = data.chief_id; //ketua pelaksana
+  form.hp_chief = data.committee?.profile?.hp; //ketua pelaksana
+  form.type_activity_id = data.type_activity_id; //jenis kegiatan
+  form.periode = data.periode;
+  form.poster = data.poster; //konsep kegiatan
+  form.concept = data.concept; //konsep kegiatan
+  form.committee_layout = data.committee_layout; //susunan panitia
+  form.target_participant = data.target_participant; //target peserta
+  form.speaker_id = data.speaker_id; //pemateri
+  form.total_activity = data.total_activity; // total kegiatan yang sudah dikerjakan
+  form.price = data.price; // harga
+  form.facility = data.facility; // fasiliitas
+  form.total_rooms_stay = data.total_rooms_stay; // jumlah ruang menginap
+  form.benefit = data.benefit; // jumlah ruang menginap
+  form.location = data.location;
+  form.google_maps = data.google_maps;
+  form.address = data.address;
   form.status = data.status;
+  form.start_date_class = formatDate(data.start_date_class);
+  form.end_date_class = formatDate(data.end_date_class);
   form.approval_date = data.approval_date;
   form.graduation_date = data.graduation_date;
-  form.file = data.file;
+  form.proposal = data.link_proposal;
+
+  previewPoster.value = data.poster;
   modalRoom("show");
 }
 
@@ -278,10 +443,6 @@ function checkedAll() {
   }
 }
 
-function optionSubmission() {
-  showModal();
-}
-
 function handleOptionSchedule() {
   formCheckbox.post("/dashboard/schedule/option-schedule", {
     preserveScroll: true,
@@ -300,39 +461,127 @@ function handleOptionSchedule() {
     },
   });
 }
-// function optionSubmission() {
-//   const konfirm = confirm(
-//     `Apakah anda yakin ingin menghapus data ini?`
-//   );
-//   if (!konfirm) return;
-//   formCheckbox.post("/dashboard/schedule/destroy", {
-//     preserveScroll: true,
-//     onSuccess: () => {
-//       formCheckbox.id = [];
-//       toast("success", "Data Berhasil Dihapus");
-//       let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-//         checkedCheckboxes.forEach(element => {
-//             element.checked = false
-//         });
-//     },
-//   });
-// }
 
-function uploadImage(e) {
+const speakers = ref([]);
+const setSpeaker = async (classRoomId) => {
+  try {
+    await axios
+      .get(`/dashboard/schedule/speaker/${classRoomId}`)
+      .then((response) => {
+        speakers.value = response.data;
+      })
+      .catch((error) => (speakers.value = ""));
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// const setHpCommittee = async (userId) => {
+//   try {
+//     if (userId) {
+//       await axios
+//         .get(`/dashboard/schedule/committee/${userId}`)
+//         .then((response) => {
+//           form.hp_chief = response.data?.profile.hp;
+//         })
+//         .catch((error) => (form.hp_chief = ""));
+//     } else {
+//       form.hp_chief = "";
+//     }
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
+const setChiefRegional = async (userId) => {
+  try {
+    if (userId) {
+      await axios
+        .get(`/dashboard/schedule/committee/${userId}`)
+        .then((response) => {
+          form.regional_id = response.data?.profile?.regional?.id;
+          form.hp_chief = response.data?.profile?.hp;
+        })
+        .catch((error) => {
+            form.regional_id = ""
+            form.hp_chief = ""
+        });
+    } else {
+      form.regional_id = "";
+      form.hp_chief = "";
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// const setRegionalRegencyIds = async (scheduleId) => {
+//   try {
+//     if(scheduleId) {
+//         await axios
+//     .get(`/dashboard/schedule/regency_regional_ids/${scheduleId}`)
+//       .then((response) => {
+//         console.log(response)
+//         // form.regional_id = response.data?.profile.regional?.id;
+//       })
+//       .catch((error) => (form.regional_id = ""));
+//     }else{
+//         form.regional_id = "";
+//     }
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
+function optionSubmission() {
+  const konfirm = confirm(`Apakah anda yakin ingin menghapus data ini?`);
+  if (!konfirm) return;
+  formCheckbox.post("/dashboard/schedule/destroy", {
+    preserveScroll: true,
+    onSuccess: () => {
+      formCheckbox.id = [];
+      toast("success", "Data Berhasil Dihapus");
+      let checkedCheckboxes = document.querySelectorAll(
+        'input[type="checkbox"]:checked'
+      );
+      checkedCheckboxes.forEach((element) => {
+        element.checked = false;
+      });
+    },
+  });
+}
+
+const previewPoster = ref();
+function uploadPoster(e) {
   const image = e.target.files[0];
   if (
-    (image.type == "image/png") |
-    (image.type == "image/jpg") |
-    (image.type == "image/jpeg")
+    image.type == "image/png" ||
+    image.type == "image/jpg" ||
+    image.type == "image/jpeg"
   ) {
     const reader = new FileReader();
     reader.readAsDataURL(image);
     reader.onload = (e) => {
-      previewImage.value = e.target.result;
-      form.image = image;
+      previewPoster.value = e.target.result;
+      form.poster = image;
     };
   } else {
-    form.image = null;
+    form.poster = null;
+    closeModal("crud-modal");
+    toast("warning", "Harus Format Gambar");
+  }
+}
+
+function uploadProposal(e) {
+  const file = e.target.files[0];
+  if (file.type == "application/pdf") {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (e) => {
+      form.proposal = file;
+    };
+  } else {
+    form.proposal = null;
     closeModal("crud-modal");
     toast("warning", "Harus Format Gambar");
   }
@@ -351,37 +600,33 @@ function uploadImage(e) {
           <div
             class="p-6 flex flex-col items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
           >
-            <!-- <div>
-                    icon plus
-                    <div
-                      @click="showModal()"
-                      title="Tambah Artikel"
-                      class="cursor-pointer"
-                    >
-                      <svg
-                        class="h-8 w-8 bg-green-400 p-1 rounded-lg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g
-                          id="SVGRepo_tracerCarrier"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        ></g>
-                        <g id="SVGRepo_iconCarrier">
-                          <path
-                            d="M4 12H20M12 4V20"
-                            stroke="#000000"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          ></path>
-                        </g>
-                      </svg>
-                    </div>
-                  </div> -->
+            <div>
+              <!-- icon plus -->
+              <div @click="showModal()" title="Tambah" class="cursor-pointer">
+                <svg
+                  class="h-8 w-8 bg-green-400 p-1 rounded-lg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g
+                    id="SVGRepo_tracerCarrier"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <path
+                      d="M4 12H20M12 4V20"
+                      stroke="#000000"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                  </g>
+                </svg>
+              </div>
+            </div>
 
             <label for="table-search" class="sr-only">Search</label>
             <div class="relative">
@@ -409,7 +654,7 @@ function uploadImage(e) {
                 type="text"
                 id="table-search-users"
                 class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Panitia"
+                placeholder="Pengusul"
               />
             </div>
           </div>
@@ -439,7 +684,7 @@ function uploadImage(e) {
                         <p>Email Peserta</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Panitia</p>
+                        <p>Pengusul</p>
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <p>Proposal</p>
@@ -540,40 +785,60 @@ function uploadImage(e) {
                       </td>
                       <td class="px-6 py-4">
                         <a
-                          class="text-blue-500 underline"
+                          v-if="item.link_proposal"
+                          class="text-blue-500 underline cursor-pointer"
                           :href="item.link_proposal"
                           target="_blank"
                           rel="noopener noreferrer"
-                          >{{ item.proposal }}</a
+                          >Proposal</a
+                        >
+                        <a v-else class="text-blue-500 underline cursor-none"
+                          >Tidak Ada Proposal</a
                         >
                       </td>
                       <td class="px-6 py-4">
                         {{
                           item.start_date_class
-                            ? item.start_date_class
+                            ? formatDateIndonesia(item.start_date_class)
                             : "-----"
                         }}
                       </td>
                       <td class="px-6 py-4">
                         {{
-                          item.end_date_class ? item.end_date_class : "-----"
+                          item.end_date_class
+                            ? formatDateIndonesia(item.end_date_class)
+                            : "-----"
                         }}
                       </td>
                       <td class="px-6 py-4">
-                        {{ item.created_at }}
-                      </td>
-                      <td class="px-6 py-4">
-                        {{ item.date_overview ? item.date_overview : "-----" }}
-                      </td>
-                      <td class="px-6 py-4">
-                        {{ item.date_received ? item.date_received : "-----" }}
-                      </td>
-                      <td class="px-6 py-4">
-                        {{ item.approval_date ? item.approval_date : "-----" }}
+                        {{ formatDateIndonesia(item.created_at) }}
                       </td>
                       <td class="px-6 py-4">
                         {{
-                          item.graduation_date ? item.graduation_date : "-----"
+                          item.date_overview
+                            ? formatDateIndonesia(item.date_overview)
+                            : "-----"
+                        }}
+                      </td>
+                      <td class="px-6 py-4">
+                        {{
+                          item.date_received
+                            ? formatDateIndonesia(item.date_received)
+                            : "-----"
+                        }}
+                      </td>
+                      <td class="px-6 py-4">
+                        {{
+                          item.approval_date
+                            ? formatDateIndonesia(item.approval_date)
+                            : "-----"
+                        }}
+                      </td>
+                      <td class="px-6 py-4">
+                        {{
+                          item.graduation_date
+                            ? formatDateIndonesia(item.graduation_date)
+                            : "-----"
                         }}
                       </td>
                       <td class="px-6 py-4">
@@ -759,6 +1024,16 @@ function uploadImage(e) {
                                 </button>
                               </li>
                               <li>
+                                <button
+                                  title="Edit"
+                                  @click="editSchedule(item)"
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Edit
+                                </button>
+                              </li>
+                              <li>
                                 <Link
                                   :href="`/dashboard/schedule/report/${item.id}`"
                                   title="Laporan"
@@ -815,12 +1090,12 @@ function uploadImage(e) {
               class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
             >
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                Pilih
+                Jadwal
               </h3>
               <button
                 type="button"
                 class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                @click="closeModal()"
+                @click="closeModal('crud-modal')"
               >
                 <svg
                   class="w-3 h-3"
@@ -842,36 +1117,473 @@ function uploadImage(e) {
             </div>
             <!-- Modal body -->
             <form
-              @submit.prevent="handleOptionSchedule"
+              @submit.prevent="addSchedule"
               enctype="multipart/form-data"
               class="p-4 md:p-5"
             >
               <div class="grid gap-4 mb-4 grid-cols-2">
                 <div class="col-span-2">
                   <label
-                    for="graduation"
+                    for="poster"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Graduation</label
+                    >Poster</label
+                  >
+                  <img :src="previewPoster" class="w-5/12 py-2" />
+                  <input
+                    @change="uploadPoster"
+                    type="file"
+                    name="poster"
+                    id="poster"
+                    accept="image/*"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="start_date_class"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Mulai</label
+                  >
+                  <input
+                    v-model="form.start_date_class"
+                    type="date"
+                    name="start_date_class"
+                    id="start_date_class"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Tanggal Muali"
+                  />
+                </div>
+
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="end_date_class"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Selesai</label
+                  >
+                  <input
+                    v-model="form.end_date_class"
+                    type="date"
+                    name="end_date_class"
+                    id="end_date_class"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Tanggal Selesai"
+                  />
+                  <p v-if="isInvalidDateRange" class="text-red-600">
+                    *Tanggal mulai tidak boleh lebih dari tanggal berakhir.
+                  </p>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="committee_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Pengusul</label
                   >
                   <select
-                    id="graduation"
-                    name="graduation"
-                    v-model="formCheckbox.status"
+                    v-model="form.committee_id"
+                    id="committee_id"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   >
-                    <option selected value="">Choose a Option</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="pending">Pending</option>
+                    <option value="" selected>Pilih Pengusul</option>
+                    <option
+                      v-for="(item, index) in props.committees"
+                      :key="index"
+                      :value="item.id"
+                    >
+                      {{ item.name }}
+                    </option>
                   </select>
+                </div>
+
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="chief_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Ketua Pelaksana</label
+                  >
+                  <select
+                    @change="setChiefRegional(form.chief_id)"
+                    v-model="form.chief_id"
+                    id="chief_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" selected>Pilih Ketua Pelaksana</option>
+                    <option
+                      v-for="(item, index) in props.committees"
+                      :key="index"
+                      :value="item.id"
+                    >
+                      {{ item.name }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="regional_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Regional</label
+                  >
+                  <select
+                    v-model="form.regional_id"
+                    disabled
+                    id="regional_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" selected>Pilih Regional</option>
+                    <option
+                      v-for="(item, index) in props.regionals"
+                      :key="index"
+                      :value="item.id"
+                    >
+                      {{ item.name }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                    <label
+                      for="hp_chief"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >HP Ketua Pelaksana</label
+                    >
+                    <input
+                      v-model="form.hp_chief"
+                      readonly
+                      type="text"
+                      name="hp_chief"
+                      id="hp_chief"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      placeholder="HP"
+                    />
+                  </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="regency_regional_ids"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Kabupaten<span class="text-xs text-red-600"
+                      >*Kabupaten yang bisa mendaftar kelas</span
+                    ></label
+                  >
+                  <multiselect
+                    v-model="form.regency_regional_ids"
+                    tag-placeholder="Add this as new tag"
+                    placeholder="Search or add a tag"
+                    label="name"
+                    track-by="id"
+                    :options="options"
+                    :multiple="true"
+                    :taggable="true"
+                    @tag="addTag"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 cursor-pointer"
+                  >
+                    <template #tag="{ option, remove }"
+                      ><span class="custom__tag"
+                        ><span>{{ option.name }}</span
+                        ><span class="custom__remove" @click="remove(option)"
+                          >❌</span
+                        ></span
+                      ></template
+                    >
+                  </multiselect>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="class_room_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Kelas</label
+                  >
+                  <select
+                    @change="setSpeaker(form.class_room_id)"
+                    v-model="form.class_room_id"
+                    id="class_room_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" selected>Pilih Kelas</option>
+                    <option
+                      v-for="(item, index) in props.classRooms"
+                      :key="index"
+                      :value="item.id"
+                    >
+                      {{ item.name }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="speaker_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Pemateri</label
+                  >
+                  <select
+                    v-model="form.speaker_id"
+                    @change="chainedProvince(form.speaker_id)"
+                    id="speaker_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" :selected="form.speaker == null">
+                      Pilih Narasumber
+                    </option>
+                    <option
+                      v-for="(item, index) in speakers"
+                      :key="index"
+                      :value="item.id"
+                      :selected="form.speaker_id == item.id"
+                    >
+                      {{ item.name }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="category_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Tingkatan Kelas</label
+                  >
+                  <select
+                    v-model="form.category_id"
+                    id="category_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" selected>Pilih Tingkatan</option>
+                    <option
+                      v-for="(item, index) in props.categories"
+                      :key="index"
+                      :value="item.id"
+                    >
+                      {{ item.name }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="class_room_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Jenis Kegiatan</label
+                  >
+                  <select
+                    v-model="form.type_activity_id"
+                    id="class_room_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" selected>Pilih Jenis Kegiatan</option>
+                    <option
+                      v-for="(item, index) in props.typeActivities"
+                      :key="index"
+                      :value="item.id"
+                    >
+                      {{ item.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="periode"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Periode Ke</label
+                  >
+                  <input
+                    v-model="form.periode"
+                    type="number"
+                    name="periode"
+                    id="periode"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Periode Ke"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="concept"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Konsep Kegiatan</label
+                  >
+                  <textarea
+                    v-model="form.concept"
+                    type="text"
+                    name="concept"
+                    id="concept"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Konsep Kegiatan"
+                  ></textarea>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="committee_layout"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Susunan Panitia</label
+                  >
+                  <textarea
+                    v-model="form.committee_layout"
+                    type="text"
+                    name="committee_layout"
+                    id="committee_layout"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Susunan Panitia"
+                  ></textarea>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="target_participant"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Target Peserta</label
+                  >
+                  <textarea
+                    v-model="form.target_participant"
+                    type="text"
+                    name="target_participant"
+                    id="target_participant"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Target Peserta"
+                  ></textarea>
+                </div>
+
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="total_activity"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Total Kegiatan Yang Sudah Dilaksanakan</label
+                  >
+                  <input
+                    v-model="form.total_activity"
+                    type="number"
+                    name="total_activity"
+                    id="total_activity"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Total Kegiatan Yang Sudah Dilaksanakan"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="price"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Harga Tiket Masuk</label
+                  >
+                  <input
+                    v-model="form.price"
+                    type="number"
+                    name="price"
+                    id="price"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Harga Tiket Masuk"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="total_rooms_stay"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Total Ruangan</label
+                  >
+                  <input
+                    v-model="form.total_rooms_stay"
+                    type="number"
+                    name="total_rooms_stay"
+                    id="total_rooms_stay"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Total Ruangan"
+                  />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="benefit"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Fasilitas Yang Diberikan Ke Peserta</label
+                  >
+                  <textarea
+                    v-model="form.facility"
+                    type="number"
+                    name="benefit"
+                    id="benefit"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Fasilitas Yang Diberikan Ke Peserta"
+                  ></textarea>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="benefit"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Benefit Peserta</label
+                  >
+                  <textarea
+                    v-model="form.benefit"
+                    type="number"
+                    name="benefit"
+                    id="benefit"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Benefit Peserta"
+                  ></textarea>
+                </div>
+
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="location"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Lokasi</label
+                  >
+                  <input
+                    v-model="form.location"
+                    type="text"
+                    name="location"
+                    id="location"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Lokasi"
+                  />
+                </div>
+
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="google_maps"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Google Maps</label
+                  >
+                  <input
+                    v-model="form.google_maps"
+                    type="url"
+                    name="google_maps"
+                    id="google_maps"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Google Maps"
+                  />
+                </div>
+
+                <div class="col-span-2">
+                  <label
+                    for="alamat"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Alamat</label
+                  >
+                  <textarea
+                    v-model="form.address"
+                    id="alamat"
+                    name="alamat"
+                    rows="4"
+                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    placeholder="Alamat"
+                  ></textarea>
+                </div>
+                <div class="col-span-2">
+                  <label
+                    for="proposal"
+                    class="w-2block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Surat Pengajuan</label
+                  >
+                  <a v-if="form.proposal && form.id" class="ml-1 text-blue-500 underline" :href="form.proposal" target="_blank" rel="noopener noreferrer">Link Proposal</a>
+                  <div class="flex items-center">
+                    <div class="w-2/12">
+                      <input
+                        @change="uploadProposal"
+                        type="file"
+                        name="proposal"
+                        id="proposal"
+                        accept="application/pdf"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
               <button
-                title="Tambah Kelas"
                 type="submit"
                 class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
-                {{ form.id ? "Update" : "Update" }}
+                {{ form.id ? "Update" : "Add" }}
               </button>
             </form>
           </div>

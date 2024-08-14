@@ -40,4 +40,7 @@
         // upload berita acara
         Route::post('/upload-appointment-file', [Committee\ScheduleController::class, 'uploadAppointmentFile'])->name('upload.appintment.file');
         Route::post('/appointment-file', [Committee\ScheduleController::class, 'appointmentFile'])->name('appintment.file');
+
+        Route::get('/committee/{userId}', [Committee\ScheduleController::class, 'committee'])->name('committee');
+
     });

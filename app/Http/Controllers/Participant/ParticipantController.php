@@ -92,7 +92,7 @@ class ParticipantController extends Controller
         try {
             $users = Auth::user();
             $profile = Profile::where('profileable_id', $users->id)->first();
-            $regency_regional_ids = Schedule::where('regency_regional_id', $profile->regional_id)
+            $regency_regional_ids = Schedule::where('regional_id', $profile->regional_id)
                 ->pluck('regency_regional_ids')
                 ->toArray(); // Ambil array dari kolom regency_regional_ids
             // return $regency_regional_ids;
@@ -105,16 +105,11 @@ class ParticipantController extends Controller
                 ->get();
 
             $schedules->map(function ($schedule) {
-                $this->fileSettings();
+                $directorySchedule = '/file/schedule/';
                 if (isset($schedule['poster'])) {
-                    $schedule['poster'] = $this->getFileAttribute($schedule['poster']);
+                    $schedule['poster'] = asset($directorySchedule . $schedule['poster']);
                 } else {
-                    $schedule['link_poster'] = null;
-                }
-                if (isset($schedule['proposal'])) {
-                    $schedule['proposal'] = $this->getFileAttribute($schedule['proposal']);
-                } else {
-                    $schedule['link_proposal'] = null;
+                    $schedule['poster'] = null;
                 }
                 $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('Y-m-d');
                 $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('Y-m-d');
@@ -149,16 +144,11 @@ class ParticipantController extends Controller
                     ->get();
 
                 $schedules->map(function ($schedule) {
-                    $this->fileSettings();
+                    $directorySchedule = '/file/schedule/';
                     if (isset($schedule['poster'])) {
-                        $schedule['poster'] = $this->getFileAttribute($schedule['poster']);
+                        $schedule['poster'] = asset($directorySchedule . $schedule['poster']);
                     } else {
                         $schedule['link_poster'] = null;
-                    }
-                    if (isset($schedule['proposal'])) {
-                        $schedule['proposal'] = $this->getFileAttribute($schedule['proposal']);
-                    } else {
-                        $schedule['link_proposal'] = null;
                     }
                     $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('Y-m-d');
                     $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('Y-m-d');
@@ -173,7 +163,7 @@ class ParticipantController extends Controller
                 $errors['file'] = $exception->getFile();
                 $errors['line'] = $exception->getLine();
                 $errors['trace'] = $exception->getTrace();
-                Log::channel('daily')->info('function waitingApproval in Participant/ParticipantController', $errors);
+                Log::channel('daily')->info('function eventActive in Participant/ParticipantController', $errors);
             }
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
@@ -198,16 +188,11 @@ class ParticipantController extends Controller
                 ->get();
 
             $schedules->map(function ($schedule) {
-                $this->fileSettings();
+                $directorySchedule = '/file/schedule/';
                 if (isset($schedule['poster'])) {
-                    $schedule['poster'] = $this->getFileAttribute($schedule['poster']);
+                    $schedule['poster'] = asset($directorySchedule . $schedule['poster']);
                 } else {
-                    $schedule['link_poster'] = null;
-                }
-                if (isset($schedule['proposal'])) {
-                    $schedule['proposal'] = $this->getFileAttribute($schedule['proposal']);
-                } else {
-                    $schedule['link_proposal'] = null;
+                    $schedule['poster'] = null;
                 }
                 $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('Y-m-d');
                 $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('Y-m-d');
@@ -232,10 +217,10 @@ class ParticipantController extends Controller
             $userId = Auth::user()->id;
             $histories = User::with([
                 'profile',
-                'certificate',
                 'submissions.schedule.classRoom',
                 'submissions.schedule.category',
                 'submissions.schedule.regencyRegional',
+                'submissions.certificate',
             ])
                 ->where('id', $userId)
                 ->get();
@@ -244,8 +229,9 @@ class ParticipantController extends Controller
                 $this->fileSettings();
                 $history->formatted_updated_at = isset($history->updated_at) ? Carbon::parse($history->updated_at)->format('d-m-Y') : null;
                 foreach ($history->submissions as $submission) {
+                    $directorySchedule = '/file/schedule/';
                     if (isset($submission->schedule->poster)) {
-                        $submission->schedule->poster = $this->getFileAttribute($submission->schedule->poster);
+                        $submission->schedule->poster = asset($directorySchedule . $submission->schedule->poster);
                     } else {
                         $submission->schedule->poster = null;
                     }
@@ -296,7 +282,7 @@ class ParticipantController extends Controller
                 $certif->formatted_created_at = \Carbon\Carbon::now()->translatedFormat('l, d F Y');
                 $certif->formatted_expired_at = \Carbon\Carbon::now()->translatedFormat('l, d F Y');
                 $certif->image = isset($certif->image) ?  asset($this->directoryCertificate . $certif->image) : // get path public
-                    null;
+                    '/user.png';
                 return $certif;
             });
             // return $certificate;
@@ -330,8 +316,9 @@ class ParticipantController extends Controller
 
                 // Proses setiap submission pengguna
                 $user->submissions->each(function ($submission) {
+                    $directorySchedule = '/file/schedule/';
                     if (isset($submission->schedule->poster)) {
-                        $submission->schedule->poster = $this->getFileAttribute($submission->schedule->poster);
+                        $submission->schedule->poster = asset($directorySchedule . $submission->schedule->poster);
                     } else {
                         $submission->schedule->poster = null;
                     }

@@ -33,8 +33,9 @@ class AppServiceProvider extends ServiceProvider
                 ->line('Jika Anda tidak membuat akun, tidak diperlukan tindakan lebih lanjut.');
         });
 
-        if(config('app.env') === 'local') {
-            URL::forceScheme('https');
-        }
+        // Force HTTPS
+        // if(config('app.env') === 'local') {
+        //     URL::forceScheme('https');
+        // }
     }
 }

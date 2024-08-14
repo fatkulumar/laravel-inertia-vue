@@ -112,7 +112,7 @@ function hanldeRegisterClass() {
 </script>
 
 <template>
-  <Head title="Event Tersedia" />
+  <Head title="Kelas Tersedia" />
   <div>
     <AuthenticatedLayoutParticipant>
       <div class="py-12">

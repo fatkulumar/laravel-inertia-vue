@@ -426,6 +426,13 @@ function handleOptionSubmission() {
           </div>
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
+                <div
+              class="text-red-600 text-sm ml-2"
+              v-for="(error, index) in props.errors"
+              :key="index"
+            >
+              *{{ error }}
+            </div>
               <div class="overflow-x-auto shadow-md sm:rounded-lg">
                 <table
                   class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
@@ -551,12 +558,13 @@ function handleOptionSubmission() {
                       </td>
                       <td
                         class="px-6 py-4"
-                        v-if="item.participant?.certificate?.credential_id"
+                        v-if="item.certificate?.credential_id"
                       >
-                        <Link
+                        <a
                           class="text-blue-500 hover:underline"
-                          :href="item.participant?.certificate?.credential_id"
-                          >Sertifikat {{ item.participant?.name }}</Link
+                          :href="`/certificate/${item.certificate?.credential_id}`"
+                          target="_blank"
+                          >Sertifikat {{ item.participant?.name }}</a
                         >
                       </td>
                       <td class="px-6 py-4" v-else>Sertifikat Belum Ada</td>
@@ -666,7 +674,7 @@ function handleOptionSubmission() {
                                     certificateSubmission(
                                       item.id,
                                       item.participant?.id,
-                                      item.participant?.certificate
+                                      item.certificate
                                         ?.credential_id
                                     )
                                   "
@@ -918,7 +926,7 @@ function handleOptionSubmission() {
                   >
                   <input
                     v-model="form.credential_id"
-                    :readonly="form.credential_id"
+                    :readonly="form.credential_id && props.submissions.data[0]?.certificate?.credential_id"
                     type="text"
                     name="credential_id"
                     id="credential_id"
@@ -926,17 +934,17 @@ function handleOptionSubmission() {
                     placeholder="Nomor Kredensial Sertifikat"
                   />
                 </div>
-                <div class="col-span-2 text-red-600 text-xs" v-if="form.credential_id">
+                <div class="col-span-2 text-red-600 text-xs" v-if="form.credential_id && props.submissions.data[0]?.certificate?.credential_id">
                   Sudah ada sertifikat
                 </div>
               </div>
               <button
                 title="Tambah Kelas"
-                :disabled="form.credential_id"
+                :disabled="form.credential_id && props.submissions.data[0]?.certificate?.credential_id  "
                 type="submit"
                 class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
-                {{ form.credential_id ? "Update" : "Add" }}
+                {{ form.credential_id && props.submissions.data[0]?.certificate?.credential_id ? "Update" : "Add" }}
               </button>
             </form>
           </div>

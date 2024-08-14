@@ -75,24 +75,32 @@ function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
   });
 }
 
-function uploadImage(e) {
-  const image = e.target.files[0];
-  if (
-    (image.type == "image/png") |
-    (image.type == "image/jpg") |
-    (image.type == "image/jpeg")
-  ) {
-    const reader = new FileReader();
-    reader.readAsDataURL(image);
-    reader.onload = (e) => {
-      previewImage.value = e.target.result;
-      form.image = image;
-    };
-  } else {
-    form.image = null;
-    closeModal("crud-modal");
-    toast("warning", "Harus Format Gambar");
-  }
+// function uploadImage(e) {
+//   const image = e.target.files[0];
+//   if (
+//     (image.type == "image/png") |
+//     (image.type == "image/jpg") |
+//     (image.type == "image/jpeg")
+//   ) {
+//     const reader = new FileReader();
+//     reader.readAsDataURL(image);
+//     reader.onload = (e) => {
+//       previewImage.value = e.target.result;
+//       form.image = image;
+//     };
+//   } else {
+//     form.image = null;
+//     closeModal("crud-modal");
+//     toast("warning", "Harus Format Gambar");
+//   }
+// }
+
+function formatDateIndonesia(timestamp) {
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Bulan dimulai dari 0
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${day}-${month}-${year}`;
 }
 </script>
 
@@ -110,10 +118,10 @@ function uploadImage(e) {
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
               <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <div class="lg:col-span-2 flex md:flex-row flex-col gap-7">
+                <div class="flex md:flex-row flex-col gap-16">
                   <form @submit.prevent="updateParticipant">
                     <div
-                      class="grid gap-4 gap-y-2 text-sm grid-cols-1 md:grid-cols-5"
+                      class="grid gap-4 gap-y-2 text-sm grid-cols-1 md:grid-cols-4"
                     >
                       <div class="md:col-span-2">
                         <label for="name">Nama</label>
@@ -202,7 +210,7 @@ function uploadImage(e) {
                   </form>
                   <div>
                     <div
-                      class="max-w-sm w-full lg:max-w-72 lg:flex"
+                      class="max-w-sm w-full lg:max-w-full lg:flex"
                       v-for="(item, index) in props.participant[0]?.submissions"
                       :key="index"
                     >
@@ -221,14 +229,14 @@ function uploadImage(e) {
                           <img
                             class="w-10 h-10 rounded-full mr-4"
                             :src="item.schedule?.poster"
-                            alt="Avatar of Jonathan Reinink"
+                            :alt="item.schedule?.category?.name"
                           />
                           <div class="text-sm">
                             <p class="text-gray-900 leading-none">
                               {{ item.status }}
                             </p>
                             <p class="text-gray-600">
-                              {{ item.schedule?.created_at }}
+                              {{ formatDateIndonesia(item.schedule?.created_at) }}
                             </p>
                           </div>
                         </div>

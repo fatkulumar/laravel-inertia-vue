@@ -30,4 +30,9 @@
 
         Route::post('/upload-appointment-file', [Dashboard\ScheduleController::class, 'uploadAppointmentFile'])->name('upload.appintment.file');
         Route::get('/download-appointment-file/{scheduleId}', [Dashboard\ScheduleController::class, 'downloadAppointmentFile'])->name('download.appintment.file');
+
+        Route::get('/speaker/{classRoomId}', [Dashboard\ScheduleController::class, 'speaker'])->name('speaker');
+        Route::get('/committee/{userId}', [Dashboard\ScheduleController::class, 'committee'])->name('committee');
+
+        Route::get('/regency_regional_ids/{scheduleId}', [Dashboard\ScheduleController::class, 'regencyRegionalIds'])->name('regency.regional.ids');
     });

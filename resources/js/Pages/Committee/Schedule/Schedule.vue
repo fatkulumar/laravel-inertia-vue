@@ -67,11 +67,10 @@ const transformedDataRegencyRegionals = props.regencyRegionals.map(item => ({
 }));
 
 
-const value = ref(transformedDataRegencyRegional);
+const value = ref();
 const options = ref(transformedDataRegencyRegionals);
 
 const addTag = (newTag) => {
-    alert('ok')
   const tag = {
     name: newTag,
     id: newTag.substring(0, 2) + Math.floor(Math.random() * 10000000),
@@ -110,7 +109,7 @@ const form = useForm({
   //   participant_id: "",
   committee_id: props.committee.id,
   hp: props.committee.profile?.hp,
-  regency_regional_id: props.regencyRegional ? props.regencyRegional[0].id : null,
+//   regency_regional_id: props.regencyRegional ? props.regencyRegional[0].id : null,
   regency_regional_ids: value.value,
   category_id: "",
   class_room_id: "",
@@ -145,7 +144,7 @@ function resetForm() {
     form.class_room_id = "",
     form.chief_id = "", //ketua pelaksana
     form.hp_chief = "", //ketua pelaksana
-    form.regency_regional_id = "",
+    // form.regency_regional_id = "",
     form.regency_regional_ids = "",
     form.type_activity_id = "", //jenis kegiatan
     form.periode = "",
@@ -321,10 +320,6 @@ function checkedAll() {
   }
 }
 
-function optionSubmission() {
-  showModal();
-}
-
 function handleOptionSubmission() {
   formCheckbox.post("/dashboard/submission/option-submission", {
     preserveScroll: true,
@@ -343,30 +338,31 @@ function handleOptionSubmission() {
     },
   });
 }
-// function optionSubmission() {
-//   const konfirm = confirm(
-//     `Apakah anda yakin ingin menghapus data ini?`
-//   );
-//   if (!konfirm) return;
-//   formCheckbox.post("/dashboard/submission/destroy", {
-//     preserveScroll: true,
-//     onSuccess: () => {
-//       formCheckbox.id = [];
-//       toast("success", "Data Berhasil Dihapus");
-//       let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-//         checkedCheckboxes.forEach(element => {
-//             element.checked = false
-//         });
-//     },
-//   });
-// }
+
+function optionSubmission() {
+  const konfirm = confirm(
+    `Apakah anda yakin ingin menghapus data ini?`
+  );
+  if (!konfirm) return;
+  formCheckbox.post("/committee/schedule/destroy", {
+    preserveScroll: true,
+    onSuccess: () => {
+      formCheckbox.id = [];
+      toast("success", "Data Berhasil Dihapus");
+      let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        checkedCheckboxes.forEach(element => {
+            element.checked = false
+        });
+    },
+  });
+}
 
 const previewPoster = ref(null);
 function uploadPoster(e) {
   const image = e.target.files[0];
   if (
-    (image.type == "image/png") |
-    (image.type == "image/jpg") |
+    (image.type == "image/png") ||
+    (image.type == "image/jpg") ||
     (image.type == "image/jpeg")
   ) {
     const reader = new FileReader();
@@ -416,6 +412,23 @@ const setSpeaker = async (classRoomId) => {
         speakers.value = response.data;
       })
       .catch((error) => (speakers.value = ""));
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const setHpCommittee = async (userId) => {
+  try {
+    if (userId) {
+      await axios
+        .get(`/committee/schedule/committee/${userId}`)
+        .then((response) => {
+          form.hp_chief = response.data?.profile.hp;
+        })
+        .catch((error) => (form.hp_chief = ""));
+    } else {
+      form.hp_chief = "";
+    }
   } catch (error) {
     console.log(error);
   }
@@ -528,6 +541,12 @@ const setSpeaker = async (classRoomId) => {
                       <th scope="col" class="px-6 py-3">
                         <div class="flex gap-1 items-center">
                           <p class="text-center mt-1">Action</p>
+                          <input
+                            @click="checkedAll()"
+                            class="h-6 w-6"
+                            type="checkbox"
+                            :id="`checkboxAll`"
+                          />
                           <div
                             @click="optionSubmission()"
                             v-show="choice"
@@ -792,6 +811,7 @@ const setSpeaker = async (classRoomId) => {
                     >Ketua Pelaksana</label
                   >
                   <select
+                    @change="setHpCommittee(form.chief_id)"
                     v-model="form.chief_id"
                     id="chief_id"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"

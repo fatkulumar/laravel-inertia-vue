@@ -241,7 +241,7 @@ function hideAlert(idElemet) {
       <div>
         <InputLabel for="image" value="Photo" />
 
-        <input type="file" @change="uploadImage" />
+        <input type="file" accept="image/*" @change="uploadImage" />
 
         <InputError class="mt-2" :message="form.errors.image" />
       </div>

@@ -13,13 +13,21 @@ use App\Exports\TotalNotGraduatedParticipantByScheduleClassExport;
 use App\Exports\TotalParticipantByScheduleClassExport;
 use App\Http\Controllers\Controller;
 use App\Models\AppointmentFile;
+use App\Models\Category;
+use App\Models\ClassRoom;
+use App\Models\Letter;
+use App\Models\RegencyRegional;
+use App\Models\Regional;
 use App\Models\Schedule;
+use App\Models\Speaker;
 use App\Models\Submission;
+use App\Models\TypeActivity;
 use App\Models\User;
 use App\Traits\EntityValidator;
 use App\Traits\FileUpload;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
@@ -44,13 +52,14 @@ class ScheduleController extends Controller
     public function index(Request $request)
     {
         try {
+
             $schedules = Schedule::orderBy('created_at', 'desc')
-                ->when($request['search'], function($query, $request) {
-                    $query->whereHas('committee', function ($query) use ($request) {
+                ->when($request['search'], function ($query, $request) {
+                    $query->whereHas('participant', function ($query) use ($request) {
                         $query->where('name', 'like', '%' . $request . '%');
                     });
                 })
-                ->with('committee', 'classRoom', 'category', 'regional')
+                ->with('committee.profile', 'classRoom', 'category', 'regional', 'letter')
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);
@@ -60,10 +69,10 @@ class ScheduleController extends Controller
                 if (isset($submission['poster'])) {
                     $submission['poster'] = $this->getFileAttribute($submission['poster']);
                 } else {
-                    $submission['link_poster'] = null;
+                    $submission['poster'] = null;
                 }
-                if (isset($submission['proposal'])) {
-                    $submission['link_proposal'] = $this->getFileAttribute($submission['proposal']);
+                if (isset($submission->letter->file)) {
+                    $submission['link_proposal'] = $this->getFileAttribute($submission->letter->file);
                 } else {
                     $submission['link_proposal'] = null;
                 }
@@ -71,9 +80,27 @@ class ScheduleController extends Controller
                 $submission->formatted_start_date_class = Carbon::parse($submission->start_date_class)->format('Y-m-d');
                 return $submission;
             });
+
+            $classRooms = ClassRoom::all(['id', 'name']);
+            $categories = Category::all(['id', 'name']);
+
+            $committees = User::with('profile.regional')->role('panitia')->get();
+            $typeActivities = TypeActivity::all(['id', 'name']);
+            $regencyRegional = RegencyRegional::with('regional')
+                ->get();
+            $regencyRegionals = RegencyRegional::with('regional')
+                ->get();
+            $regionals = Regional::all(['id', 'name']);
             // return $schedules;
             return Inertia::render('Dashboard/Schedule/Schedule', [
                 'schedules' => $schedules,
+                'committees' => $committees,
+                'classRooms' => $classRooms,
+                'categories' => $categories,
+                'typeActivities' => $typeActivities,
+                'regencyRegionals' => $regencyRegionals,
+                'regencyRegional' => $regencyRegional,
+                'regionals' => $regionals,
             ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
@@ -90,31 +117,134 @@ class ScheduleController extends Controller
     public function store(Request $request)
     {
         try {
-            $validasiData = $this->storeValidator($request);
-            if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
 
+            $regionalIds = array();
+            $jsonRegencyRegionalIds = $request->post('regency_regional_ids');
+            // return $request;
+            if (json_last_error() === JSON_ERROR_NONE) {
+                // Proses setiap elemen dalam array menggunakan foreach
+                foreach ($jsonRegencyRegionalIds as $item) {
+                    // return "Name: " . $item['name'] . ", ID: " . $item['id'] . "\n";
+                    $regionalIds[] = $item['id'];
+                }
+            } else {
+                return "Error decoding JSON: " . json_last_error_msg();
+            }
             $id = $request->post('id');
             if ($id) {
+                $validasiData = $this->updateValidator($request);
+                if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
 
-                $submissions = Schedule::where('id', $id)->first();
+                $schedule = Schedule::where('id', $id)->first();
+
+                $poster = $request->file('poster');
+                if ($poster) {
+                    $this->fileSettings();
+                    $uploadPoster = $this->uploadFile($poster);
+                } else {
+                    $uploadPoster = $schedule->poster;
+                }
+
+                $proposal = $request->file('proposal');
+                if ($proposal) {
+                    $this->fileSettings();
+                    $uploadProposal = $this->uploadFile($proposal);
+                } else {
+                    $uploadProposal = $schedule->proposal;
+                }
+
+
                 $saveData = [
-                    'participant_id' => $request->post('participant_id'),
-                    'committeee_id' => $request->post('committeee_id'),
+                    'regional_id' => $request->post('regional_id'),
+                    'committee_id' => $request->post('committee_id'),
+                    'class_room_id' => $request->post('class_room_id'),
+                    'category_id' => $request->post('category_id'),
+                    // 'regency_regional_id' => $request->post('category_id'),
+                    'regency_regional_ids' => json_encode($regionalIds),
                     'status' => $request->post('status'),
-                    'file' => $request->post('file'),
+                    'start_date_class' => $request->post('start_date_class'),
+                    'end_date_class' => $request->post('end_date_class'),
+                    'periode' => $request->post('periode'),
+                    'location' => $request->post('location'),
+                    'google_maps' => $request->post('google_maps'),
+                    'address' => $request->post('address'),
+                    'chief_id' => $request->post('chief_id'),
+                    'type_activity_id' => $request->post('type_activity_id'), //jenis kegiatan
+                    'poster' => $uploadPoster,
+                    'concept' => $request->post('concept'), //konsep kegiatan
+                    'committee_layout' => $request->post('committee_layout'), //susunan panitia
+                    'target_participant' => $request->post('target_participant'), //target peserta
+                    'speaker' => $request->post('speaker'), //pemateri
+                    'total_activity' => $request->post('total_activity'), // total kegiatan yang sudah dikerjakan
+                    'price' => $request->post('price'), // harga
+                    'facility' => $request->post('facility'), // fasiliitas
+                    'total_rooms_stay' => $request->post('total_rooms_stay'), // jumlah ruang menginap
+                    'benefit' => $request->post('benefit'), // jumlah ruang menginap
                 ];
-                $result = $submissions->update($saveData);
+
+                $result = $schedule->update($saveData);
+
+                Letter::where('schedule_id', $id)->update([
+                    'file' => $uploadProposal,
+                ]);
+
                 if (!$result) return redirect()->back()->withErrors($result)->withInput();
             } else {
 
+                $validasiData = $this->storeValidator($request);
+                if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+
+                $poster = $request->file('poster');
+                if ($poster) {
+                    $this->fileSettings();
+                    $uploadPoster = $this->uploadFile($poster);
+                } else {
+                    $uploadPoster = "Poster Tidak Ada";
+                }
+
+                $proposal = $request->file('proposal');
+                if ($proposal) {
+                    $this->fileSettings();
+                    $uploadProposal = $this->uploadFile($proposal);
+                } else {
+                    $uploadProposal = "Proposal Tidak Ada";
+                }
+
                 $saveData = [
-                    'participant_id' => $request->post('participant_id'),
-                    'committeee_id' => $request->post('committeee_id'),
+                    'regional_id' => $request->post('regional_id'),
+                    'committee_id' => $request->post('committee_id'),
+                    'class_room_id' => $request->post('class_room_id'),
+                    'category_id' => $request->post('category_id'),
+                    // 'regency_regional_id' => $request->post('regency_regional_id'),
+                    'regency_regional_ids' => json_encode($regionalIds),
                     'status' => $request->post('status'),
-                    'file' => $request->post('file'),
+                    'start_date_class' => $request->post('start_date_class'),
+                    'end_date_class' => $request->post('end_date_class'),
+                    'periode' => $request->post('periode'),
+                    'location' => $request->post('location'),
+                    'google_maps' => $request->post('google_maps'),
+                    'address' => $request->post('address'),
+                    'chief_id' => $request->post('chief_id'),
+                    'type_activity_id' => $request->post('type_activity_id'), //jenis kegiatan
+                    'poster' => $uploadPoster,
+                    'concept' => $request->post('concept'), //konsep kegiatan
+                    'committee_layout' => $request->post('committee_layout'), //susunan panitia
+                    'target_participant' => $request->post('target_participant'), //target peserta
+                    'speaker_id' => $request->post('speaker_id'), //pemateri
+                    'total_activity' => $request->post('total_activity'), // total kegiatan yang sudah dikerjakan
+                    'price' => $request->post('price'), // harga
+                    'facility' => $request->post('facility'), // fasiliitas
+                    'total_rooms_stay' => $request->post('total_rooms_stay'), // jumlah ruang menginap
+                    'benefit' => $request->post('benefit'), // jumlah ruang menginap
                 ];
 
                 $result = Schedule::create($saveData);
+
+                Letter::create([
+                    'schedule_id' => $result->id,
+                    'file' => $uploadProposal,
+                ]);
+
                 if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
             }
         } catch (\Exception $exception) {
@@ -126,20 +256,134 @@ class ScheduleController extends Controller
         }
     }
 
+    private function updateValidator(Request $request)
+    {
+        try {
+            $rules = [
+                'regional_id' => 'required|string|max:36',
+                'committee_id' => 'required|string|max:36',
+                'class_room_id' => 'required|string|max:36',
+                'category_id' => 'required|string|max:36',
+                // 'regency_regional_id' => 'required|string|max:36',
+                'regency_regional_ids' => 'nullable|array',
+                'start_date_class' => 'required|string|max:15',
+                'end_date_class' => 'required|string|max:15',
+                'location' => 'required|string|max:255',
+                'google_maps' => 'required|string|max:10000',
+                'address' => 'required|string|max:2000',
+                'periode' => 'required|integer',
+                'poster' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'status' => 'required|string|max:10',
+                'chief_id' => 'required|string|max:36',
+                'type_activity_id' => 'required|string|max:36',
+                'concept' => 'required|string',
+                'committee_layout' => 'required|string',
+                'target_participant' => 'required|string',
+                'speaker_id' => 'required|string|max:36',
+                'total_activity' => 'required|integer',
+                'price' => 'required|integer',
+                'facility' => 'required|string|max:20000',
+                'total_rooms_stay' => 'required|integer',
+                'benefit' => 'required|string|max:20000',
+                'proposal' => 'nullable|mimes:pdf|max:2048',
+            ];
+            $Validatedata = [
+                'regional_id' => $request->post('regional_id'),
+                'committee_id' => $request->post('committee_id'),
+                'class_room_id' => $request->post('class_room_id'),
+                'category_id' => $request->post('category_id'),
+                // 'regency_regional_id' => $request->post('regency_regional_id'),
+                'regency_regional_ids' => $request->post('regency_regional_ids'),
+                'status' => $request->post('status'),
+                'start_date_class' => $request->post('start_date_class'),
+                'end_date_class' => $request->post('end_date_class'),
+                'periode' => $request->post('periode'),
+                'location' => $request->post('location'),
+                'google_maps' => $request->post('google_maps'),
+                'address' => $request->post('address'),
+                'chief_id' => $request->post('chief_id'),
+                'type_activity_id' => $request->post('type_activity_id'),
+                'poster' => $request->file('poster'),
+                'concept' => $request->post('concept'),
+                'committee_layout' => $request->post('committee_layout'),
+                'target_participant' => $request->post('target_participant'),
+                'speaker_id' => $request->post('speaker_id'),
+                'total_activity' => $request->post('total_activity'),
+                'price' => $request->post('price'),
+                'facility' => $request->post('facility'),
+                'total_rooms_stay' => $request->post('total_rooms_stay'),
+                'benefit' => $request->post('benefit'),
+                'proposal' => $request->file('proposal'),
+            ];
+            $validator = EntityValidator::validate($Validatedata, $rules);
+            if ($validator->fails()) return $validator->errors();
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function updateValidator in SubmissionController', $errors);
+        }
+    }
+
     private function storeValidator(Request $request)
     {
         try {
             $rules = [
-                'participant_id' => 'required|string|max:36',
-                'committeee_id' => 'required|string|max:36',
-                'status' => 'required|string|max:15',
-                'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'regional_id' => 'required|string|max:36',
+                'committee_id' => 'required|string|max:36',
+                'class_room_id' => 'required|string|max:36',
+                'category_id' => 'required|string|max:36',
+                // 'regency_regional_id' => 'required|string|max:36',
+                'regency_regional_ids' => 'nullable|array',
+                'start_date_class' => 'required|string|max:15',
+                'end_date_class' => 'required|string|max:15',
+                'location' => 'required|string|max:255',
+                'google_maps' => 'required|string|max:10000',
+                'address' => 'required|string|max:2000',
+                'periode' => 'required|integer',
+                'poster' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'status' => 'required|string|max:10',
+                'chief_id' => 'required|string|max:36',
+                'type_activity_id' => 'required|string|max:36',
+                'concept' => 'required|string',
+                'committee_layout' => 'required|string',
+                'target_participant' => 'required|string',
+                'speaker_id' => 'required|string|max:36',
+                'total_activity' => 'required|integer',
+                'price' => 'required|integer',
+                'facility' => 'required|string|max:20000',
+                'total_rooms_stay' => 'required|integer',
+                'benefit' => 'required|string|max:20000',
+                'proposal' => 'required|mimes:pdf|max:2048',
             ];
             $Validatedata = [
-                'participant_id' => $request->post('participant_id'),
-                'committeee_id' => $request->post('committeee_id'),
+                'regional_id' => $request->post('regional_id'),
+                'committee_id' => $request->post('committee_id'),
+                'class_room_id' => $request->post('class_room_id'),
+                'category_id' => $request->post('category_id'),
+                // 'regency_regional_id' => $request->post('regency_regional_id'),
+                'regency_regional_ids' => $request->post('regency_regional_ids'),
                 'status' => $request->post('status'),
-                'file' => $request->post('file'),
+                'start_date_class' => $request->post('start_date_class'),
+                'end_date_class' => $request->post('end_date_class'),
+                'periode' => $request->post('periode'),
+                'location' => $request->post('location'),
+                'google_maps' => $request->post('google_maps'),
+                'address' => $request->post('address'),
+                'chief_id' => $request->post('chief_id'),
+                'type_activity_id' => $request->post('type_activity_id'),
+                'poster' => $request->file('poster'),
+                'concept' => $request->post('concept'),
+                'committee_layout' => $request->post('committee_layout'),
+                'target_participant' => $request->post('target_participant'),
+                'speaker_id' => $request->post('speaker_id'),
+                'total_activity' => $request->post('total_activity'),
+                'price' => $request->post('price'),
+                'facility' => $request->post('facility'),
+                'total_rooms_stay' => $request->post('total_rooms_stay'),
+                'benefit' => $request->post('benefit'),
+                'proposal' => $request->file('proposal'),
             ];
             $validator = EntityValidator::validate($Validatedata, $rules);
             if ($validator->fails()) return $validator->errors();
@@ -158,7 +402,16 @@ class ScheduleController extends Controller
     public function delete(string $id)
     {
         try {
-            Schedule::findOrFail($id)->delete();
+            DB::transaction(function () use ($id) {
+                $schedule = Schedule::with('letter')->findOrFail($id);
+                if ($schedule->letter && $schedule->letter->file && $schedule->poster) {
+                    $this->fileSettings();
+                    $this->deleteFile($schedule->letter->file);
+                    $this->deleteFile($schedule->poster);
+                }
+                $schedule->letter->delete();
+                $schedule->delete();
+            });
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
@@ -175,9 +428,19 @@ class ScheduleController extends Controller
     {
         try {
             $ids = $request->post('id');
-            foreach ($ids as $id) {
-                Schedule::findOrFail($id)->delete();
-            }
+            DB::transaction(function () use ($ids) {
+                foreach ($ids as $id) {
+                    $schedule = Schedule::with('letter')->findOrFail($id);
+                    if ($schedule->letter && $schedule->letter->file && $schedule->poster) {
+                        $this->fileSettings();
+                        $this->deleteFile($schedule->letter->file);
+                        $this->deleteFile($schedule->poster);
+                    }
+                    $schedule->letter->delete();
+                    $schedule->delete();
+                }
+            });
+
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
@@ -258,7 +521,17 @@ class ScheduleController extends Controller
     public function deleteSchedule(Request $request, $id)
     {
         try {
-            Schedule::where('id', $id)->delete();
+            DB::transaction(function () use ($id){
+                $schedule = Schedule::with('letter')->findOrFail($id);
+                $letter = Letter::where('schedule_id', $id)->first();
+                if($schedule->letter->file && $schedule->poster) {
+                    $this->fileSettings();
+                    $this->deleteFile($schedule->letter->file);
+                    $this->deleteFile($schedule->poster);
+                }
+                $schedule->delete();
+                $letter->delete();
+            });
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
@@ -273,7 +546,7 @@ class ScheduleController extends Controller
         try {
             $ids = $request->post('id');
             $status = $request->post('status');
-            foreach($ids as $id) {
+            foreach ($ids as $id) {
                 Schedule::where('id', $id)->update([
                     'status' => $status,
                     'graduation_date' => Carbon::now(),
@@ -602,6 +875,56 @@ class ScheduleController extends Controller
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function storeAppointmentFileValidator in Dashboard/ScheduleController', $errors);
+        }
+    }
+
+    public function speaker($classRoomId)
+    {
+        try {
+            $speakers = Speaker::where('class_room_id', $classRoomId)->get();
+            return response()->json($speakers);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function speaker in SchedlueController', $errors);
+        }
+    }
+
+    public function committee($userId)
+    {
+        try {
+            $users = User::with('profile.regional')->where('id', $userId)->first();
+            return response()->json($users);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function speaker in SchedlueController', $errors);
+        }
+    }
+
+    public function regencyRegionalIds($scheduleId)
+    {
+        try {
+            $schedule = Schedule::where('id', $scheduleId)
+            ->pluck('regency_regional_ids')
+            ->first(); // Ambil array dari kolom regency_regional_ids
+            $regencyRegionalIds = json_decode($schedule, true);
+
+            $regencyRegionals = [];
+            foreach($regencyRegionalIds as $item) {
+                $regencyRegionals[] = RegencyRegional::find($item);
+            }
+            return response()->json($regencyRegionals);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function speaker in SchedlueController', $errors);
         }
     }
 }

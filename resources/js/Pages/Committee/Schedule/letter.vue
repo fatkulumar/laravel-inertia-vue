@@ -106,7 +106,7 @@ function uploadLetter(e) {
             <TabMenuDetailSchedule :id="idSubmissionLastSegment" />
       </template>
       <template #headerTitle>
-        Surat Tugas
+        Surat Tugas {{ props.letters.data[0]?.name }}
       </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -120,7 +120,7 @@ function uploadLetter(e) {
                         </p>
                     </div>
                     <div class="ml-2">
-                        <a class="hover:underline hover:text-blue-500" :href="props.letters.data[0]?.link_file" target="_blank" rel="noopener noreferrer">{{ props.letters.data[0]?.name }}</a>
+                        <a class="hover:underline text-blue-500" :href="props.letters.data[0]?.link_file" target="_blank" rel="noopener noreferrer">Proposal</a>
                     </div>
                 </div>
                 <div class="bg-gray-100 flex items-center">

@@ -31,6 +31,7 @@ use Inertia\Inertia;
 use App\Traits\FileUpload;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ScheduleController extends Controller
@@ -107,18 +108,19 @@ class ScheduleController extends Controller
     {
         try {
             $id = $request->post('id');
-
             $regionalIds = array();
             $jsonRegencyRegionalIds = $request->post('regency_regional_ids');
             // return $request;
-            if (json_last_error() === JSON_ERROR_NONE) {
-                // Proses setiap elemen dalam array menggunakan foreach
-                foreach ($jsonRegencyRegionalIds as $item) {
-                    // return "Name: " . $item['name'] . ", ID: " . $item['id'] . "\n";
-                    $regionalIds[] = $item['id'];
+            if($jsonRegencyRegionalIds) {
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    // Proses setiap elemen dalam array menggunakan foreach
+                    foreach ($jsonRegencyRegionalIds as $item) {
+                        // return "Name: " . $item['name'] . ", ID: " . $item['id'] . "\n";
+                        $regionalIds[] = $item['id'];
+                    }
+                } else {
+                    return "Error decoding JSON: " . json_last_error_msg();
                 }
-            } else {
-                return "Error decoding JSON: " . json_last_error_msg();
             }
             // return $regionalIds;
             if ($id) {
@@ -205,7 +207,7 @@ class ScheduleController extends Controller
                     'committee_id' => $request->post('committee_id'),
                     'class_room_id' => $request->post('class_room_id'),
                     'category_id' => $request->post('category_id'),
-                    'regency_regional_id' => $request->post('regency_regional_id'),
+                    // 'regency_regional_id' => $request->post('regency_regional_id'),
                     'regency_regional_ids' => json_encode($regionalIds),
                     'status' => $request->post('status'),
                     'start_date_class' => $request->post('start_date_class'),
@@ -254,8 +256,8 @@ class ScheduleController extends Controller
                 'committee_id' => 'required|string|max:36',
                 'class_room_id' => 'required|string|max:36',
                 'category_id' => 'required|string|max:36',
-                'regency_regional_id' => 'required|string|max:36',
-                'regency_regional_ids' => 'required',
+                // 'regency_regional_id' => 'required|string|max:36',
+                'regency_regional_ids' => 'nullable|array',
                 'start_date_class' => 'required|string|max:15',
                 'end_date_class' => 'required|string|max:15',
                 'location' => 'required|string|max:255',
@@ -283,7 +285,7 @@ class ScheduleController extends Controller
                 'committee_id' => $request->post('committee_id'),
                 'class_room_id' => $request->post('class_room_id'),
                 'category_id' => $request->post('category_id'),
-                'regency_regional_id' => $request->post('regency_regional_id'),
+                // 'regency_regional_id' => $request->post('regency_regional_id'),
                 'regency_regional_ids' => $request->post('regency_regional_ids'),
                 'status' => $request->post('status'),
                 'start_date_class' => $request->post('start_date_class'),
@@ -325,8 +327,8 @@ class ScheduleController extends Controller
                 'committee_id' => 'required|string|max:36',
                 'class_room_id' => 'required|string|max:36',
                 'category_id' => 'required|string|max:36',
-                'regency_regional_id' => 'required|string|max:36',
-                'regency_regional_ids' => 'required',
+                // 'regency_regional_id' => 'required|string|max:36',
+                'regency_regional_ids' => 'nullable|array',
                 'start_date_class' => 'required|string|max:15',
                 'end_date_class' => 'required|string|max:15',
                 'location' => 'required|string|max:255',
@@ -353,7 +355,7 @@ class ScheduleController extends Controller
                 'committee_id' => $request->post('committee_id'),
                 'class_room_id' => $request->post('class_room_id'),
                 'category_id' => $request->post('category_id'),
-                'regency_regional_id' => $request->post('regency_regional_id'),
+                // 'regency_regional_id' => $request->post('regency_regional_id'),
                 'regency_regional_ids' => $request->post('regency_regional_ids'),
                 'status' => $request->post('status'),
                 'start_date_class' => $request->post('start_date_class'),
@@ -454,7 +456,16 @@ class ScheduleController extends Controller
     public function delete(string $id)
     {
         try {
-            Schedule::findOrFail($id)->delete();
+            DB::transaction(function () use ($id) {
+                $schedule = Schedule::with('letter')->findOrFail($id);
+                if ($schedule->letter && $schedule->letter->file && $schedule->poster) {
+                    $this->fileSettings();
+                    $this->deleteFile($schedule->letter->file);
+                    $this->deleteFile($schedule->poster);
+                }
+                $schedule->letter->delete();
+                $schedule->delete();
+            });
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
@@ -471,9 +482,18 @@ class ScheduleController extends Controller
     {
         try {
             $ids = $request->post('id');
-            foreach ($ids as $id) {
-                Schedule::findOrFail($id)->delete();
-            }
+            DB::transaction(function () use ($ids) {
+                foreach ($ids as $id) {
+                    $schedule = Schedule::with('letter')->findOrFail($id);
+                    if ($schedule->letter && $schedule->letter->file && $schedule->poster) {
+                        $this->fileSettings();
+                        $this->deleteFile($schedule->letter->file);
+                        $this->deleteFile($schedule->poster);
+                    }
+                    $schedule->letter->delete();
+                    $schedule->delete();
+                }
+            });
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
@@ -1193,6 +1213,20 @@ class ScheduleController extends Controller
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function downloadReportTotalFemaleNotGraduatedParticipantByScheduleClass in Committee/ScheduleController', $errors);
+        }
+    }
+
+    public function committee($userId)
+    {
+        try {
+            $users = User::with('profile.regional')->where('id', $userId)->first();
+            return response()->json($users);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function speaker in SchedlueController', $errors);
         }
     }
 }

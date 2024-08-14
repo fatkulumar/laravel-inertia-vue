@@ -254,7 +254,7 @@ class ParticipantController extends Controller
             $certificate->map(function ($certif) {
                 $certif->formatted_created_at = \Carbon\Carbon::now()->translatedFormat('l, d F Y');
                 $certif->formatted_expired_at = \Carbon\Carbon::now()->translatedFormat('l, d F Y');
-                $certif->image = asset($this->directoryCertificate . $certif->image);
+                $certif->image = $certif->image ? asset($this->directoryCertificate . $certif->image) : '/user.png';
                 return $certif;
             });
 

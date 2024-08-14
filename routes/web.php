@@ -46,6 +46,7 @@ Route::get('/profile/regency_regional/{regionalId}', [ProfileController::class, 
 
 Route::get('/certificate/{credentialId}', function ($credentialId) {
     $directoryCertificate = '/file/certificate/';
+    $userProfile = '/user.png';
     $certificate = Certificate::with([
         'headOrganization',
         'user.submissions.schedule.category',
@@ -60,8 +61,12 @@ Route::get('/certificate/{credentialId}', function ($credentialId) {
         return $certif;
     });
 
-    $certificate->map(function ($certif) use ($directoryCertificate) {
-        $certif->image = asset($directoryCertificate . $certif->image);
+    $certificate->map(function ($certif) use ($directoryCertificate, $userProfile) {
+        if($certif->image) {
+            $certif->image = asset($directoryCertificate . $certif->image);
+        }else{
+            $certif->image = asset($userProfile);
+        }
         return $certif;
     });
 

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Certificate;
+use App\Models\HeadOrganization;
+use App\Models\Profile;
 use App\Models\Schedule;
 use App\Models\Submission;
 use App\Traits\EntityValidator;
@@ -40,7 +42,7 @@ class SubmissionController extends Controller
                         $query->where('name', 'like', '%' . $request . '%');
                     });
                 })
-                ->with('participant.certificate', 'schedule', 'schedule.regional', 'schedule.classRoom','schedule.category')
+                ->with('participant', 'schedule', 'schedule.regional', 'schedule.classRoom','schedule.category', 'certificate')
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);
@@ -280,35 +282,22 @@ class SubmissionController extends Controller
     public function certificateSubmission(Request $request)
     {
         try {
-
-            $data = ['title' => 'Welcome to Laravel PDF Generation'];
-
-            $pdf = Pdf::loadView('pdf_template_certificate', $data)
-                        ->setPaper('a4', 'landscape')
-                        ->setOptions([
-                            'margin-left' => 0,
-                            'margin-right' => 0,
-                            'margin-top' => 0,
-                            'margin-bottom' => 0
-                        ]);
-            $pdfContent = $pdf->output();
-
-            $filePath = public_path('file/certificate.pdf');
-            File::put($filePath, $pdfContent);
-
-            // $validasiData = $this->certificateValidator($request);
-            // if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
-
+            $validasiData = $this->certificateValidator($request);
+            if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
+            $headOrgnization = HeadOrganization::where('status', 'active')->first('id');
+            $profile = Profile::where('profileable_id', $request->post('participant_id'))->first();
             $submission_id = $request->post('submission_id');
             $credential_id = $request->post('credential_id');
             $participant_id = $request->post('participant_id');
             $saveData = [
                 'submission_id' => $submission_id,
                 'credential_id' => $credential_id,
-                'certificateable_id' => $participant_id,
-                'certificateable_type' => 'App\Models\User',
+                'user_id' => $participant_id,
+                'head_organization_id' => $headOrgnization->id,
+                'expired_at' => Carbon::now()->addYears(2),
+                'image' => $profile->image,
             ];
-            Certificate::createOrUpdate($saveData);
+            Certificate::create($saveData);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
