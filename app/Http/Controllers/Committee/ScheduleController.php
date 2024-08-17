@@ -55,14 +55,14 @@ class ScheduleController extends Controller
     {
         try {
             $users = Auth::user();
-            $profile = Profile::where('profileable_id', $users->id)->first();
+            $profile = Profile::where('profileable_id', $users->id)->first('regional_id');
             $schedules = Schedule::orderBy('created_at', 'desc')
                 ->when($request['search'], function ($query, $request) {
                     $query->whereHas('participant', function ($query) use ($request) {
                         $query->where('name', 'like', '%' . $request . '%');
                     });
                 })
-                ->with('committee.profile.regional')
+                ->with(['committee:id,name', 'committee.profile:id,profileable_id,regional_id', 'committee.profile.regional:id,name'])
                 ->where('regional_id', $profile->regional_id)
                 ->paginate(5)
                 ->withQueryString()
@@ -71,16 +71,18 @@ class ScheduleController extends Controller
             $classRooms = ClassRoom::all(['id', 'name']);
             $categories = Category::all(['id', 'name']);
 
-            $committee = User::with('profile.regional')->where('id', Auth()->user()->id)->first();
-            $committees = User::with('profile.regional', 'chief')->role('panitia')->get();
+            $committee = User::with('profile.regional')->where('id', Auth()->user()->id)->first('id', 'name');
+            $committees = User::with(['profile:id,profileable_id,regional_id', 'profile.regional:id,name', 'chief:id,name'])
+                ->role('panitia')
+                ->get(['id', 'name']);
             $typeActivities = TypeActivity::all(['id', 'name']);
             $regency_regional_id = Auth::user()->profile->regency_regional_id;
-            $regencyRegional = RegencyRegional::with('regional')
+            $regencyRegional = RegencyRegional::with('regional:id,name')
                 ->where('id', $regency_regional_id)
-                ->get();
-            $regencyRegionals = RegencyRegional::with('regional')
-                ->get();
-            // return $regencyRegional;
+                ->get(['id', 'regional_id', 'regency']);
+            $regencyRegionals = RegencyRegional::with('regional:id,name')
+                ->get(['id', 'regional_id', 'regency']);
+            // return $regencyRegionals;
 
             return Inertia::render('Committee/Schedule/Schedule', [
                 'schedules' => $schedules,
@@ -111,7 +113,7 @@ class ScheduleController extends Controller
             $regionalIds = array();
             $jsonRegencyRegionalIds = $request->post('regency_regional_ids');
             // return $request;
-            if($jsonRegencyRegionalIds) {
+            if ($jsonRegencyRegionalIds) {
                 if (json_last_error() === JSON_ERROR_NONE) {
                     // Proses setiap elemen dalam array menggunakan foreach
                     foreach ($jsonRegencyRegionalIds as $item) {
@@ -528,7 +530,14 @@ class ScheduleController extends Controller
                         $query->where('name', 'like', '%' . $request . '%');
                     });
                 })
-                ->with('schedule.speaker', 'province', 'city', 'classRoom', 'city', 'category')
+                ->with([
+                        'schedule:id,speaker_id,class_room_id',
+                        'province:id,code,name',
+                        'city:id,code,name',
+                        'classRoom:id,name',
+                        'category:id,name',
+                ])
+                ->select('province_code', 'city_code', 'class_room_id', 'category_id', 'id', 'name', 'image')
                 ->paginate(10);
 
             // return $speakers;
@@ -549,7 +558,10 @@ class ScheduleController extends Controller
         try {
             $letters = Letter::whereHas('schedule', function ($query) use ($scheduleId) {
                 $query->where('id', $scheduleId);
-            })->with('schedule')->paginate(10);
+            })
+            ->with('schedule:id')
+            ->select('id', 'file', 'name', 'schedule_id')
+            ->paginate(10);
 
             // Map over the paginated results to modify each letter
             $letters->getCollection()->transform(function ($letter) {
@@ -699,7 +711,17 @@ class ScheduleController extends Controller
                     });
                 })
                 ->where('schedule_id', $scheduleId)
-                ->with('schedule.classRoom', 'schedule.category', 'participant.roles', 'participant.profile.regional')
+                ->with([
+                    'schedule:id,poster,class_room_id,category_id',
+                    'schedule.classRoom:id,name',
+                    'schedule.category:id,name',
+                    'participant:id,name,email,image',
+                    'participant.roles:id,name',
+                    'participant.roles',
+                    'participant.profile:id,profileable_id,regional_id,address,hp,image,gender',
+                    'participant.profile.regional:id,name'
+                ])
+                ->select('id', 'proof', 'status', 'created_at', 'schedule_id', 'participant_id')
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);
@@ -707,15 +729,15 @@ class ScheduleController extends Controller
             $submissions->map(function ($submission) {
                 $this->fileSettings();
                 if (isset($submission->participant->image)) {
-                    $submission->participant->image = $this->getFileAttribute($submission->participant->image);
+                    $submission->participant['link_image'] = $this->getFileAttribute($submission->participant->image);
                 } else {
-                    $submission->participant->image = null;
+                    $submission->participant['link_image'] = null;
                 }
 
                 if (isset($submission->schedule->poster)) {
-                    $submission->schedule->poster = $this->getFileAttribute($submission->schedule->poster);
+                    $submission->schedule['link_poster'] = $this->getFileAttribute($submission->schedule->poster);
                 } else {
-                    $submission->schedule->poster = null;
+                    $submission->schedule['link_poster'] = null;
                 }
                 return $submission;
             });

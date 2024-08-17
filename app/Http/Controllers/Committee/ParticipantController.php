@@ -66,8 +66,16 @@ class ParticipantController extends Controller
      */
     public function show(string $id)
     {
-        $participant = User::with('profile.regional', 'submissions.schedule', 'submissions.schedule.classRoom', 'submissions.schedule.category')
-            ->where('id', $id)->get();
+        $participant = User::with([
+                'profile:id,profileable_id,regional_id,address,hp,image,gender',
+                'profile.regional:id,name',
+                'submissions:id,schedule_id,participant_id,status',
+                'submissions.schedule:id,class_room_id,category_id,poster,status,created_at,updated_at',
+                'submissions.schedule.classRoom:id,name',
+                'submissions.schedule.category:id,name'
+            ])
+            ->where('id', $id)
+            ->get(['id', 'name', 'email']);
         $participant->each(function ($user) {
             $this->fileSettings();
 
@@ -91,7 +99,7 @@ class ParticipantController extends Controller
 
             return $user;
         });
-        $regionals = Regional::all();
+        $regionals = Regional::all(['id', 'name']);
         // return $participant;
         return Inertia::render('Committee/DetailParticipant', [
             'participant' => $participant,
@@ -188,15 +196,16 @@ class ParticipantController extends Controller
             $users = Auth::user();
             $profile = Profile::with('regional')->where('profileable_id', $users->id)->first();
             $schedules = Schedule::with([
-                'classRoom',
-                'category',
-                'submissions.certificate',
+                'classRoom:id,name',
+                'category:id,name',
+                'submissions:id,schedule_id,status,participant_id',
+                'submissions.certificate:credential_id,submission_id',
+                'submissions.schedule:id,poster,updated_at,end_date_class,start_date_class',
                 'submissions' => function ($query) use ($userId) {
                     $query->whereHas('participant', function ($query) use ($userId) {
                         $query->where('id', $userId);
                     });
                 },
-                'regencyRegional'
             ])
             ->where('regional_id', $profile->regional_id)
             ->whereHas('submissions', function ($query) use ($userId) {
@@ -204,7 +213,7 @@ class ParticipantController extends Controller
                     $query->where('id', $userId);
                 });
             })
-            ->get();
+            ->get(['id', 'periode', 'status', 'updated_at', 'class_room_id', 'category_id']);
 
             $schedules->map(function ($schedule) {
                 $this->fileSettings();
@@ -216,10 +225,10 @@ class ParticipantController extends Controller
                     }
                 }
 
-                if (isset($schedule['poster'])) {
-                    $schedule['poster'] = $this->getFileAttribute($schedule['poster']);
+                if (isset($submission->schedule['poster'])) {
+                    $submission->schedule['poster'] = $this->getFileAttribute($submission->schedule['poster']);
                 } else {
-                    $schedule['poster'] = null;
+                    $submission->schedule['poster'] = null;
                 }
                 $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('Y-m-d');
                 $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('Y-m-d');

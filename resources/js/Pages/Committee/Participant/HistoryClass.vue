@@ -55,11 +55,11 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
                   <div
                     v-for="(submission, indexSubmission) in item.submissions"
                     :key="indexSubmission"
-                    class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 w-full"
+                    class="flex flex-col gap-2 items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 w-full"
                   >
                     <img
                       class="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-48 md:rounded-none md:rounded-s-lg"
-                      :src="item.poster"
+                      :src="submission.schedule?.poster"
                       :alt="item.class_room?.name"
                     />
                     <div class="flex justify-between items-center">
@@ -93,7 +93,6 @@ const idSubmissionLastSegment = segments.pop() || segments.pop();
                         >
                           {{ submission.status }}
                         </div>
-
                         <Link
                           :href="`/committee/participant/certificate/${submission.certificate?.credential_id}/${submission.participant_id}`"
                           v-if="submission.status == 'graduated'"

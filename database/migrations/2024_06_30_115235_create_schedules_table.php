@@ -39,7 +39,6 @@ return new class extends Migration
             $table->dateTime('end_date_class');
             $table->date('approval_date')->nullable();
             $table->date('graduation_date')->nullable();
-            // $table->text('proposal');
             $table->dateTime('date_overview')->nullable();
             $table->dateTime('date_received')->nullable();
             $table->timestamps();

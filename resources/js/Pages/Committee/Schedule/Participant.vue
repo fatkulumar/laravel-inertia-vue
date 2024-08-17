@@ -130,12 +130,6 @@ function detailPeserta(data) {
   form.role = data.participant?.roles[0]?.name;
   form.regional = data.participant?.profile?.regional?.name;
   form.regional_id = data.participant?.profile?.regional?.id;
-//   form.class_room_id = data.class_room_id;
-//   form.periode = data.periode;
-//   form.google_maps = data.google_maps;
-//   form.address = data.address;
-//   form.start_date_class = data.start_date_class;
-//   form.end_date_class = data.end_date_class;
 
   modalDetailPeserta("show");
 }
