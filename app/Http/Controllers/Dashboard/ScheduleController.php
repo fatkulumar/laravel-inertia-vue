@@ -59,7 +59,7 @@ class ScheduleController extends Controller
                         $query->where('name', 'like', '%' . $request . '%');
                     });
                 })
-                ->with('committee.profile', 'classRoom', 'category', 'regional', 'letter')
+                ->with('committee:id,name,email','committee.profile:id,profileable_id,profileable_type,regional_id,regency_regional_id,address,hp', 'classRoom:id,name', 'category:id,name', 'regional:id,name', 'letter:id,schedule_id,file,name')
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);
@@ -107,7 +107,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function index in Dashboard/SubmissionController', $errors);
+            Log::channel('daily')->info('function index in Dashboard/cheduleController', $errors);
         }
     }
 
@@ -121,14 +121,17 @@ class ScheduleController extends Controller
             $regionalIds = array();
             $jsonRegencyRegionalIds = $request->post('regency_regional_ids');
             // return $request;
-            if (json_last_error() === JSON_ERROR_NONE) {
-                // Proses setiap elemen dalam array menggunakan foreach
-                foreach ($jsonRegencyRegionalIds as $item) {
-                    // return "Name: " . $item['name'] . ", ID: " . $item['id'] . "\n";
-                    $regionalIds[] = $item['id'];
+
+            if(!empty($jsonRegencyRegionalIds)) {
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    // Proses setiap elemen dalam array menggunakan foreach
+                    foreach ($jsonRegencyRegionalIds as $item) {
+                        // return "Name: " . $item['name'] . ", ID: " . $item['id'] . "\n";
+                        $regionalIds[] = $item['id'];
+                    }
+                } else {
+                    return "Error decoding JSON: " . json_last_error_msg();
                 }
-            } else {
-                return "Error decoding JSON: " . json_last_error_msg();
             }
             $id = $request->post('id');
             if ($id) {
@@ -252,7 +255,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function store in SubmissionController', $errors);
+            Log::channel('daily')->info('function store in cheduleController', $errors);
         }
     }
 
@@ -322,7 +325,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function updateValidator in SubmissionController', $errors);
+            Log::channel('daily')->info('function updateValidator in cheduleController', $errors);
         }
     }
 
@@ -392,7 +395,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function storeValidator in SubmissionController', $errors);
+            Log::channel('daily')->info('function storeValidator in cheduleController', $errors);
         }
     }
 
@@ -417,7 +420,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function delete in SubmissionController', $errors);
+            Log::channel('daily')->info('function delete in cheduleController', $errors);
         }
     }
 
@@ -446,7 +449,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function delete in SubmissionController', $errors);
+            Log::channel('daily')->info('function delete in cheduleController', $errors);
         }
     }
 
@@ -463,7 +466,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+            Log::channel('daily')->info('function rejectSubmission in cheduleController', $errors);
         }
     }
 
@@ -480,7 +483,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+            Log::channel('daily')->info('function rejectSubmission in cheduleController', $errors);
         }
     }
 
@@ -497,7 +500,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+            Log::channel('daily')->info('function rejectSubmission in cheduleController', $errors);
         }
     }
 
@@ -514,7 +517,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+            Log::channel('daily')->info('function rejectSubmission in cheduleController', $errors);
         }
     }
 
@@ -537,7 +540,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+            Log::channel('daily')->info('function rejectSubmission in cheduleController', $errors);
         }
     }
 
@@ -557,7 +560,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function rejectSubmission in SubmissionController', $errors);
+            Log::channel('daily')->info('function rejectSubmission in cheduleController', $errors);
         }
     }
 
@@ -646,7 +649,7 @@ class ScheduleController extends Controller
             $errors['file'] = $exception->getFile();
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
-            Log::channel('daily')->info('function report in SubmissionController', $errors);
+            Log::channel('daily')->info('function report in cheduleController', $errors);
         }
     }
 

@@ -32,9 +32,43 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+
+        // $id_regional1 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+        // Regional::create([
+        //     'id' => $id_regional1,
+        //     'name' => 'Surabaya',
+        // ]);
+
+        // $regency_regional_id1 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+        // RegencyRegional::create([
+        //     'id' => $regency_regional_id1,
+        //     'regional_id' => $id_regional1,
+        //     'regency' => 'Ngoro',
+        // ]);
+
+        // $userId1 = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 36);
+        // $user1 = User::create([
+        //     'id' => $userId1,
+        //     'name' => 'Admin MMPJ',
+        //     'email' => 'mmpj@gmail.com',
+        //     'email_verified_at' => now(),
+        //     'password' => Hash::make('hahahahaha'),
+        //     'image' => 'image',
+        // ]);
+
+        // Role::create(['name' => 'admin']);
+        // $user1->assignRole('admin');
+
+        // Profile::create([
+        //     'address' => 'Jl. Cempaka No. 1',
+        //     'regional_id' => $id_regional1,
+        //     'regency_regional_id' => $regency_regional_id1,
+        //     'profileable_id' => $userId1,
+        //     'profileable_type' => 'App\Models\User',
+        //     'hp' => '6281234567890',
+        // ]);
+
         // User::factory(10)->create();
-
-
 
         for ($i = 0; $i < 12; $i++) {
 
@@ -243,7 +277,6 @@ class DatabaseSeeder extends Seeder
                     'class_room_id' => $classRoom3->id,
                     'chief_id' => $userId3, //ketua pelaksana
                     'type_activity_id' => $type_activity_id,
-                    'regency_regional_id' => $regency_regional_id3,
                     'regency_regional_ids' => json_encode(["n8zyi6st7qscsg88cs8kwsw804kk48s","n8zyi6st7qscsg88cs8kwsw804kk48u"]),
                     'periode' => 14,
                     'poster' => 'Link Poster', //konsep kegiatan

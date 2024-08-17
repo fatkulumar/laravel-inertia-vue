@@ -26,7 +26,7 @@ let search = ref(props.filters.search);
 
 watch(search, (value) => {
   router.get(
-    "/dashboard/category",
+    "/dashboard/head-organization",
     { search: value },
     {
       preserveState: true,
@@ -270,12 +270,14 @@ function uploadImage(e) {
 </script>
 
 <template>
-  <Head title="Article" />
+  <Head title="Ketua MPJ" />
   <div>
     <AuthenticatedLayoutAdmin>
-      <!-- <template #header>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">Article</h2>
-            </template> -->
+      <template #header>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+          Ketua MPJ
+        </h2>
+      </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div
@@ -494,7 +496,7 @@ function uploadImage(e) {
                               <li>
                                 <button
                                   title="Edit Ketua"
-                                   @click="editHeadOrganization(item)"
+                                  @click="editHeadOrganization(item)"
                                   type="button"
                                   class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                                 >
@@ -504,7 +506,9 @@ function uploadImage(e) {
                               <li>
                                 <button
                                   title="Hapus Ketua"
-                                  @click="deleteHeadOrganization(item.id, item.title)"
+                                  @click="
+                                    deleteHeadOrganization(item.id, item.title)
+                                  "
                                   type="button"
                                   class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                                 >

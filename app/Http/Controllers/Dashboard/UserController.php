@@ -23,13 +23,14 @@ class UserController extends Controller
     {
         try {
             $users = User::orderBy('created_at', 'desc')
-                ->with('roles', 'profile', 'profile.regional')
+                ->with('roles:id,name', 'profile:id,profileable_id,regional_id,regency_regional_id,address,hp,image,gender','profile.regional:id,name')
                 ->whereDoesntHave('roles', function ($query) {
                     $query->where('name', 'admin');
                 })
                 ->when($request['search'], function ($query, $request) {
                     $query->where('name', 'like', '%' . $request . '%');
                 })
+                ->select('id', 'name', 'email')
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);

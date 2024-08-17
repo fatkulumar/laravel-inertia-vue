@@ -231,9 +231,9 @@ class ParticipantController extends Controller
                 foreach ($history->submissions as $submission) {
                     $directorySchedule = '/file/schedule/';
                     if (isset($submission->schedule->poster)) {
-                        $submission->schedule->poster = asset($directorySchedule . $submission->schedule->poster);
+                        $submission->schedule['link_poster'] = asset($directorySchedule . $submission->schedule->poster);
                     } else {
-                        $submission->schedule->poster = null;
+                        $submission->schedule['link_poster'] = null;
                     }
                 }
 

@@ -142,7 +142,7 @@ function hanldeRegisterClass() {
                   >
                     <img
                       class="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-48 md:rounded-none md:rounded-s-lg"
-                      :src="submission.schedule.poster"
+                      :src="submission.schedule.link_poster"
                       :alt="submission.schedule.class_room.name"
                     />
                     <div class="flex justify-between items-center">
@@ -190,60 +190,6 @@ function hanldeRegisterClass() {
                     </div>
                   </div>
                 </div>
-                <!-- <div
-                  v-else
-                  class="flex gap-2 items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
-                  v-for="(item, index) in props.histories"
-                  :key="index"
-                >
-                  <div
-                    v-for="(submission, indexSubmission) in item.submissions"
-                    :key="indexSubmission"
-                  >
-                    {{ submission.schedule.class_room.name }}
-                    {{ submission.schedule.category.name }}
-                    {{ submission.schedule.regency_regional.regency }}
-                    {{ submission.status }}
-
-                    <div
-                      class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 w-full cursor-pointer"
-                    >
-                      <img
-                      class="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-48 md:rounded-none md:rounded-s-lg"
-                      :src="item.poster"
-                      alt=""
-                    />
-                      <div
-                        class="flex flex-col justify-between p-4 leading-normal"
-                      >
-                        <h5
-                          class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-                        >
-                          {{ submission.schedule.class_room.name }} |
-                          {{ submission.schedule.category.name }}
-                          <small class="text-xs text-yellow-500 absolute"
-                            >Lulus</small
-                          >
-                        </h5>
-                        <div class="flex gap-2 bg-gray-400 p-1 rounded-sm">
-                          <p>{{ item.start_date_class }}</p>
-                          <p>-</p>
-                          <p>{{ item.end_date_class }}</p>
-                        </div>
-                        <p
-                          class="mb-3 font-normal text-gray-700 dark:text-gray-400"
-                        >
-                          {{ item.facility }}
-                        </p>
-                        <p
-                          class="mb-3 font-normal text-gray-700 dark:text-gray-400"
-                        >
-                          {{ item.benefit }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div> -->
               </div>
             </div>
           </div>

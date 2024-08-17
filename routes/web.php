@@ -1,22 +1,24 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Mail\SendEmail;
 use App\Models\Certificate;
-use Carbon\Carbon;
 use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use setasign\Fpdi\Fpdi;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 Route::get('/', function () {
+    if(isset(Auth::user()->roles)) {
+        $role = Auth::user()->roles[0]->name;
+    }else{
+        $role = "tidak ada auth";
+    }
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
+        'role' => $role,
     ]);
 })
 ->name('dashboard');

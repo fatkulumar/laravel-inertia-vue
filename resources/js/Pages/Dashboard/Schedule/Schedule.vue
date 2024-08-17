@@ -99,8 +99,6 @@ const form = useForm({
   id: "",
   regional_id: "",
   committee_id: "",
-  //   hp: "",
-  regency_regional_id: "",
   regency_regional_ids: value.value,
   category_id: "",
   class_room_id: "",
@@ -133,8 +131,6 @@ function resetForm() {
   form.id = "";
   form.regional_id = "";
   form.committee_id = "";
-  //   form.hp = "";
-  //   form.regency_regional_id = "";
   form.regency_regional_ids = value.value;
   form.category_id = "";
   form.class_room_id = "";
@@ -503,8 +499,8 @@ const setChiefRegional = async (userId) => {
           form.hp_chief = response.data?.profile?.hp;
         })
         .catch((error) => {
-            form.regional_id = ""
-            form.hp_chief = ""
+          form.regional_id = "";
+          form.hp_chief = "";
         });
     } else {
       form.regional_id = "";
@@ -592,9 +588,11 @@ function uploadProposal(e) {
   <Head title="Pengajuan Jadwal" />
   <div>
     <AuthenticatedLayoutAdmin>
-      <!-- <template #header>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">Article</h2>
-            </template> -->
+      <template #header>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+          Pengajuan Jadwal
+        </h2>
+      </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div
@@ -669,49 +667,52 @@ function uploadProposal(e) {
                   >
                     <tr>
                       <th scope="col" class="px-6 py-3">
-                        <p>No</p>
+                        No
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Kelas</p>
+                        Poster
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Kategori</p>
+                        Kelas
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Regional</p>
+                        Kategori
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Email Peserta</p>
+                        Regional
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Pengusul</p>
+                        Email Peserta
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Proposal</p>
+                        Pengusul
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Tanggal Mulai Kelas</p>
+                        Proposal
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Tanggal Selesai Kelas</p>
+                        Tanggal Mulai Kelas
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Tanggal Pengajuan</p>
+                        Tanggal Selesai Kelas
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Tanggal Overview</p>
+                        Tanggal Pengajuan
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Tanggal Diterima</p>
+                        Tanggal Overview
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Tanggal Disetujui</p>
+                        Tanggal Diterima
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Tanggal Kelulusan</p>
+                        Tanggal Disetujui
                       </th>
                       <th scope="col" class="px-6 py-3">
-                        <p>Status</p>
+                        Tanggal Kelulusan
+                      </th>
+                      <th scope="col" class="px-6 py-3">
+                        Status
                       </th>
                       <th scope="col" class="px-6 py-3">
                         <div class="flex gap-1 items-center">
@@ -769,6 +770,11 @@ function uploadProposal(e) {
                         {{ props.schedules.from + index }}
                       </td>
                       <td class="px-6 py-4">
+                        <div>
+                            <img :src="item.poster" :alt="item.class_room?.name">
+                        </div>
+                      </td>
+                      <td class="px-6 py-4">
                         {{ item.class_room?.name }}
                       </td>
                       <td class="px-6 py-4">
@@ -792,7 +798,7 @@ function uploadProposal(e) {
                           rel="noopener noreferrer"
                           >Proposal</a
                         >
-                        <a v-else class="text-blue-500 underline cursor-none"
+                        <a v-else class="cursor-none"
                           >Tidak Ada Proposal</a
                         >
                       </td>
@@ -844,76 +850,7 @@ function uploadProposal(e) {
                       <td class="px-6 py-4">
                         {{ item.status }}
                       </td>
-                      <!-- <td class="px-6 py-4">
-                        <div class="flex gap-2">
-                          <div
-                            @click="approvalSchedule(item)"
-                            title="Diterima"
-                            class="bg-green-100 p-0.5 rounded-md"
-                          >
-                            <svg height="25x" width="25px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 46.372 46.372" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path style="fill:#010002;" d="M45.668,9.281l-4.914-4.914c-0.905-0.905-2.409-0.944-3.36-0.089L18.665,21.124 c-0.951,0.855-2.504,0.868-3.469,0.028l-5.09-4.433c-0.965-0.84-2.48-0.788-3.385,0.117l-6.042,6.042 c-0.905,0.905-0.905,2.371,0,3.276L15.82,41.295c0,0,0.491,0.491,1.096,1.096c0.605,0.605,1.79,0.325,2.645-0.626l26.194-29.123 C46.612,11.69,46.572,10.186,45.668,9.281z"></path> </g> </g></svg>
-                          </div>
 
-                          <div
-                            @click="rejectSchedule(item.id, item.participant?.name)"
-                            title="Diterima"
-                            class="bg-red-100 p-0.5 rounded-md cursor-pointer flex items-center"
-                          >
-                          <svg
-                            class="h-6 w-6 cursor-pointer"
-                            viewBox="0 0 192 192"
-                            xmlns="http://www.w3.org/2000/svg"
-                            xml:space="preserve"
-                            fill="none"
-                            >
-                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                            <g
-                                id="SVGRepo_tracerCarrier"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            ></g>
-                            <g id="SVGRepo_iconCarrier">
-                                <svg viewBox="0 0 25 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>Tolak</title> <desc>Created with Sketch Beta.</desc> <defs> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage"> <g id="Icon-Set-Filled" sketch:type="MSLayerGroup" transform="translate(-469.000000, -1041.000000)" fill="#000000"> <path d="M487.148,1053.48 L492.813,1047.82 C494.376,1046.26 494.376,1043.72 492.813,1042.16 C491.248,1040.59 488.712,1040.59 487.148,1042.16 L481.484,1047.82 L475.82,1042.16 C474.257,1040.59 471.721,1040.59 470.156,1042.16 C468.593,1043.72 468.593,1046.26 470.156,1047.82 L475.82,1053.48 L470.156,1059.15 C468.593,1060.71 468.593,1063.25 470.156,1064.81 C471.721,1066.38 474.257,1066.38 475.82,1064.81 L481.484,1059.15 L487.148,1064.81 C488.712,1066.38 491.248,1066.38 492.813,1064.81 C494.376,1063.25 494.376,1060.71 492.813,1059.15 L487.148,1053.48" id="cross" sketch:type="MSShapeGroup"> </path> </g> </g> </g></svg>
-                                <path
-                                d="m195.656 33.271-52.882 52.882"
-                                style="
-                                    fill: none;
-                                    fill-opacity: 1;
-                                    fill-rule: nonzero;
-                                    stroke: #000000;
-                                    stroke-width: 12;
-                                    stroke-linecap: round;
-                                    stroke-linejoin: round;
-                                    stroke-miterlimit: 5;
-                                    stroke-dasharray: none;
-                                    stroke-opacity: 1;
-                                "
-                                transform="translate(-77.923 40.646)"
-                                ></path>
-                            </g>
-                            </svg>
-                          </div>
-                          <div
-                            @click="deleteSchedule(item.id, item.class_room?.name, item.category?.name)"
-                            title="Hapus"
-                            class="bg-purple-100 p-0.5 rounded-md cursor-pointer"
-                          >
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                            <path fill="none" d="M0 0h24v24H0z"/>
-                            <path d="M3 6h18v2H3V6zm3 3h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9zm2-7h8v2H8V2zm2 2h4v2h-4V4z"/>
-                          </svg>
-
-                          </div>
-                          <div class="flex items-center">
-                            <input
-                              @click="toggleCheckbox(item.id)"
-                              class="h-6 w-6"
-                              type="checkbox"
-                              :id="`checkbox${item.id}`"
-                            />
-                          </div>
-                        </div>
-                      </td> -->
                       <td class="px-6 py-4">
                         <div class="flex gap-2">
                           <div
@@ -1239,21 +1176,21 @@ function uploadProposal(e) {
                   </select>
                 </div>
                 <div class="col-span-2 sm:col-span-1">
-                    <label
-                      for="hp_chief"
-                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >HP Ketua Pelaksana</label
-                    >
-                    <input
-                      v-model="form.hp_chief"
-                      readonly
-                      type="text"
-                      name="hp_chief"
-                      id="hp_chief"
-                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="HP"
-                    />
-                  </div>
+                  <label
+                    for="hp_chief"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >HP Ketua Pelaksana</label
+                  >
+                  <input
+                    v-model="form.hp_chief"
+                    readonly
+                    type="text"
+                    name="hp_chief"
+                    id="hp_chief"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="HP"
+                  />
+                </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label
                     for="regency_regional_ids"
@@ -1564,7 +1501,14 @@ function uploadProposal(e) {
                     class="w-2block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >Surat Pengajuan</label
                   >
-                  <a v-if="form.proposal && form.id" class="ml-1 text-blue-500 underline" :href="form.proposal" target="_blank" rel="noopener noreferrer">Link Proposal</a>
+                  <a
+                    v-if="form.proposal && form.id"
+                    class="ml-1 text-blue-500 underline"
+                    :href="form.proposal"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >Link Proposal</a
+                  >
                   <div class="flex items-center">
                     <div class="w-2/12">
                       <input

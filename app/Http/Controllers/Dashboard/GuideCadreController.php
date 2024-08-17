@@ -23,7 +23,8 @@ class GuideCadreController extends Controller
                 ->when($request['search'], function ($query, $request) {
                     $query->where('name', 'like', '%' . $request . '%');
                 })
-                ->with('typeActivity')
+                ->with(['typeActivity:id,name'])
+                ->select('id', 'type_activity_id', 'name', 'link', 'information')
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);

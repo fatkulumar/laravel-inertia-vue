@@ -29,10 +29,13 @@
     composer install
     ```
     ```
+    copy .env-example to .env
+    ```
+    ```
     php artisan migrate:fresh --seed --seed
     ```
     ```
-    copy .env-example to .env
+    php artisan laravolt:indonesia:seed
     ```
 
 ##### Installation

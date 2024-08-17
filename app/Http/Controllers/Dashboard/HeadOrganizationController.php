@@ -23,6 +23,13 @@ class HeadOrganizationController extends Controller
                 ->when($request['search'], function ($query, $request) {
                     $query->where('name', 'like', '%' . $request . '%');
                 })
+                ->select(
+                    'id',
+                    'name',
+                    'status',
+                    'start_date',
+                    'end_date'
+                )
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);

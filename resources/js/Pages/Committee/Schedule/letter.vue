@@ -120,7 +120,9 @@ function uploadLetter(e) {
                         </p>
                     </div>
                     <div class="ml-2">
-                        <a class="hover:underline text-blue-500" :href="props.letters.data[0]?.link_file" target="_blank" rel="noopener noreferrer">Proposal</a>
+                        <a :class="props.letters.data[0]?.link_file ? 'hover:underline text-blue-500' : ''" :href="props.letters.data[0]?.link_file" target="_blank" rel="noopener noreferrer">
+                            {{ props.letters.data[0]?.link_file ? 'Proposal' : 'Tidak Ada Proposal' }}
+                        </a>
                     </div>
                 </div>
                 <div class="bg-gray-100 flex items-center">

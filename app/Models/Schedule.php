@@ -16,7 +16,6 @@ class Schedule extends Model
         'committee_id',
         'category_id',
         'class_room_id',
-        'regency_regional_id',
         'regency_regional_ids',
         'chief_id', //ketua pelaksana
         'type_activity_id', //jenis kegiatan

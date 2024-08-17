@@ -22,6 +22,10 @@ class RegionalController extends Controller
                 ->when($request['search'], function ($query, $request) {
                     $query->where('name', 'like', '%' . $request . '%');
                 })
+                ->select(
+                    'id',
+                    'name'
+                )
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);

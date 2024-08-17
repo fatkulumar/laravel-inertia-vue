@@ -14,4 +14,6 @@
         Route::post('/graduated-submission', [Dashboard\SubmissionController::class, 'graduatedSubmission'])->name('graduatedSubmission');
         Route::post('/certificate-submission', [Dashboard\SubmissionController::class, 'certificateSubmission'])->name('certificateSubmission');
         Route::post('/option-submission', [Dashboard\SubmissionController::class, 'optionSubmission'])->name('optionSubmission');
+
+        Route::get('/schedule/{committeeId}', [Dashboard\SubmissionController::class, 'schedule'])->name('schedule');
     });

@@ -42,7 +42,8 @@ class SpeakerController extends Controller
                 ->when($request['search'], function ($query, $request) {
                     $query->where('name', 'like', '%' . $request . '%');
                 })
-                ->with('classRoom', 'category', 'city', 'province')
+                ->with(['classRoom:id,name', 'category:id,name', 'city:id,code,name', 'province:id,code,name'])
+                ->select('class_room_id', 'category_id', 'city_code', 'province_code', 'id', 'name', 'image')
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);

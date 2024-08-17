@@ -6,9 +6,18 @@ import { ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
 import { Modal } from "flowbite";
+import axios from "axios";
 
 const props = defineProps({
   submissions: {
+    type: Object,
+    default: () => ({}),
+  },
+  committees: {
+    type: Object,
+    default: () => ({}),
+  },
+  participants: {
     type: Object,
     default: () => ({}),
   },
@@ -40,11 +49,13 @@ const form = useForm({
   participant_id: "",
   committee_id: "",
   status: "",
-  approval_date: "",
-  graduation_date: "",
-  file: "",
+//   approval_date: "",
+//   graduation_date: "",
+//   file: "",
   submission_id: "",
   credential_id: "",
+  proof: "",
+  schedule_id: "",
 });
 
 function resetForm() {
@@ -52,59 +63,67 @@ function resetForm() {
   form.participant_id = "";
   form.committee_id = "";
   form.status = "";
-  form.approval_date = "";
-  form.graduation_date = "";
-  form.file = "";
+//   form.approval_date = "";
+//   form.graduation_date = "";
+//   form.file = "";
   form.submission_id = "";
   form.credential_id = "";
+  form.proof = null;
+  form.schedule_id = null;
 }
 
-function modalRoom(opt) {
-  const $targetEl = document.getElementById("crud-modal");
-  // options with default values
-  const options = {
-    placement: "bottom-right",
-    backdrop: "dynamic",
-    backdropClasses: "bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40",
-    closable: false,
-  };
+// function modalRoom(opt) {
+//   const $targetEl = document.getElementById("crud-modal");
+//   // options with default values
+//   const options = {
+//     placement: "bottom-right",
+//     backdrop: "dynamic",
+//     backdropClasses: "bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40",
+//     closable: false,
+//   };
 
-  // instance options object
-  const instanceOptions = {
-    id: "crud-modal",
-    override: true,
-  };
+//   // instance options object
+//   const instanceOptions = {
+//     id: "crud-modal",
+//     override: true,
+//   };
 
-  const modal = new Modal($targetEl, options, instanceOptions);
-  if (opt == "hide") {
-    modal.hide();
-  }
-  if (opt == "show") {
-    modal.show();
-  }
+//   const modal = new Modal($targetEl, options, instanceOptions);
+//   if (opt == "hide") {
+//     modal.hide();
+//   }
+//   if (opt == "show") {
+//     modal.show();
+//   }
+// }
+
+function addsubmission() {
+  form.post("/dashboard/submission/store", {
+    preserveScroll: true,
+    onSuccess: () => {
+      resetForm();
+      closeModal("crud-submission");
+      toast("success", "Data Berhasil Ditambah");
+    },
+  });
 }
 
-// function addsubmission() {
-//   form.post("/dashboard/schedule/store", {
-//     preserveScroll: true,
-//     onSuccess: () => {
-//       resetForm();
-//       modalRoom("hide");
-//       toast("success", "Data Berhasil Ditambah");
-//     },
-//   });
-// }
+async function EditSubmission(data) {
+  form.id = data.id;
+  form.participant_id = data.participant_id;
+  form.committee_id = data.schedule?.committee_id;
+  form.status = data.status;
+  form.proof = data.proof;
+  form.schedule_id = data.schedule?.id;
+  previewProof.value = data.link_proof;
+  try {
+    await chainedSchedule(data.schedule?.committee_id);
+  } catch (error) {
+    console.error('Error in chainedSchedule:', error);
+  }
 
-// function editClassRoom(data) {
-//   form.id = data.id;
-//   form.participant_id = data.participant_id;
-//   form.committee_id = data.committee_id;
-//   form.status = data.status;
-//   form.approval_date = data.approval_date;
-//   form.graduation_date = data.graduation_date;
-//   form.file = data.file;
-//   modalRoom("show");
-// }
+  showModal("crud-submission");
+}
 
 function rejectSubmission(id, namePeserta) {
   form.id = id;
@@ -293,8 +312,8 @@ function checkedAll() {
   }
 }
 
-function optionSubmission() {
-  showModal();
+function optionSubmission(targetModal = "crud-modal") {
+  showModal(targetModal);
 }
 
 function handleOptionSubmission() {
@@ -315,84 +334,88 @@ function handleOptionSubmission() {
     },
   });
 }
-// function optionSubmission() {
-//   const konfirm = confirm(
-//     `Apakah anda yakin ingin menghapus data ini?`
-//   );
-//   if (!konfirm) return;
-//   formCheckbox.post("/dashboard/schedule/destroy", {
-//     preserveScroll: true,
-//     onSuccess: () => {
-//       formCheckbox.id = [];
-//       toast("success", "Data Berhasil Dihapus");
-//       let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-//         checkedCheckboxes.forEach(element => {
-//             element.checked = false
-//         });
-//     },
-//   });
-// }
 
-// function uploadImage(e) {
-//     const image = e.target.files[0];
-//     if (image.type == 'image/png' | image.type == 'image/jpg' | image.type == 'image/jpeg') {
-//         const reader = new FileReader();
-//         reader.readAsDataURL(image);
-//         reader.onload = e => {
-//             previewImage.value = e.target.result;
-//             form.image = image;
-//         };
-//     } else {
-//         form.image = null;
-//         closeModal('crud-modal');
-//         toast('warning', 'Harus Format Gambar')
-//     }
-// }
+const previewProof = ref(null);
+function uploadProof(e) {
+  const proof = e.target.files[0];
+  if (
+    proof.type == "image/png" ||
+    proof.type == "image/jpg" ||
+    proof.type == "image/jpeg"
+  ) {
+    const reader = new FileReader();
+    reader.readAsDataURL(proof);
+    reader.onload = (e) => {
+      previewProof.value = e.target.result;
+      form.proof = proof;
+    };
+  } else {
+    form.proof = null;
+    toast("warning", "Harus Format Gambar");
+  }
+}
+
+const schedule = ref([]);
+const chainedSchedule = async (scheduleId) => {
+    if(scheduleId) {
+        await axios
+        .get(`/dashboard/submission/schedule/${scheduleId}`)
+        .then((response) => {
+        schedule.value = response.data;
+        })
+        .catch((error) => console.error(error));
+    }else{
+        schedule.value = []
+    }
+};
+
 </script>
 
 <template>
   <Head title="Pengajuan Kelas" />
   <div>
     <AuthenticatedLayoutAdmin>
-      <!-- <template #header>
-                    <h2 class="font-semibold text-xl text-gray-800 leading-tight">Article</h2>
-</template>-->
+      <template #header>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+          Pengajuan Kelas
+        </h2>
+      </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div
             class="p-6 flex flex-col items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"
           >
-            <!-- <div>
-                    icon plus
-                    <div
-                      @click="showModal()"
-                      title="Tambah Artikel"
-                      class="cursor-pointer"
-                    >
-                      <svg
-                        class="h-8 w-8 bg-green-400 p-1 rounded-lg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g
-                          id="SVGRepo_tracerCarrier"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        ></g>
-                        <g id="SVGRepo_iconCarrier">
-                          <path
-                            d="M4 12H20M12 4V20"
-                            stroke="#000000"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          ></path>
-                        </g>
-                      </svg>
-                    </div>
-                  </div> -->
+            <div>
+              <!-- icon plus -->
+              <div
+                @click="showModal('crud-submission')"
+                title="Tambah Artikel"
+                class="cursor-pointer"
+              >
+                <svg
+                  class="h-8 w-8 bg-green-400 p-1 rounded-lg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g
+                    id="SVGRepo_tracerCarrier"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <path
+                      d="M4 12H20M12 4V20"
+                      stroke="#000000"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                  </g>
+                </svg>
+              </div>
+            </div>
 
             <label for="table-search" class="sr-only">Search</label>
             <div class="relative">
@@ -426,13 +449,13 @@ function handleOptionSubmission() {
           </div>
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
-                <div
-              class="text-red-600 text-sm ml-2"
-              v-for="(error, index) in props.errors"
-              :key="index"
-            >
-              *{{ error }}
-            </div>
+              <!-- <div
+                class="text-red-600 text-sm ml-2"
+                v-for="(error, index) in props.errors"
+                :key="index"
+              >
+                *{{ error }}
+              </div> -->
               <div class="overflow-x-auto shadow-md sm:rounded-lg">
                 <table
                   class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
@@ -484,7 +507,7 @@ function handleOptionSubmission() {
                           <div
                             @click="optionSubmission()"
                             v-show="choice"
-                            title="Pilihan"
+                            title="Pilih Status"
                             class="bg-red-100 p-0.5 rounded-md cursor-pointer"
                           >
                             <svg
@@ -654,6 +677,18 @@ function handleOptionSubmission() {
                               </li>
                               <li>
                                 <button
+                                  title="Edit"
+                                  @click="
+                                    EditSubmission(item)
+                                  "
+                                  type="button"
+                                  class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                >
+                                  Edit
+                                </button>
+                              </li>
+                              <li>
+                                <button
                                   title="Lulus"
                                   @click="
                                     graduatedSubmission(
@@ -674,8 +709,7 @@ function handleOptionSubmission() {
                                     certificateSubmission(
                                       item.id,
                                       item.participant?.id,
-                                      item.certificate
-                                        ?.credential_id
+                                      item.certificate?.credential_id
                                     )
                                   "
                                   type="button"
@@ -696,76 +730,6 @@ function handleOptionSubmission() {
                           </div>
                         </div>
                       </td>
-                      <!-- <td class="px-6 py-4">
-                        <div class="flex gap-2">
-                          <div
-                            @click="approvalSubmission(item.id, item.participant?.name)"
-                            title="Diterima"
-                            class="bg-green-100 p-0.5 rounded-md"
-                          >
-                            <svg height="25x" width="25px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 46.372 46.372" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path style="fill:#010002;" d="M45.668,9.281l-4.914-4.914c-0.905-0.905-2.409-0.944-3.36-0.089L18.665,21.124 c-0.951,0.855-2.504,0.868-3.469,0.028l-5.09-4.433c-0.965-0.84-2.48-0.788-3.385,0.117l-6.042,6.042 c-0.905,0.905-0.905,2.371,0,3.276L15.82,41.295c0,0,0.491,0.491,1.096,1.096c0.605,0.605,1.79,0.325,2.645-0.626l26.194-29.123 C46.612,11.69,46.572,10.186,45.668,9.281z"></path> </g> </g></svg>
-                          </div>
-
-                          <div
-                            @click="rejectSubmission(item.id, item.participant?.name)"
-                            title="Diterima"
-                            class="bg-red-100 p-0.5 rounded-md cursor-pointer flex items-center"
-                          >
-                          <svg
-                            class="h-6 w-6 cursor-pointer"
-                            viewBox="0 0 192 192"
-                            xmlns="http://www.w3.org/2000/svg"
-                            xml:space="preserve"
-                            fill="none"
-                            >
-                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                            <g
-                                id="SVGRepo_tracerCarrier"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            ></g>
-                            <g id="SVGRepo_iconCarrier">
-                                <svg viewBox="0 0 25 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>Tolak</title> <desc>Created with Sketch Beta.</desc> <defs> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage"> <g id="Icon-Set-Filled" sketch:type="MSLayerGroup" transform="translate(-469.000000, -1041.000000)" fill="#000000"> <path d="M487.148,1053.48 L492.813,1047.82 C494.376,1046.26 494.376,1043.72 492.813,1042.16 C491.248,1040.59 488.712,1040.59 487.148,1042.16 L481.484,1047.82 L475.82,1042.16 C474.257,1040.59 471.721,1040.59 470.156,1042.16 C468.593,1043.72 468.593,1046.26 470.156,1047.82 L475.82,1053.48 L470.156,1059.15 C468.593,1060.71 468.593,1063.25 470.156,1064.81 C471.721,1066.38 474.257,1066.38 475.82,1064.81 L481.484,1059.15 L487.148,1064.81 C488.712,1066.38 491.248,1066.38 492.813,1064.81 C494.376,1063.25 494.376,1060.71 492.813,1059.15 L487.148,1053.48" id="cross" sketch:type="MSShapeGroup"> </path> </g> </g> </g></svg>
-                                <path
-                                d="m195.656 33.271-52.882 52.882"
-                                style="
-                                    fill: none;
-                                    fill-opacity: 1;
-                                    fill-rule: nonzero;
-                                    stroke: #000000;
-                                    stroke-width: 12;
-                                    stroke-linecap: round;
-                                    stroke-linejoin: round;
-                                    stroke-miterlimit: 5;
-                                    stroke-dasharray: none;
-                                    stroke-opacity: 1;
-                                "
-                                transform="translate(-77.923 40.646)"
-                                ></path>
-                            </g>
-                            </svg>
-                          </div>
-                          <div
-                            @click="deleteSubmission(item.id, item.class_room?.name, item.category?.name)"
-                            title="Lulus"
-                            class="bg-purple-100 p-0.5 rounded-md cursor-pointer"
-                          >
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                            <path fill="none" d="M0 0h24v24H0z"/>
-                            <path d="M3 6h18v2H3V6zm3 3h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9zm2-7h8v2H8V2zm2 2h4v2h-4V4z"/>
-                          </svg>
-
-                          </div>
-                          <div class="flex items-center">
-                            <input
-                              @click="toggleCheckbox(item.id)"
-                              class="h-6 w-6"
-                              type="checkbox"
-                              :id="`checkbox${item.id}`"
-                            />
-                          </div>
-                        </div>
-                      </td> -->
                     </tr>
                   </tbody>
                 </table>
@@ -801,7 +765,7 @@ function handleOptionSubmission() {
               class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
             >
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                Pilih
+                Status
               </h3>
               <button
                 type="button"
@@ -845,7 +809,7 @@ function handleOptionSubmission() {
                     v-model="formCheckbox.status"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   >
-                    <option selected value="">Choose a Option</option>
+                    <option selected value="">Pilih Status</option>
                     <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
                     <option value="pending">Pending</option>
@@ -926,7 +890,10 @@ function handleOptionSubmission() {
                   >
                   <input
                     v-model="form.credential_id"
-                    :readonly="form.credential_id && props.submissions.data[0]?.certificate?.credential_id"
+                    :readonly="
+                      form.credential_id &&
+                      props.submissions.data[0]?.certificate?.credential_id
+                    "
                     type="text"
                     name="credential_id"
                     id="credential_id"
@@ -934,17 +901,204 @@ function handleOptionSubmission() {
                     placeholder="Nomor Kredensial Sertifikat"
                   />
                 </div>
-                <div class="col-span-2 text-red-600 text-xs" v-if="form.credential_id && props.submissions.data[0]?.certificate?.credential_id">
+                <div
+                  class="col-span-2 text-red-600 text-xs"
+                  v-if="
+                    form.credential_id &&
+                    props.submissions.data[0]?.certificate?.credential_id
+                  "
+                >
                   Sudah ada sertifikat
                 </div>
               </div>
               <button
                 title="Tambah Kelas"
-                :disabled="form.credential_id && props.submissions.data[0]?.certificate?.credential_id  "
+                :disabled="
+                  form.credential_id &&
+                  props.submissions.data[0]?.certificate?.credential_id
+                "
                 type="submit"
                 class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
-                {{ form.credential_id && props.submissions.data[0]?.certificate?.credential_id ? "Update" : "Add" }}
+                {{
+                  form.credential_id &&
+                  props.submissions.data[0]?.certificate?.credential_id
+                    ? "Update"
+                    : "Add"
+                }}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- modal tabah submission -->
+      <div
+        id="crud-submission"
+        tabindex="-1"
+        aria-hidden="true"
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+      >
+        <div class="relative p-4 w-full max-w-7xl max-h-full">
+          <!-- Modal content -->
+          <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div
+              class="text-red-600 text-sm ml-2"
+              v-for="(error, index) in props.errors"
+              :key="index"
+            >
+              *{{ error }}
+            </div>
+            <div
+              class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
+            >
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Tambah Submission
+              </h3>
+              <button
+                type="button"
+                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                @click="closeModal('crud-submission')"
+              >
+                <svg
+                  class="w-3 h-3"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 14 14"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                  />
+                </svg>
+                <span class="sr-only">Close modal</span>
+              </button>
+            </div>
+            <!-- Modal body -->
+            <form
+              @submit.prevent="addsubmission"
+              enctype="multipart/form-data"
+              class="p-4 md:p-5"
+            >
+              <div class="grid gap-4 mb-4 grid-cols-2">
+                <div class="col-span-2">
+                  <label
+                    for="proof"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Bukti Pembayaran</label
+                  >
+                  <img :src="previewProof" class="w-5/12 py-2" />
+                  <input
+                    @change="uploadProof"
+                    type="file"
+                    name="proof"
+                    id="proof"
+                    accept="image/*"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                  />
+                </div>
+
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="committee_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Panitia</label
+                  >
+                  <select
+                    @change="chainedSchedule(form.committee_id)"
+                    v-model="form.committee_id"
+                    id="committee_id"
+                    name="committee_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" selected>Pilih Panitia</option>
+                    <option
+                      v-for="(item, index) in props.committees"
+                      :key="index"
+                      :value="item.id"
+                    >
+                      {{ item.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="schedule_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Jadwal</label
+                  >
+                  <select
+                    v-model="form.schedule_id"
+                    id="schedule_id"
+                    name="schedule_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" :selected="form.schedule_id == null">Pilih Jadwal</option>
+                    <option
+                      v-for="(item, index) in schedule"
+                      :key="index"
+                      :value="item.id"
+                      :selected="item.id == form.schedule_id"
+                    >
+                      {{ item.class_room?.name }} {{ item.category?.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="participant_id"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Siswa</label
+                  >
+                  <select
+                    v-model="form.participant_id"
+                    id="participant_id"
+                    name="participant_id"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option value="" selected>Pilih Siswa</option>
+                    <option
+                      v-for="(item, index) in props.participants"
+                      :key="index"
+                      :value="item.id"
+                    >
+                      {{ item.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="col-span-2 sm:col-span-1">
+                  <label
+                    for="status"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Status</label
+                  >
+                  <select
+                    v-model="form.status"
+                    id="status"
+                    name="status"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option selected value="">Pilih Status</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="pending">Pending</option>
+                    <option value="graduated">Graduated</option>
+                  </select>
+                </div>
+              </div>
+              <button
+                type="submit"
+                class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                {{ form.id ? "Update" : "Add" }}
               </button>
             </form>
           </div>

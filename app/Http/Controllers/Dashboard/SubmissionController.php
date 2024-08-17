@@ -8,6 +8,7 @@ use App\Models\HeadOrganization;
 use App\Models\Profile;
 use App\Models\Schedule;
 use App\Models\Submission;
+use App\Models\User;
 use App\Traits\EntityValidator;
 use App\Traits\FileUpload;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -37,12 +38,12 @@ class SubmissionController extends Controller
     {
         try {
             $submissions = Submission::orderBy('created_at', 'desc')
-                ->when($request['search'], function($query, $request) {
-                    $query->whereHas('committee', function ($query) use ($request) {
+                ->when($request['search'], function ($query, $request) {
+                    $query->whereHas('participant', function ($query) use ($request) {
                         $query->where('name', 'like', '%' . $request . '%');
                     });
                 })
-                ->with('participant', 'schedule', 'schedule.regional', 'schedule.classRoom','schedule.category', 'certificate')
+                ->with(['participant:id,name,email', 'schedule:id,category_id,class_room_id,committee_id', 'schedule.regional:id,name', 'schedule.classRoom:id,name', 'schedule.category:id,name', 'certificate:id,submission_id,user_id'])
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);
@@ -58,9 +59,30 @@ class SubmissionController extends Controller
                 $submission->formatted_start_date_class = Carbon::parse($submission->start_date_class)->format('d-m-Y');
                 return $submission;
             });
+
+            $committeeIds = Schedule::distinct()->get(['committee_id']);
+            $committees = User::whereIn('id', $committeeIds)->get(['id', 'name']);
+            $participants = User::whereHas('roles', function ($query) {
+                $query->where('name', 'peserta');
+            })
+            ->with('roles:name')
+            ->select('id', 'name')
+            ->get()
+            ->map(function ($user) {
+                $user->roles->transform(function ($role) {
+                    // Hapus data pivot dari setiap role
+                    unset($role->pivot);
+                    return $role;
+                });
+                unset($user->roles);
+                return $user;
+            });
+
             // return $submissions;
             return Inertia::render('Dashboard/Submission', [
                 'submissions' => $submissions,
+                'committees' => $committees,
+                'participants' => $participants,
             ]);
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
@@ -88,28 +110,35 @@ class SubmissionController extends Controller
             $validasiData = $this->storeValidator($request);
             if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
 
+            $proof = $request->file('proof');
+            if ($proof) {
+                $this->fileSettings();
+                $uploadProof = $this->uploadFile($proof);
+            } else {
+                $uploadProof = "Proof Tidak Ada";
+            }
             $id = $request->post('id');
             if ($id) {
 
-                $submissions = Schedule::where('id', $id)->first();
+                $submissions = Submission::where('id', $id)->first();
                 $saveData = [
+                    'schedule_id' => $request->post('schedule_id'),
                     'participant_id' => $request->post('participant_id'),
-                    'committeee_id' => $request->post('committeee_id'),
                     'status' => $request->post('status'),
-                    'file' => $request->post('file'),
+                    'proof' => $uploadProof,
                 ];
                 $result = $submissions->update($saveData);
                 if (!$result) return redirect()->back()->withErrors($result)->withInput();
             } else {
 
                 $saveData = [
+                    'schedule_id' => $request->post('schedule_id'),
                     'participant_id' => $request->post('participant_id'),
-                    'committeee_id' => $request->post('committeee_id'),
                     'status' => $request->post('status'),
-                    'file' => $request->post('file'),
+                    'proof' => $uploadProof,
                 ];
 
-                $result = Schedule::create($saveData);
+                $result = Submission::create($saveData);
                 if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
             }
         } catch (\Exception $exception) {
@@ -126,15 +155,15 @@ class SubmissionController extends Controller
         try {
             $rules = [
                 'participant_id' => 'required|string|max:36',
-                'committeee_id' => 'required|string|max:36',
-                'status' => 'required|string|max:15',
-                'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'schedule_id' => 'required|string|max:36',
+                'status' => 'required|string|max:10',
+                'proof' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ];
             $Validatedata = [
                 'participant_id' => $request->post('participant_id'),
-                'committeee_id' => $request->post('committeee_id'),
+                'schedule_id' => $request->post('schedule_id'),
                 'status' => $request->post('status'),
-                'file' => $request->post('file'),
+                'proof' => $request->file('proof'),
             ];
             $validator = EntityValidator::validate($Validatedata, $rules);
             if ($validator->fails()) return $validator->errors();
@@ -265,7 +294,7 @@ class SubmissionController extends Controller
         try {
             $ids = $request->post('id');
             $status = $request->post('status');
-            foreach($ids as $id) {
+            foreach ($ids as $id) {
                 Submission::where('id', $id)->update([
                     'status' => $status,
                 ]);
@@ -328,6 +357,25 @@ class SubmissionController extends Controller
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function certificateValidator in SubmissionController', $errors);
+        }
+    }
+
+    public function schedule(Request $request, $committeeId)
+    {
+        try {
+            $profile = Profile::where('profileable_id', $committeeId)->first();
+            $schedule = Schedule::with(['classRoom:id,name', 'category:id,name'])
+                ->where('committee_id', $committeeId)
+                ->where('regional_id', $profile->regional_id)
+                ->select('class_room_id', 'category_id', 'id')
+                ->get();
+            return response()->json($schedule, 200);
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function schedule in SubmissionController', $errors);
         }
     }
 }

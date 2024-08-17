@@ -265,9 +265,9 @@ function uploadImage(e) {
   <Head title="Users" />
   <div>
     <AuthenticatedLayoutAdmin>
-      <!-- <template #header>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">Article</h2>
-            </template> -->
+      <template #header>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">Users</h2>
+            </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div
@@ -598,7 +598,7 @@ function uploadImage(e) {
                     <select v-model="form.role" name="role" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                         <option :selected="form.role == null" value="">Choose a Role</option>
                         <option value="peserta">Peserta</option>
-                        <option value="admin">Admin</option>
+                        <!-- <option value="admin">Admin</option> -->
                         <option value="panitia">Panitia</option>
                     </select>
                 </div>

@@ -227,35 +227,17 @@ function deleteClassRoomChoice() {
     },
   });
 }
-
-function uploadImage(e) {
-  const image = e.target.files[0];
-  if (
-    (image.type == "image/png") |
-    (image.type == "image/jpg") |
-    (image.type == "image/jpeg")
-  ) {
-    const reader = new FileReader();
-    reader.readAsDataURL(image);
-    reader.onload = (e) => {
-      previewImage.value = e.target.result;
-      form.image = image;
-    };
-  } else {
-    form.image = null;
-    closeModal("crud-modal");
-    toast("warning", "Harus Format Gambar");
-  }
-}
 </script>
 
 <template>
   <Head title="Kategori Kelas" />
   <div>
     <AuthenticatedLayoutAdmin>
-      <!-- <template #header>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">Article</h2>
-            </template> -->
+      <template #header>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+          Kategori Kelas
+        </h2>
+      </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div
@@ -451,7 +433,7 @@ function uploadImage(e) {
                               <li>
                                 <button
                                   title="Edit Ketua"
-                                   @click="editClassRoom(item)"
+                                  @click="editClassRoom(item)"
                                   type="button"
                                   class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                                 >
@@ -461,7 +443,7 @@ function uploadImage(e) {
                               <li>
                                 <button
                                   title="Hapus Ketua"
-                                   @click="deleteClassRoom(item.id, item.title)"
+                                  @click="deleteClassRoom(item.id, item.title)"
                                   type="button"
                                   class="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                                 >
