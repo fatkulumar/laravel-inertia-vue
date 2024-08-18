@@ -25,7 +25,8 @@ class RegencyRegionalController extends Controller
                 ->when($request['search'], function ($query, $request) {
                     $query->where('regency', 'like', '%' . $request . '%');
                 })
-                ->with('regional')
+                ->with('regional:id,name')
+                ->select('regional_id', 'id', 'regional_id', 'regency', 'created_at')
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);

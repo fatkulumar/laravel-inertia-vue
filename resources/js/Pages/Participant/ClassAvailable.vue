@@ -153,10 +153,10 @@ function hanldeRegisterClass() {
                       >
                         {{ item.class_room?.name }} | {{ item.category?.name }}
                       </h5>
-                      <div class="flex gap-2 bg-gray-400 p-1 rounded-sm">
-                        <p>{{ item.start_date_class }}</p>
+                      <div class="flex gap-2 bg-gray-300 p-1 rounded-sm">
+                        <p>{{ item.formatted_start_date_class }}</p>
                         <p>-</p>
-                        <p>{{ item.end_date_class }}</p>
+                        <p>{{ item.formatted_end_date_class }}</p>
                       </div>
                       <p
                         class="mb-3 font-normal text-gray-700 dark:text-gray-400"

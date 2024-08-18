@@ -758,15 +758,15 @@ class ScheduleController extends Controller
     {
         try {
             $documentations = Documentation::where('schedule_id', $scheduleId)
-                ->with('schedule')
-                ->get();
+                ->with('schedule:id')
+                ->get(['id', 'schedule_id', 'title', 'image', 'description', 'schedule_id']);
 
             $documentations->map(function ($documentation) {
                 $this->fileSettings();
                 if (isset($documentation['image'])) {
                     $documentation['image'] = $this->getFileAttribute($documentation['image']);
                 } else {
-                    $documentation['link_image'] = null;
+                    $documentation['image'] = null;
                 }
                 return $documentation;
             });
@@ -925,17 +925,21 @@ class ScheduleController extends Controller
         try {
 
             // Mengambil pengguna dengan role 'peserta'
-            $participants = User::with(['profile', 'submissions'])
-                ->whereHas('roles', function ($query) {
-                    $query->where('name', 'peserta');
-                })
-                ->whereHas('submissions', function ($query) use ($scheduleId) {
-                    $query->where('schedule_id', $scheduleId);
-                })
-                ->get();
-
+            $participants = User::with([
+                                        'profile:id,profileable_id,gender',
+                                        'submissions:id,schedule_id,participant_id,status',
+                                        'submissions.schedule:id,status,class_room_id,category_id',
+                                        'submissions.schedule.classRoom:id,name',
+                                        'submissions.schedule.category:id,name'
+            ])
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'peserta');
+            })
+            ->whereHas('submissions', function ($query) use ($scheduleId) {
+                $query->where('schedule_id', $scheduleId);
+            })->get(['id', 'name', 'email']);
             $totalParticipants = $participants->count();
-
+                // return $participants;
             $totalMaleParticipants = $participants->filter(function ($user) {
                 return $user->profile && $user->profile->gender == 'laki-laki';
             })->count();
@@ -949,7 +953,7 @@ class ScheduleController extends Controller
             })->count();
 
             $totalNotGraduatedParticipants = $participants->filter(function ($user) {
-                return !$user->submissions->contains('status', 'graduated');
+                return !$user->submissions->contains('status', '!=' ,'graduated');
             })->count();
 
             $totalGraduatedMaleParticipants = $participants->filter(function ($user) {
@@ -985,7 +989,7 @@ class ScheduleController extends Controller
                     'female' => $totalNotGraduatedFemaleParticipants,
                 ],
             ];
-
+            // return $reports;
             $appointmentFiles = AppointmentFile::where('schedule_id', $scheduleId)->get();
 
             $appointmentFiles->map(function ($appointmentFile) {

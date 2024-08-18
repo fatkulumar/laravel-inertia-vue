@@ -130,15 +130,7 @@ function hanldeRegisterClass() {
                   :key="index"
                 >
                   <div
-                    @click="
-                      showModal(
-                        'submission-modal',
-                        item.id,
-                        item.class_room?.name,
-                        item.category?.name
-                      )
-                    "
-                    class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 w-full cursor-pointer"
+                    class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 w-full"
                   >
                     <img
                       class="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-48 md:rounded-none md:rounded-s-lg"
@@ -153,10 +145,10 @@ function hanldeRegisterClass() {
                       >
                         {{ item.class_room?.name }} | {{ item.category?.name }} <small class="text-xs text-green-500 absolute">Kelas Aktif</small>
                       </h5>
-                      <div class="flex gap-2 bg-gray-400 p-1 rounded-sm">
-                        <p>{{ item.start_date_class }}</p>
+                      <div class="flex gap-2 bg-gray-300 p-1 rounded-sm">
+                        <p>{{ item.formatted_start_date_class }}</p>
                         <p>-</p>
-                        <p>{{ item.end_date_class }}</p>
+                        <p>{{ item.formatted_end_date_class }}</p>
                       </div>
                       <p
                         class="mb-3 font-normal text-gray-700 dark:text-gray-400"

@@ -157,7 +157,7 @@ class SubmissionController extends Controller
                 'participant_id' => 'required|string|max:36',
                 'schedule_id' => 'required|string|max:36',
                 'status' => 'required|string|max:10',
-                'proof' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'proof' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ];
             $Validatedata = [
                 'participant_id' => $request->post('participant_id'),

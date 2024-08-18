@@ -6,7 +6,6 @@ import { Modal } from "flowbite";
 import Swal from "sweetalert2";
 import TabMenuDetailParticipant from "@/Components/Participant/TabMenuDetailParticipant.vue";
 
-
 onMounted(() => {
   initFlowbite();
 });
@@ -118,9 +117,9 @@ function hanldeRegisterClass() {
   <Head title="History Kelas" />
   <div>
     <AuthenticatedLayoutParticipant>
-        <template #header>
-          <TabMenuDetailParticipant />
-        </template>
+      <template #header>
+        <TabMenuDetailParticipant />
+      </template>
       <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -161,6 +160,16 @@ function hanldeRegisterClass() {
                                 submission.schedule.periode
                               }}</span>
                             </div>
+                            <p
+                              class="mb-3 font-normal text-gray-700 dark:text-gray-400"
+                            >
+                              {{ submission?.schedule?.facility }}
+                            </p>
+                            <p
+                              class="mb-3 font-normal text-gray-700 dark:text-gray-400"
+                            >
+                              {{ submission?.schedule?.benefit }}
+                            </p>
                           </h5>
                         </div>
 
@@ -178,10 +187,12 @@ function hanldeRegisterClass() {
                         >
                           {{ submission.status }}
                         </div>
-
                         <Link
                           :href="`/participant/participant/certificate/${submission.certificate.credential_id}`"
-                          v-if="submission.status == 'graduated' && submission.certificate"
+                          v-if="
+                            submission.status == 'graduated' &&
+                            submission.certificate
+                          "
                           class="rounded-md text-white text-center px-1 bg-orange-500 hover:bg-orange-600"
                         >
                           Sertifikat

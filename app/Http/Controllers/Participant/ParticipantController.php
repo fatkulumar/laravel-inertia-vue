@@ -91,18 +91,29 @@ class ParticipantController extends Controller
     {
         try {
             $users = Auth::user();
-            $profile = Profile::where('profileable_id', $users->id)->first();
+            $profile = Profile::where('profileable_id', $users->id)->first('regional_id');
             $regency_regional_ids = Schedule::where('regional_id', $profile->regional_id)
                 ->pluck('regency_regional_ids')
                 ->toArray(); // Ambil array dari kolom regency_regional_ids
             // return $regency_regional_ids;
-            $schedules = Schedule::with('classRoom', 'category')
+            $schedules = Schedule::with('classRoom:id,name', 'category:id,name')
                 ->where('regional_id', $profile->regional_id)
                 ->whereIn('regency_regional_ids', $regency_regional_ids)
                 ->where('status', 'approval')
                 ->whereDate('end_date_class', '>=', Carbon::now())
                 ->whereDoesntHave('submissions')
-                ->get();
+                ->get(
+                    [
+                        'id',
+                        'category_id',
+                        'class_room_id',
+                        'poster',
+                        'start_date_class',
+                        'end_date_class',
+                        'benefit',
+                        'facility',
+                    ]
+                );
 
             $schedules->map(function ($schedule) {
                 $directorySchedule = '/file/schedule/';
@@ -111,8 +122,8 @@ class ParticipantController extends Controller
                 } else {
                     $schedule['poster'] = null;
                 }
-                $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('Y-m-d');
-                $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('Y-m-d');
+                $schedule->formatted_end_date_class = Carbon::parse($schedule->end_date_class)->format('d-m-Y');
+                $schedule->formatted_start_date_class = Carbon::parse($schedule->start_date_class)->format('d-m-Y');
                 return $schedule;
             });
 
@@ -135,13 +146,24 @@ class ParticipantController extends Controller
             try {
                 $users = Auth::user();
                 $profile = Profile::where('profileable_id', $users->id)->first();
-                $schedules = Schedule::with('classRoom', 'category', 'submissions')
+                $schedules = Schedule::with(['classRoom:id,name', 'category:id,name', 'submissions:id,schedule_id,participant_id,status'])
                     ->where('regional_id', $profile->regional_id)
                     ->whereHas('submissions', function ($query) {
                         $query->where('status', 'approved'); // Sesuaikan dengan kondisi yang Anda inginkan
                     })
                     ->whereDate('end_date_class', '>=', Carbon::now())
-                    ->get();
+                    ->get(
+                        [
+                            'id',
+                            'category_id',
+                            'class_room_id',
+                            'poster',
+                            'start_date_class',
+                            'end_date_class',
+                            'benefit',
+                            'facility',
+                        ]
+                    );
 
                 $schedules->map(function ($schedule) {
                     $directorySchedule = '/file/schedule/';
@@ -179,13 +201,24 @@ class ParticipantController extends Controller
         try {
             $users = Auth::user();
             $profile = Profile::where('profileable_id', $users->id)->first();
-            $schedules = Schedule::with('classRoom', 'category', 'submissions')
+            $schedules = Schedule::with(['classRoom:id,name', 'category:id,name', 'submissions:id,schedule_id,participant_id,status'])
                 ->where('regional_id', $profile->regional_id)
                 ->whereHas('submissions', function ($query) {
                     $query->where('status', 'pending'); // Sesuaikan dengan kondisi yang Anda inginkan
                 })
                 ->whereDate('end_date_class', '>=', Carbon::now())
-                ->get();
+                ->get(
+                    [
+                        'id',
+                        'category_id',
+                        'class_room_id',
+                        'poster',
+                        'start_date_class',
+                        'end_date_class',
+                        'benefit',
+                        'facility',
+                    ]
+                );
 
             $schedules->map(function ($schedule) {
                 $directorySchedule = '/file/schedule/';
@@ -216,14 +249,16 @@ class ParticipantController extends Controller
         try {
             $userId = Auth::user()->id;
             $histories = User::with([
-                'profile',
-                'submissions.schedule.classRoom',
-                'submissions.schedule.category',
-                'submissions.schedule.regencyRegional',
-                'submissions.certificate',
+                'profile:id,profileable_id,regional_id,address,hp,image,gender',
+                'submissions:id,schedule_id,participant_id,status,created_at,updated_at',
+                'submissions.schedule:id,regional_id,category_id,class_room_id,poster,start_date_class,end_date_class,benefit,facility,periode',
+                'submissions.schedule.classRoom:id,name',
+                'submissions.schedule.category:id,name',
+                'submissions.schedule.regencyRegional:id,regency,regional_id',
+                'submissions.certificate:id,credential_id',
             ])
                 ->where('id', $userId)
-                ->get();
+                ->get('id', 'name', 'email', 'updated_at');
 
             $histories->map(function ($history) {
                 $this->fileSettings();
@@ -302,8 +337,18 @@ class ParticipantController extends Controller
     {
         try {
             $id = Auth::user()->id;
-            $participant = User::with('profile.regional', 'submissions.schedule', 'submissions.schedule.classRoom', 'submissions.schedule.category')
-                ->where('id', $id)->get();
+            $participant = User::with(
+                [
+                    'profile:id,profileable_id,regional_id,address,hp,image,gender',
+                    'profile.regional:id,name',
+                    'submissions:id,schedule_id,participant_id,status,created_at,updated_at',
+                    'submissions.schedule:id,regional_id,category_id,class_room_id,poster',
+                    'submissions.schedule.classRoom:id,name',
+                    'submissions.schedule.category:id,name',
+                ]
+            )
+            ->where('id', $id)
+            ->get(['id', 'name', 'email', 'image']);
             $participant->each(function ($user) {
                 $this->fileSettings();
 
@@ -328,7 +373,7 @@ class ParticipantController extends Controller
 
                 return $user;
             });
-            $regionals = Regional::all();
+            $regionals = Regional::all(['id', 'name']);
             // return $participant;
             return Inertia::render('Participant/DetailParticipant', [
                 'participant' => $participant,

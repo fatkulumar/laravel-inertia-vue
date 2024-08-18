@@ -220,7 +220,7 @@ function uploadImage(e) {
                         <div class="flex items-center">
                           <img
                             class="w-10 h-10 rounded-full mr-4"
-                            :src="item.schedule?.poster"
+                            :src="item.schedule?.link_poster"
                             alt="Avatar of Jonathan Reinink"
                           />
                           <div class="text-sm">

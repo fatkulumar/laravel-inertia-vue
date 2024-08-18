@@ -89,9 +89,9 @@ class ParticipantController extends Controller
             // Proses setiap submission pengguna
             $user->submissions->each(function ($submission) {
                 if (isset($submission->schedule->poster)) {
-                    $submission->schedule->poster = $this->getFileAttribute($submission->schedule->poster);
+                    $submission->schedule->link_poster = $this->getFileAttribute($submission->schedule->poster);
                 } else {
-                    $submission->schedule->poster = null;
+                    $submission->schedule->link_poster = null;
                 }
 
                 return $submission;
@@ -155,7 +155,13 @@ class ParticipantController extends Controller
                 })
                 ->whereHas('participant.roles')
                 ->whereHas('participant.profile.regional')
-                ->with('schedule.classRoom', 'schedule.category', 'participant.roles', 'participant.profile.regional')
+                ->with([
+                    'schedule:id,class_room_id,category_id,poster,status,created_at,updated_at',
+                    'schedule.classRoom:id,name',
+                    'schedule.category:id,name',
+                    'participant.roles:id,name',
+                    'participant.profile.regional:id,name'
+                ])
                 ->paginate(5)
                 ->withQueryString()
                 ->appends(['search' => $request['search']]);
@@ -163,15 +169,15 @@ class ParticipantController extends Controller
             $submissions->map(function ($submission) {
                 $this->fileSettings();
                 if (isset($submission->participant->image)) {
-                    $submission->participant->image = $this->getFileAttribute($submission->participant->image);
+                    $submission->participant->link_image = $this->getFileAttribute($submission->participant->image);
                 } else {
-                    $submission->participant->image = null;
+                    $submission->participant->link_image = null;
                 }
 
                 if (isset($submission->schedule->poster)) {
-                    $submission->schedule->poster = $this->getFileAttribute($submission->schedule->poster);
+                    $submission->schedule->link_poster = $this->getFileAttribute($submission->schedule->poster);
                 } else {
-                    $submission->schedule->poster = null;
+                    $submission->schedule->link_poster = null;
                 }
                 return $submission;
             });

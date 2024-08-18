@@ -51,6 +51,7 @@ class TotalParticipantByScheduleClassExport implements FromQuery, WithHeadings, 
                 $submission->schedule->end_date_class,
                 $submission->status == 'graduated' ? 'Lulus' : 'Tidak Lulus',
             ];
+            break;
         }
 
         return $result;
@@ -58,15 +59,18 @@ class TotalParticipantByScheduleClassExport implements FromQuery, WithHeadings, 
 
     public function query()
     {
-        return User::with(['submissions.schedule.classRoom', 'submissions.schedule.category'])
+        return User::with([
+                'profile:id,profileable_id,gender',
+                'submissions:id,schedule_id,participant_id,status',
+                'submissions.schedule:id,status,class_room_id,category_id,start_date_class,end_date_class',
+                'submissions.schedule.classRoom:id,name',
+                'submissions.schedule.category:id,name'
+            ])
             ->whereHas('roles', function ($query) {
                 $query->where('name', 'peserta');
             })
             ->whereHas('submissions', function ($query) {
                 $query->where('schedule_id', $this->scheduleId);
-            })
-            ->whereHas('profile', function ($query) {
-                $query->where('gender', 'laki-laki'); // Menambahkan filter berdasarkan gender
             });
     }
 }
