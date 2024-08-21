@@ -248,25 +248,7 @@ function deleteClassRoomChoice() {
   });
 }
 
-function uploadImage(e) {
-  const image = e.target.files[0];
-  if (
-    (image.type == "image/png") |
-    (image.type == "image/jpg") |
-    (image.type == "image/jpeg")
-  ) {
-    const reader = new FileReader();
-    reader.readAsDataURL(image);
-    reader.onload = (e) => {
-      previewImage.value = e.target.result;
-      form.image = image;
-    };
-  } else {
-    form.image = null;
-    closeModal("crud-modal");
-    toast("warning", "Harus Format Gambar");
-  }
-}
+const minDate = ref(new Date().toISOString().split('T')[0]);
 </script>
 
 <template>
@@ -617,7 +599,6 @@ function uploadImage(e) {
                   >
                   <select
                     v-model="form.status"
-                    type="text"
                     name="status"
                     id="status"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
@@ -651,6 +632,7 @@ function uploadImage(e) {
                     >Tanggal Selesai Khidmah</label
                   >
                   <input
+                    :min="minDate"
                     v-model="form.end_date"
                     type="date"
                     name="end_date"

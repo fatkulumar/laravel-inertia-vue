@@ -15,4 +15,9 @@ class AppointmentFile extends Model
         'name',
         'file',
     ];
+
+    public function schedule()
+    {
+        return $this->hasOne(Schedule::class, 'id', 'schedule_id');
+    }
 }

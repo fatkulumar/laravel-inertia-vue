@@ -559,7 +559,7 @@ class ScheduleController extends Controller
             $letters = Letter::whereHas('schedule', function ($query) use ($scheduleId) {
                 $query->where('id', $scheduleId);
             })
-            ->with('schedule:id')
+            ->with('schedule:id,status')
             ->select('id', 'file', 'name', 'schedule_id')
             ->paginate(10);
 
@@ -758,7 +758,7 @@ class ScheduleController extends Controller
     {
         try {
             $documentations = Documentation::where('schedule_id', $scheduleId)
-                ->with('schedule:id')
+                ->with('schedule:id,status')
                 ->get(['id', 'schedule_id', 'title', 'image', 'description', 'schedule_id']);
 
             $documentations->map(function ($documentation) {
@@ -990,7 +990,7 @@ class ScheduleController extends Controller
                 ],
             ];
             // return $reports;
-            $appointmentFiles = AppointmentFile::where('schedule_id', $scheduleId)->get();
+            $appointmentFiles = AppointmentFile::with(['schedule:id,status'])->where('schedule_id', $scheduleId)->get();
 
             $appointmentFiles->map(function ($appointmentFile) {
                 $this->fileSettings();

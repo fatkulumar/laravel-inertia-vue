@@ -69,7 +69,6 @@ function toast(icon = "success", text = "Data Berhasil Ditambahkan") {
   });
 }
 
-// const previewImage = ref(null);
 function uploadLetter(e) {
   const pdf = e.target.files[0];
   if (
@@ -87,15 +86,6 @@ function uploadLetter(e) {
   }
 }
 
-// const cities = ref([]);
-// const chainedProvince = async (provinceCode) => {
-//     await axios
-//     .get(`/dashboard/speaker/city/${provinceCode}`)
-//     .then((response) => {
-//         cities.value = response.data;
-//     })
-//     .catch((error) => console.error(error));
-// };
 </script>
 
 <template>
@@ -125,7 +115,7 @@ function uploadLetter(e) {
                         </a>
                     </div>
                 </div>
-                <div class="bg-gray-100 flex items-center">
+                    <div v-if="props.letters.data[0]?.schedule?.status == 'pending'" class="bg-gray-100 flex items-center">
                     <form @submit.prevent="addLetter" class="flex flex-col w-full gap-2">
                         <input @change="uploadLetter" accept="application/pdf" type="file">
                         <button class="w-full p-2 bg-blue-500 text-white rounded-lg" type="submit">Upload</button>

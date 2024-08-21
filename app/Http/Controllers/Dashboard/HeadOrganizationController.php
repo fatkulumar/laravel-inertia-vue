@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\HeadOrganization;
 use App\Traits\EntityValidator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
@@ -19,20 +20,27 @@ class HeadOrganizationController extends Controller
     public function index(Request $request)
     {
         try {
-            $HeadOrganizations = HeadOrganization::orderBy('created_at', 'desc')
-                ->when($request['search'], function ($query, $request) {
-                    $query->where('name', 'like', '%' . $request . '%');
-                })
-                ->select(
-                    'id',
-                    'name',
-                    'status',
-                    'start_date',
-                    'end_date'
-                )
-                ->paginate(5)
-                ->withQueryString()
-                ->appends(['search' => $request['search']]);
+            $cacheKey = 'head_organizations_' . ($request['search'] ?? 'all') . '_page_' . request('page', 1);
+            if(Cache::has($cacheKey)) {
+                $HeadOrganizations = Cache::get($cacheKey);
+            }else{
+                $HeadOrganizations = Cache::rememberForever($cacheKey, function () use ($request) {
+                    return HeadOrganization::orderBy('created_at', 'desc')
+                                ->when($request['search'], function ($query, $request) {
+                                    $query->where('name', 'like', '%' . $request . '%');
+                                })
+                                ->select(
+                                    'id',
+                                    'name',
+                                    'status',
+                                    'start_date',
+                                    'end_date'
+                                )
+                                ->paginate(5)
+                                ->withQueryString()
+                                ->appends(['search' => $request['search']]);
+                });
+            }
             return Inertia::render('Dashboard/HeadOrganization', [
                 'HeadOrganizations' => $HeadOrganizations,
             ]);
@@ -46,14 +54,6 @@ class HeadOrganizationController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -62,6 +62,7 @@ class HeadOrganizationController extends Controller
             $validasiData = $this->storeValidator($request);
             if ($validasiData) return redirect()->back()->withErrors($validasiData)->withInput();
 
+            $cacheKey = 'head_organizations_' . ($request['search'] ?? 'all') . '_page_' . request('page', 1);
             $id = $request->post('id');
             if ($id) {
 
@@ -73,6 +74,10 @@ class HeadOrganizationController extends Controller
                     'end_date' => $request->post('end_date'),
                 ];
                 $result = $HeadOrganization->update($saveData);
+                Cache::flush();
+                $this->createCacheAllData($cacheKey, $request);
+                // Cache::forget($cacheKey);
+                // Cache::forever($cacheKey, $HeadOrganization->fresh());
                 if (!$result) return redirect()->back()->withErrors($result)->withInput();
             } else {
 
@@ -84,6 +89,9 @@ class HeadOrganizationController extends Controller
                 ];
 
                 $result = HeadOrganization::create($saveData);
+                Cache::flush();
+                Cache::forget($cacheKey);
+                Cache::forever($cacheKey, $result);
                 if (!isset($result->id)) return redirect()->back()->withErrors($result)->withInput();
             }
         } catch (\Exception $exception) {
@@ -127,7 +135,12 @@ class HeadOrganizationController extends Controller
     public function delete(string $id)
     {
         try {
-            HeadOrganization::findOrFail($id)->delete();
+            $delete = HeadOrganization::findOrFail($id)->delete();
+            if($delete) {
+                $cacheKey = 'head_organizations_' . ($request['search'] ?? 'all') . '_page_' . request('page', 1);
+                Cache::forget($cacheKey);
+                Cache::forget('head_organization_' . $id);
+            }
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
             $errors['file'] = $exception->getFile();
@@ -143,9 +156,15 @@ class HeadOrganizationController extends Controller
     public function destroy(Request $request)
     {
         try {
+            $cacheKey = 'head_organizations_' . ($request['search'] ?? 'all') . '_page_' . request('page', 1);
             $ids = $request->post('id');
             foreach ($ids as $id) {
-                HeadOrganization::findOrFail($id)->delete();
+                $delete = HeadOrganization::findOrFail($id)->delete();
+                if($delete) {
+                    Cache::forget($cacheKey);
+                    Cache::forget('head_organization_' . $id);
+                }
+                break;
             }
         } catch (\Exception $exception) {
             $errors['message'] = $exception->getMessage();
@@ -153,6 +172,34 @@ class HeadOrganizationController extends Controller
             $errors['line'] = $exception->getLine();
             $errors['trace'] = $exception->getTrace();
             Log::channel('daily')->info('function delete in HeadOrganizationController', $errors);
+        }
+    }
+
+    private function createCacheAllData($cacheKey, $request)
+    {
+        try {
+            Cache::rememberForever($cacheKey, function () use ($request) {
+                return HeadOrganization::orderBy('created_at', 'desc')
+                            ->when($request['search'], function ($query, $request) {
+                                $query->where('name', 'like', '%' . $request . '%');
+                            })
+                            ->select(
+                                'id',
+                                'name',
+                                'status',
+                                'start_date',
+                                'end_date'
+                            )
+                            ->paginate(5)
+                            ->withQueryString()
+                            ->appends(['search' => $request['search']]);
+            });
+        } catch (\Exception $exception) {
+            $errors['message'] = $exception->getMessage();
+            $errors['file'] = $exception->getFile();
+            $errors['line'] = $exception->getLine();
+            $errors['trace'] = $exception->getTrace();
+            Log::channel('daily')->info('function createCacheAllData in HeadOrganizationController', $errors);
         }
     }
 }

@@ -160,7 +160,9 @@ function editDocumentation(data) {
               <div class="my-2">
                 <!-- icon plus -->
                 <div
+
                   @click="showModal()"
+                  v-if="documentations[0].schedule?.status == 'pending'"
                   title="Tambah Dokumentasi"
                   class="cursor-pointer"
                 >
@@ -211,7 +213,7 @@ function editDocumentation(data) {
                          {{ item.description }}
                         </p>
                       </div>
-                      <div class="grid grid-cols-2 gap-2">
+                      <div class="grid grid-cols-2 gap-2" v-if="item?.schedule?.status == 'pending'">
                         <button @click="editDocumentation(item)" title="Edit Dokumentasi" class="bg-blue-500 p-2 rounded-lg text-white" type="button">Edit</button>
                         <button @click="deleteDocumentation(item.id, item.title)" title="Hapus Dokumentasi" class="bg-red-500 p-2 rounded-lg text-white" type="button">Hapus</button>
                       </div>
