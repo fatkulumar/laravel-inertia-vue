@@ -2,7 +2,7 @@
 import AuthenticatedLayoutParticipant from "@/Layouts/AuthenticatedLayoutParticipant.vue";
 import { Head, useForm } from "@inertiajs/vue3";
 import { onMounted, ref } from "vue";
-import { Modal } from "flowbite";
+import { initFlowbite, Modal } from "flowbite";
 import Swal from "sweetalert2";
 
 onMounted(() => {

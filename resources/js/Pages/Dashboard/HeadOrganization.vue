@@ -5,7 +5,12 @@ import { router } from "@inertiajs/vue3";
 import { computed, ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
-import { Modal } from "flowbite";
+import { initFlowbite, Modal } from "flowbite";
+import { onMounted } from "vue";
+
+onMounted(() => {
+    initFlowbite();
+});
 
 const props = defineProps({
   HeadOrganizations: {

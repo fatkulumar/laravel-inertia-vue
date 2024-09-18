@@ -1,6 +1,12 @@
 <script setup>
 import AuthenticatedLayoutCommittee from '@/Layouts/AuthenticatedLayoutCommittee.vue';
 import { Head } from '@inertiajs/vue3';
+import { initFlowbite } from 'flowbite';
+import { onMounted } from 'vue';
+
+onMounted(() => {
+    initFlowbite();
+});
 </script>
 
 <template>

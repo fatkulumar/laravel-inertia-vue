@@ -3,6 +3,12 @@ import AuthenticatedLayoutParticipant from "@/Layouts/AuthenticatedLayoutPartici
 import { Head, useForm } from "@inertiajs/vue3";
 import Swal from "sweetalert2";
 import TabMenuDetailParticipant from "@/Components/Participant/TabMenuDetailParticipant.vue";
+import { onMounted } from "vue";
+import { initFlowbite } from "flowbite";
+
+onMounted(() => {
+    initFlowbite();
+});
 
 const props = defineProps({
   participant: {

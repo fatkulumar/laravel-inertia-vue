@@ -1,6 +1,11 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { initFlowbite } from 'flowbite';
+import { onMounted, ref } from 'vue';
+
+onMounted(() => {
+    initFlowbite();
+});
 
 defineProps({
     canLogin: {

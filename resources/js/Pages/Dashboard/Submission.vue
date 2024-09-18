@@ -2,11 +2,15 @@
 import AuthenticatedLayoutAdmin from "@/Layouts/AuthenticatedLayoutAdmin.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import Pagination from "@/Components/Partials/Pagination.vue";
 import Swal from "sweetalert2";
-import { Modal } from "flowbite";
+import { initFlowbite, Modal } from "flowbite";
 import axios from "axios";
+
+onMounted(() => {
+    initFlowbite();
+});
 
 const props = defineProps({
   submissions: {

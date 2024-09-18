@@ -2,7 +2,7 @@
 import AuthenticatedLayoutCommittee from "@/Layouts/AuthenticatedLayoutCommittee.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
 import { onMounted, ref } from "vue";
-import { Modal } from "flowbite";
+import { initFlowbite, Modal } from "flowbite";
 import Swal from "sweetalert2";
 import TabMenuDetailParticipant from "@/Components/Committee/TabMenuDetailParticipant.vue";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
